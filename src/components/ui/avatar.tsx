@@ -3,7 +3,6 @@
 import React, { useRef, useState } from 'react';
 import { cn, generateGradientAvatar } from '@/lib/utils';
 
-// --- Avatar ---
 interface AvatarProps {
   src?: string | null;
   name: string;
@@ -32,7 +31,7 @@ export function Avatar({ src, name, size = 'md', className }: AvatarProps) {
         src={src}
         alt={name}
         className={cn(
-          'rounded-full object-cover ring-2 ring-slate-700/50',
+          'rounded-full object-cover ring-2 ring-slate-200',
           sizes[size],
           className
         )}
@@ -43,7 +42,7 @@ export function Avatar({ src, name, size = 'md', className }: AvatarProps) {
   return (
     <div
       className={cn(
-        'rounded-full flex items-center justify-center font-semibold text-white ring-2 ring-slate-700/50',
+        'rounded-full flex items-center justify-center font-semibold text-white ring-2 ring-white',
         sizes[size],
         className
       )}
@@ -54,7 +53,6 @@ export function Avatar({ src, name, size = 'md', className }: AvatarProps) {
   );
 }
 
-// --- Avatar Upload ---
 interface AvatarUploadProps {
   currentUrl?: string | null;
   name: string;
@@ -92,9 +90,9 @@ export function AvatarUpload({ currentUrl, name, onUpload, isUploading, classNam
           src={preview || currentUrl}
           name={name || 'User'}
           size="xl"
-          className="transition-all duration-300 group-hover:ring-pulse-500/50"
+          className="transition-shadow duration-200 group-hover:ring-pulse-300"
         />
-        <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="absolute inset-0 rounded-full bg-slate-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           {isUploading ? (
             <svg className="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />

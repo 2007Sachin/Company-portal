@@ -18,13 +18,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="space-y-1.5">
         {label && (
-          <label htmlFor={inputId} className="block text-sm font-medium text-slate-300">
+          <label htmlFor={inputId} className="block text-sm font-medium text-slate-700">
             {label}
           </label>
         )}
         <div className="relative">
           {leftIcon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
               {leftIcon}
             </div>
           )}
@@ -32,23 +32,23 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={cn(
-              'w-full px-4 py-3 bg-slate-800/80 border border-slate-600/50 rounded-lg text-slate-100',
-              'placeholder:text-slate-500 focus:outline-none focus:border-pulse-500/50',
-              'focus:ring-2 focus:ring-pulse-500/20 transition-all duration-200',
+              'w-full px-3 py-2.5 bg-white border border-slate-300 rounded-input text-slate-800',
+              'placeholder:text-slate-400 focus:outline-none focus:border-pulse-600',
+              'focus:ring-2 focus:ring-pulse-600/20 transition-colors duration-150',
               leftIcon && 'pl-10',
               rightIcon && 'pr-10',
-              error && 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20',
+              error && 'border-red-500 focus:border-red-500 focus:ring-red-500/20',
               className
             )}
             {...props}
           />
           {rightIcon && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
               {rightIcon}
             </div>
           )}
         </div>
-        {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
+        {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
         {hint && !error && <p className="text-xs text-slate-500 mt-1">{hint}</p>}
       </div>
     );
@@ -57,7 +57,6 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
 Input.displayName = 'Input';
 
-// --- Textarea ---
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
@@ -71,7 +70,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     return (
       <div className="space-y-1.5">
         {label && (
-          <label htmlFor={textareaId} className="block text-sm font-medium text-slate-300">
+          <label htmlFor={textareaId} className="block text-sm font-medium text-slate-700">
             {label}
           </label>
         )}
@@ -79,15 +78,15 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           id={textareaId}
           className={cn(
-            'w-full px-4 py-3 bg-slate-800/80 border border-slate-600/50 rounded-lg text-slate-100',
-            'placeholder:text-slate-500 focus:outline-none focus:border-pulse-500/50',
-            'focus:ring-2 focus:ring-pulse-500/20 transition-all duration-200 resize-none',
-            error && 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20',
+            'w-full px-3 py-2.5 bg-white border border-slate-300 rounded-input text-slate-800',
+            'placeholder:text-slate-400 focus:outline-none focus:border-pulse-600',
+            'focus:ring-2 focus:ring-pulse-600/20 transition-colors duration-150 resize-none',
+            error && 'border-red-500 focus:border-red-500 focus:ring-red-500/20',
             className
           )}
           {...props}
         />
-        {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
+        {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
         {hint && !error && <p className="text-xs text-slate-500 mt-1">{hint}</p>}
       </div>
     );

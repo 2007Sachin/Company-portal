@@ -170,11 +170,11 @@ export interface OnboardingStep {
 }
 
 export const ONBOARDING_STEPS: Omit<OnboardingStep, 'isCompleted' | 'isCurrent'>[] = [
-  { id: 1, title: 'Who You Are', subtitle: 'Identity & presence', icon: '👤' },
-  { id: 2, title: 'Proof of Work', subtitle: 'Connect platforms', icon: '🔗' },
-  { id: 3, title: 'Career Path', subtitle: 'Goals & preferences', icon: '🎯' },
-  { id: 4, title: 'Privacy & Trust', subtitle: 'Control your data', icon: '🛡️' },
-  { id: 5, title: 'Launch Profile', subtitle: 'Go live!', icon: '🚀' },
+  { id: 1, title: 'About You', subtitle: 'The basics', icon: '1' },
+  { id: 2, title: 'Your Work', subtitle: 'Connect platforms', icon: '2' },
+  { id: 3, title: 'Career Goals', subtitle: 'Where you\'re headed', icon: '3' },
+  { id: 4, title: 'Privacy', subtitle: 'You\'re in control', icon: '4' },
+  { id: 5, title: 'Launch', subtitle: 'Go live', icon: '5' },
 ];
 
 // --- Dashboard ---
@@ -208,27 +208,27 @@ export interface ChipOption {
 
 // --- Constants ---
 export const TARGET_ROLES: ChipOption[] = [
-  { label: 'Frontend Developer', value: 'frontend', icon: '🎨' },
-  { label: 'Backend Developer', value: 'backend', icon: '⚙️' },
-  { label: 'Full Stack Developer', value: 'fullstack', icon: '🔄' },
-  { label: 'Mobile Developer', value: 'mobile', icon: '📱' },
-  { label: 'ML Engineer', value: 'ml', icon: '🤖' },
-  { label: 'Data Engineer', value: 'data', icon: '📊' },
-  { label: 'DevOps Engineer', value: 'devops', icon: '🔧' },
-  { label: 'Cloud Engineer', value: 'cloud', icon: '☁️' },
-  { label: 'Security Engineer', value: 'security', icon: '🔒' },
-  { label: 'QA Engineer', value: 'qa', icon: '✅' },
+  { label: 'Frontend Developer', value: 'frontend' },
+  { label: 'Backend Developer', value: 'backend' },
+  { label: 'Full Stack Developer', value: 'fullstack' },
+  { label: 'Mobile Developer', value: 'mobile' },
+  { label: 'ML Engineer', value: 'ml' },
+  { label: 'Data Engineer', value: 'data' },
+  { label: 'DevOps Engineer', value: 'devops' },
+  { label: 'Cloud Engineer', value: 'cloud' },
+  { label: 'Security Engineer', value: 'security' },
+  { label: 'QA Engineer', value: 'qa' },
 ];
 
 export const IDEAL_ENVIRONMENTS: ChipOption[] = [
-  { label: 'Remote', value: 'remote', icon: '🏠' },
-  { label: 'Hybrid', value: 'hybrid', icon: '🔄' },
-  { label: 'On-site', value: 'onsite', icon: '🏢' },
-  { label: 'Startup', value: 'startup', icon: '🚀' },
-  { label: 'Enterprise', value: 'enterprise', icon: '🏛️' },
-  { label: 'Product Company', value: 'product', icon: '📦' },
-  { label: 'Consulting', value: 'consulting', icon: '💼' },
-  { label: 'Open Source', value: 'opensource', icon: '🌐' },
+  { label: 'Remote', value: 'remote' },
+  { label: 'Hybrid', value: 'hybrid' },
+  { label: 'On-site', value: 'onsite' },
+  { label: 'Startup', value: 'startup' },
+  { label: 'Enterprise', value: 'enterprise' },
+  { label: 'Product Company', value: 'product' },
+  { label: 'Consulting', value: 'consulting' },
+  { label: 'Open Source', value: 'opensource' },
 ];
 
 export const DEGREE_OPTIONS = [

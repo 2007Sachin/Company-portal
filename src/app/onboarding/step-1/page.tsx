@@ -48,16 +48,13 @@ export default function OnboardingStep1() {
 
   return (
     <OnboardingShell currentStep={1} completedSteps={[]} profileData={formData}>
-      <div className="space-y-8">
+      <div className="space-y-10">
         {/* Header */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">👤</span>
-            <span className="text-xs font-semibold text-pulse-400 uppercase tracking-wider">Step 1 of 5</span>
-          </div>
-          <h2 className="text-3xl font-bold font-display text-white">Who You Are</h2>
-          <p className="text-slate-400 text-lg">
-            Let&apos;s set up your identity. Make your first impression count ✨
+          <p className="text-sm font-medium text-pulse-600">Step 1 of 5</p>
+          <h2 className="text-3xl font-semibold text-slate-800">Let&apos;s build your career passport</h2>
+          <p className="text-slate-500 text-lg">
+            We&apos;ll use this to match you with the right opportunities.
           </p>
         </div>
 
@@ -72,34 +69,31 @@ export default function OnboardingStep1() {
 
         {/* Personal Info */}
         <div className="space-y-5">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-            <span className="w-6 h-px bg-slate-700" />
-            Personal Information
-          </h3>
+          <h3 className="text-sm font-semibold text-slate-800">A bit about you</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
-              label="Full Name"
+              label="Your name"
               placeholder="Rahul Kumar"
               value={formData.full_name}
               onChange={(e) => updateField('full_name', e.target.value)}
             />
             <Input
-              label="Email"
+              label="Email address"
               type="email"
               placeholder="rahul@example.com"
               value={formData.email}
               onChange={(e) => updateField('email', e.target.value)}
             />
             <Input
-              label="Phone"
+              label="Phone number"
               type="tel"
               placeholder="+91 98765 43210"
               value={formData.phone}
               onChange={(e) => updateField('phone', e.target.value)}
             />
             <Input
-              label="Location"
+              label="Where are you based?"
               placeholder="Bangalore, India"
               value={formData.location}
               onChange={(e) => updateField('location', e.target.value)}
@@ -107,7 +101,7 @@ export default function OnboardingStep1() {
           </div>
 
           <Input
-            label="Professional Headline"
+            label="What describes you best?"
             placeholder="Full Stack Developer | React & Node.js"
             value={formData.professional_headline}
             onChange={(e) => updateField('professional_headline', e.target.value)}
@@ -117,13 +111,10 @@ export default function OnboardingStep1() {
 
         {/* Education */}
         <div className="space-y-5">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-            <span className="w-6 h-px bg-slate-700" />
-            Education
-          </h3>
+          <h3 className="text-sm font-semibold text-slate-800">Your education</h3>
 
           <Input
-            label="College / University"
+            label="Your college"
             placeholder="Search your institution..."
             value={formData.college}
             onChange={(e) => updateField('college', e.target.value)}
@@ -138,14 +129,14 @@ export default function OnboardingStep1() {
               onChange={(e) => updateField('degree', e.target.value)}
             />
             <Select
-              label="Branch / Major"
+              label="Branch"
               options={branchOptions}
               placeholder="Select branch"
               value={formData.branch}
               onChange={(e) => updateField('branch', e.target.value)}
             />
             <Select
-              label="Graduation Year"
+              label="Graduation year"
               options={yearOptions}
               placeholder="Select year"
               value={formData.graduation_year}
@@ -156,22 +147,19 @@ export default function OnboardingStep1() {
 
         {/* Target Roles */}
         <div className="space-y-5">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-            <span className="w-6 h-px bg-slate-700" />
-            What You&apos;re Looking For
-          </h3>
+          <h3 className="text-sm font-semibold text-slate-800">What you&apos;re looking for</h3>
 
           <ChipGroup
-            label="Target Roles"
+            label="Roles you're interested in"
             options={TARGET_ROLES}
             selected={formData.target_roles}
             onChange={(selected) => updateField('target_roles', selected)}
             maxSelections={3}
-            hint="Select up to 3 roles you're targeting"
+            hint="Pick up to 3 roles that match your goals"
           />
 
           <ChipGroup
-            label="Ideal Work Environment"
+            label="Ideal work environment"
             options={IDEAL_ENVIRONMENTS}
             selected={formData.ideal_environment}
             onChange={(selected) => updateField('ideal_environment', selected)}
@@ -182,20 +170,15 @@ export default function OnboardingStep1() {
 
         {/* Tip Card */}
         <TipCard
-          icon="💡"
-          title="Make it stand out"
-          description="Candidates with complete profiles and professional photos get 3x more recruiter views. Take a moment to fill out every field!"
+          title="A complete profile goes a long way"
+          description="Candidates who fill out every field get 3x more recruiter views. Take a moment — it's worth it."
           variant="info"
         />
 
         {/* Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-slate-800/50">
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            Autosaved
-          </div>
+        <div className="flex items-center justify-end pt-6 border-t border-slate-200">
           <Button onClick={handleNext} size="lg">
-            Next: Proof of Work
+            Save & continue
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14" />
               <path d="m12 5 7 7-7 7" />
