@@ -18,7 +18,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className="space-y-1.5">
         {label && (
-          <label htmlFor={selectId} className="block text-sm font-medium text-slate-300">
+          <label htmlFor={selectId} className="block text-sm font-medium text-slate-700">
             {label}
           </label>
         )}
@@ -27,32 +27,32 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             ref={ref}
             id={selectId}
             className={cn(
-              'w-full px-4 py-3 bg-slate-800/80 border border-slate-600/50 rounded-lg text-slate-100',
-              'focus:outline-none focus:border-pulse-500/50 focus:ring-2 focus:ring-pulse-500/20',
-              'transition-all duration-200 appearance-none cursor-pointer',
-              error && 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20',
+              'w-full px-3 py-2.5 bg-white border border-slate-300 rounded-input text-slate-800',
+              'focus:outline-none focus:border-pulse-600 focus:ring-2 focus:ring-pulse-600/20',
+              'transition-colors duration-150 appearance-none cursor-pointer',
+              error && 'border-red-500 focus:border-red-500 focus:ring-red-500/20',
               className
             )}
             {...props}
           >
             {placeholder && (
-              <option value="" className="text-slate-500 bg-slate-800">
+              <option value="" className="text-slate-400">
                 {placeholder}
               </option>
             )}
             {options.map((option) => (
-              <option key={option.value} value={option.value} className="bg-slate-800 text-slate-100">
+              <option key={option.value} value={option.value}>
                 {option.label}
               </option>
             ))}
           </select>
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
         </div>
-        {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
+        {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
         {hint && !error && <p className="text-xs text-slate-500 mt-1">{hint}</p>}
       </div>
     );

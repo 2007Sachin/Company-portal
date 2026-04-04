@@ -19,18 +19,18 @@ interface PlatformCardProps {
 
 function PlatformCard({ name, icon, description, status, username, stats, onConnect, onDisconnect, color }: PlatformCardProps) {
   return (
-    <Card className="p-5 transition-all duration-300" hover>
+    <Card className="p-5" hover>
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-4">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}>
+          <div className={`w-12 h-12 rounded-card flex items-center justify-center ${color}`}>
             {icon}
           </div>
           <div className="space-y-1">
-            <h4 className="text-base font-semibold text-white">{name}</h4>
-            <p className="text-xs text-slate-400">{description}</p>
+            <h4 className="text-base font-semibold text-slate-800">{name}</h4>
+            <p className="text-xs text-slate-500">{description}</p>
             {status === 'connected' && username && (
-              <p className="text-xs text-emerald-400 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <p className="text-xs text-green-600 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
                 Connected as @{username}
               </p>
             )}
@@ -40,7 +40,7 @@ function PlatformCard({ name, icon, description, status, username, stats, onConn
           {status === 'connected' ? (
             <button
               onClick={onDisconnect}
-              className="text-xs text-slate-500 hover:text-red-400 transition-colors"
+              className="text-xs text-slate-400 hover:text-red-600 transition-colors"
             >
               Disconnect
             </button>
@@ -52,12 +52,11 @@ function PlatformCard({ name, icon, description, status, username, stats, onConn
         </div>
       </div>
 
-      {/* Stats */}
       {status === 'connected' && stats && stats.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-slate-700/30 grid grid-cols-3 gap-3">
+        <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-3 gap-3">
           {stats.map((stat) => (
             <div key={stat.label} className="text-center">
-              <p className="text-lg font-bold text-white">{stat.value}</p>
+              <p className="text-lg font-semibold text-slate-800">{stat.value}</p>
               <p className="text-xs text-slate-500">{stat.label}</p>
             </div>
           ))}
@@ -76,67 +75,53 @@ export default function OnboardingStep2() {
   });
 
   const handleConnectGithub = () => {
-    // TODO: Implement GitHub OAuth
-    setPlatforms((prev) => ({
-      ...prev,
-      github: { connected: true, username: 'rahulkumar' },
-    }));
+    setPlatforms((prev) => ({ ...prev, github: { connected: true, username: 'rahulkumar' } }));
   };
 
   const handleConnectLeetcode = () => {
-    // TODO: Implement LeetCode verification
-    setPlatforms((prev) => ({
-      ...prev,
-      leetcode: { connected: true, username: 'rahul_codes' },
-    }));
+    setPlatforms((prev) => ({ ...prev, leetcode: { connected: true, username: 'rahul_codes' } }));
   };
 
   const handleConnectMedium = () => {
-    // TODO: Implement Medium RSS
-    setPlatforms((prev) => ({
-      ...prev,
-      medium: { connected: true, username: 'rahulwrites' },
-    }));
+    setPlatforms((prev) => ({ ...prev, medium: { connected: true, username: 'rahulwrites' } }));
   };
 
   const connectedCount = Object.values(platforms).filter((p) => p.connected).length;
-  const completedSteps = connectedCount > 0 ? [1] : [1];
 
   return (
-    <OnboardingShell currentStep={2} completedSteps={completedSteps} profileData={{}}>
-      <div className="space-y-8">
+    <OnboardingShell currentStep={2} completedSteps={[1]} profileData={{}}>
+      <div className="space-y-10">
         {/* Header */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🔗</span>
-            <span className="text-xs font-semibold text-pulse-400 uppercase tracking-wider">Step 2 of 5</span>
-          </div>
-          <h2 className="text-3xl font-bold font-display text-white">Proof of Work</h2>
-          <p className="text-slate-400 text-lg">
-            This is the magic moment ✨ Connect your platforms and let your activity speak for itself.
+          <p className="text-sm font-medium text-pulse-600">Step 2 of 5</p>
+          <h2 className="text-3xl font-semibold text-slate-800">Show what you&apos;ve built</h2>
+          <p className="text-slate-500 text-lg">
+            Connect your platforms so recruiters see your real work — not just a resume.
           </p>
         </div>
 
         {/* Connection status */}
-        <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/30 border border-slate-700/30">
+        <div className="flex items-center gap-4 p-4 rounded-card bg-slate-50 border border-slate-200">
           <div className="flex -space-x-2">
             {[
-              { connected: platforms.github.connected, color: 'bg-gray-600' },
+              { connected: platforms.github.connected, color: 'bg-slate-700' },
               { connected: platforms.leetcode.connected, color: 'bg-amber-600' },
               { connected: platforms.medium.connected, color: 'bg-green-600' },
             ].map((p, i) => (
               <div
                 key={i}
-                className={`w-8 h-8 rounded-full border-2 border-slate-800 flex items-center justify-center text-xs ${
-                  p.connected ? p.color : 'bg-slate-700'
+                className={`w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-xs text-white font-medium ${
+                  p.connected ? p.color : 'bg-slate-300'
                 }`}
               >
-                {p.connected ? '✓' : `${i + 1}`}
+                {p.connected ? (
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M13 4L6 11L3 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                ) : `${i + 1}`}
               </div>
             ))}
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-200">{connectedCount}/3 platforms connected</p>
+            <p className="text-sm font-medium text-slate-700">{connectedCount}/3 platforms connected</p>
             <p className="text-xs text-slate-500">Connect at least 1 to generate your Pulse Score</p>
           </div>
         </div>
@@ -159,7 +144,7 @@ export default function OnboardingStep2() {
               { label: 'Languages', value: '5' },
             ] : undefined}
             onConnect={handleConnectGithub}
-            color="bg-gray-700"
+            color="bg-slate-800"
           />
 
           <PlatformCard
@@ -178,7 +163,7 @@ export default function OnboardingStep2() {
               { label: 'Streak', value: '15d' },
             ] : undefined}
             onConnect={handleConnectLeetcode}
-            color="bg-amber-700"
+            color="bg-amber-600"
           />
 
           <PlatformCard
@@ -201,21 +186,19 @@ export default function OnboardingStep2() {
           />
         </div>
 
-        {/* Tip */}
         <TipCard
-          icon="🚀"
-          title="The more you connect, the stronger your Pulse"
+          title="More connections, stronger signal"
           description="Developers with 2+ integrations have a 75% higher chance of being discovered by recruiters. GitHub alone boosts your score by 40%."
           variant="success"
         />
 
         {/* Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-slate-800/50">
+        <div className="flex items-center justify-between pt-6 border-t border-slate-200">
           <Button variant="ghost" onClick={() => router.push('/onboarding/step-1')}>
-            ← Back
+            Back
           </Button>
           <Button onClick={() => router.push('/onboarding/step-3')} size="lg">
-            Next: Career Path
+            Save & continue
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
             </svg>

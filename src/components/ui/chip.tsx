@@ -4,7 +4,6 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import type { ChipOption } from '@/types';
 
-// --- Single Chip ---
 interface ChipProps {
   label: string;
   icon?: string;
@@ -17,7 +16,7 @@ interface ChipProps {
 export function Chip({ label, icon, isActive, onClick, className, size = 'md' }: ChipProps) {
   const sizes = {
     sm: 'px-2.5 py-1 text-xs',
-    md: 'px-3.5 py-2 text-sm',
+    md: 'px-3 py-1.5 text-sm',
   };
 
   return (
@@ -25,16 +24,16 @@ export function Chip({ label, icon, isActive, onClick, className, size = 'md' }:
       type="button"
       onClick={onClick}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full font-medium border',
-        'transition-all duration-200 cursor-pointer select-none',
+        'inline-flex items-center gap-1.5 rounded-chip font-medium border',
+        'transition-colors duration-150 cursor-pointer select-none',
         sizes[size],
         isActive
-          ? 'bg-pulse-600/20 border-pulse-500/50 text-pulse-300 shadow-sm shadow-pulse-500/10'
-          : 'bg-slate-800/60 border-slate-600/40 text-slate-400 hover:border-slate-500/60 hover:text-slate-300',
+          ? 'bg-pulse-50 border-pulse-600 text-pulse-700'
+          : 'bg-white border-slate-300 text-slate-600 hover:border-slate-400 hover:text-slate-700',
         className
       )}
     >
-      {icon && <span className="text-base leading-none">{icon}</span>}
+      {icon && <span className="text-sm leading-none">{icon}</span>}
       {label}
       {isActive && (
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="ml-0.5">
@@ -45,7 +44,6 @@ export function Chip({ label, icon, isActive, onClick, className, size = 'md' }:
   );
 }
 
-// --- Chip Group ---
 interface ChipGroupProps {
   label?: string;
   options: ChipOption[];
@@ -79,7 +77,7 @@ export function ChipGroup({
     <div className={cn('space-y-2', className)}>
       {label && (
         <div className="flex items-center justify-between">
-          <label className="block text-sm font-medium text-slate-300">{label}</label>
+          <label className="block text-sm font-medium text-slate-700">{label}</label>
           {maxSelections && (
             <span className="text-xs text-slate-500">
               {selected.length}/{maxSelections} selected

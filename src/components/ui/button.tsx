@@ -3,7 +3,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-// --- Button ---
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg';
@@ -15,25 +14,26 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading, leftIcon, rightIcon, children, disabled, ...props }, ref) => {
     const variants = {
-      primary: 'bg-pulse-600 text-white hover:bg-pulse-500 focus:ring-pulse-500 shadow-lg shadow-pulse-600/25 hover:shadow-xl hover:shadow-pulse-500/30 active:scale-[0.98]',
-      secondary: 'bg-slate-700/80 text-slate-200 border border-slate-600/50 hover:bg-slate-600/80 hover:border-slate-500/50 focus:ring-slate-500',
-      ghost: 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 focus:ring-slate-500',
-      danger: 'bg-red-600/90 text-white hover:bg-red-500 focus:ring-red-500 shadow-lg shadow-red-600/25',
+      primary: 'bg-pulse-600 text-white hover:bg-pulse-700 focus:ring-pulse-600',
+      secondary: 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 focus:ring-slate-400',
+      ghost: 'text-slate-600 hover:text-slate-800 hover:bg-slate-100 focus:ring-slate-400',
+      danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-600',
     };
 
     const sizes = {
-      sm: 'px-3 py-1.5 text-sm rounded-md gap-1.5',
-      md: 'px-5 py-2.5 text-sm rounded-lg gap-2',
-      lg: 'px-6 py-3 text-base rounded-lg gap-2',
+      sm: 'px-3 py-1.5 text-sm gap-1.5',
+      md: 'px-5 py-2.5 text-sm gap-2',
+      lg: 'px-6 py-3 text-base gap-2',
     };
 
     return (
       <button
         ref={ref}
         className={cn(
-          'inline-flex items-center justify-center font-medium transition-all duration-200',
-          'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900',
-          'disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100',
+          'inline-flex items-center justify-center font-medium rounded-input',
+          'transition-colors duration-150',
+          'focus:outline-none focus:ring-2 focus:ring-offset-2',
+          'disabled:opacity-50 disabled:cursor-not-allowed',
           variants[variant],
           sizes[size],
           className

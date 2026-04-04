@@ -30,17 +30,10 @@ export function formatRelativeTime(date: string | Date): string {
 }
 
 export function getScoreColor(score: number): string {
-  if (score >= 80) return 'text-emerald-400';
-  if (score >= 60) return 'text-blue-400';
-  if (score >= 40) return 'text-amber-400';
-  return 'text-red-400';
-}
-
-export function getScoreGradient(score: number): string {
-  if (score >= 80) return 'from-emerald-500 to-emerald-400';
-  if (score >= 60) return 'from-blue-500 to-indigo-400';
-  if (score >= 40) return 'from-amber-500 to-yellow-400';
-  return 'from-red-500 to-orange-400';
+  if (score >= 80) return 'text-green-600';
+  if (score >= 60) return 'text-blue-600';
+  if (score >= 40) return 'text-amber-600';
+  return 'text-red-600';
 }
 
 export function getScoreLabel(score: number): string {
@@ -76,26 +69,26 @@ export function calculateCompletionPercentage(profile: Record<string, unknown>):
 
 export function getActivityIcon(type: string): string {
   const icons: Record<string, string> = {
-    github_commit: '📝',
-    github_pr: '🔀',
-    github_pr_merged: '✅',
-    github_repo_created: '📁',
-    github_star_received: '⭐',
-    leetcode_solve: '🧩',
-    leetcode_contest: '🏆',
-    medium_article: '📰',
-    medium_clap: '👏',
+    github_commit: 'GitCommit',
+    github_pr: 'GitPullRequest',
+    github_pr_merged: 'GitMerge',
+    github_repo_created: 'FolderPlus',
+    github_star_received: 'Star',
+    leetcode_solve: 'CheckCircle',
+    leetcode_contest: 'Trophy',
+    medium_article: 'FileText',
+    medium_clap: 'Heart',
   };
-  return icons[type] || '📌';
+  return icons[type] || 'Circle';
 }
 
 export function getPlatformColor(platform: string): string {
   const colors: Record<string, string> = {
-    github: 'text-gray-300',
-    leetcode: 'text-amber-400',
-    medium: 'text-green-400',
+    github: 'text-slate-700',
+    leetcode: 'text-amber-600',
+    medium: 'text-green-600',
   };
-  return colors[platform] || 'text-slate-400';
+  return colors[platform] || 'text-slate-500';
 }
 
 export function truncate(str: string, length: number): string {

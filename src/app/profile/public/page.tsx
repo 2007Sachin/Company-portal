@@ -4,8 +4,15 @@ import React from 'react';
 import { Card, ScoreRing, ProgressBar, Button } from '@/components/ui';
 import { Avatar } from '@/components/ui/avatar';
 import { getActivityIcon, formatRelativeTime } from '@/lib/utils';
+import { GitCommit, GitMerge, CheckCircle, FileText } from 'lucide-react';
 
-// Mock public profile data
+const activityIcons: Record<string, React.ReactNode> = {
+  GitCommit: <GitCommit size={18} />,
+  GitMerge: <GitMerge size={18} />,
+  CheckCircle: <CheckCircle size={18} />,
+  FileText: <FileText size={18} />,
+};
+
 const profile = {
   full_name: 'Rahul Kumar',
   professional_headline: 'Full Stack Developer | React & Node.js',
@@ -46,20 +53,20 @@ const languages = [
 
 export default function PublicProfilePage() {
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-slate-50">
       {/* Nav */}
-      <nav className="border-b border-slate-800/50 backdrop-blur-xl bg-slate-950/80 sticky top-0 z-50">
+      <nav className="border-b border-slate-200 bg-white sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg pulse-gradient flex items-center justify-center">
+            <div className="w-7 h-7 rounded-input bg-pulse-600 flex items-center justify-center">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
               </svg>
             </div>
-            <span className="text-sm font-bold font-display text-white">Pulse</span>
+            <span className="text-sm font-semibold text-slate-800">Pulse</span>
           </div>
           <Button size="sm" variant="secondary">
-            Create Your Profile
+            Create your profile
           </Button>
         </div>
       </nav>
@@ -67,19 +74,17 @@ export default function PublicProfilePage() {
       <main className="max-w-4xl mx-auto px-6 py-8 space-y-6">
         {/* Profile Header */}
         <Card className="overflow-hidden">
-          <div className="h-36 pulse-gradient relative">
-            <div className="absolute inset-0 bg-black/20" />
-          </div>
+          <div className="h-32 bg-pulse-600 relative" />
           <div className="px-6 pb-6">
             <div className="flex flex-col md:flex-row md:items-end gap-4 -mt-12">
-              <Avatar src={null} name={profile.full_name} size="xl" className="ring-4 ring-slate-800" />
+              <Avatar src={null} name={profile.full_name} size="xl" className="ring-4 ring-white" />
               <div className="flex-1 pb-1 space-y-1">
-                <h1 className="text-2xl font-bold font-display text-white">{profile.full_name}</h1>
-                <p className="text-sm text-slate-400">{profile.professional_headline}</p>
+                <h1 className="text-2xl font-semibold text-slate-800">{profile.full_name}</h1>
+                <p className="text-sm text-slate-500">{profile.professional_headline}</p>
                 <div className="flex flex-wrap gap-3 text-xs text-slate-500 pt-1">
-                  <span>📍 {profile.location}</span>
-                  <span>🎓 {profile.degree}, {profile.branch} · {profile.graduation_year}</span>
-                  <span>🏫 {profile.college}</span>
+                  <span>{profile.location}</span>
+                  <span>{profile.degree}, {profile.branch} &middot; {profile.graduation_year}</span>
+                  <span>{profile.college}</span>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -88,11 +93,11 @@ export default function PublicProfilePage() {
               </div>
             </div>
             {profile.bio && (
-              <p className="mt-4 text-sm text-slate-400 leading-relaxed">{profile.bio}</p>
+              <p className="mt-4 text-sm text-slate-600 leading-relaxed">{profile.bio}</p>
             )}
             <div className="flex flex-wrap gap-2 mt-4">
               {profile.target_roles.map((role) => (
-                <span key={role} className="px-3 py-1 text-xs rounded-full bg-pulse-500/10 text-pulse-300 border border-pulse-500/20">
+                <span key={role} className="px-3 py-1 text-xs rounded-chip bg-pulse-50 text-pulse-700 border border-pulse-200">
                   {role}
                 </span>
               ))}
@@ -103,46 +108,48 @@ export default function PublicProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Score */}
           <Card className="p-6 space-y-6">
-            <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Pulse Score</h3>
+            <h3 className="text-sm font-semibold text-slate-800">Pulse Score</h3>
             <div className="flex flex-col items-center gap-3">
               <ScoreRing score={score.overall} size={140} strokeWidth={10} />
-              <p className="text-xs text-slate-500">📈 Trending up · Top {100 - score.percentile}%</p>
+              <p className="text-xs text-slate-500">Trending up &middot; Top {100 - score.percentile}%</p>
             </div>
             <div className="space-y-3">
-              <ProgressBar label="Velocity" value={score.velocity} size="sm" color="bg-gradient-to-r from-blue-500 to-blue-400" />
-              <ProgressBar label="Consistency" value={score.consistency} size="sm" color="bg-gradient-to-r from-emerald-500 to-emerald-400" />
-              <ProgressBar label="Breadth" value={score.breadth} size="sm" color="bg-gradient-to-r from-purple-500 to-purple-400" />
-              <ProgressBar label="Impact" value={score.impact} size="sm" color="bg-gradient-to-r from-amber-500 to-amber-400" />
+              <ProgressBar label="Velocity" value={score.velocity} size="sm" color="bg-blue-500" />
+              <ProgressBar label="Consistency" value={score.consistency} size="sm" color="bg-green-500" />
+              <ProgressBar label="Breadth" value={score.breadth} size="sm" color="bg-purple-500" />
+              <ProgressBar label="Impact" value={score.impact} size="sm" color="bg-amber-500" />
             </div>
           </Card>
 
           {/* Activity + Languages */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Activity */}
             <Card className="p-6 space-y-4">
-              <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Recent Activity</h3>
+              <h3 className="text-sm font-semibold text-slate-800">Recent activity</h3>
               <div className="space-y-1">
-                {activity.map((item) => (
-                  <div key={item.id} className="flex items-center gap-4 px-3 py-3 rounded-lg hover:bg-slate-800/30 transition-colors">
-                    <span className="text-xl flex-shrink-0">{getActivityIcon(item.type)}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-slate-200 truncate">{item.title}</p>
-                      <p className="text-xs text-slate-500 capitalize">{item.platform}</p>
+                {activity.map((item) => {
+                  const iconName = getActivityIcon(item.type);
+                  const icon = activityIcons[iconName] || <CheckCircle size={18} />;
+                  return (
+                    <div key={item.id} className="flex items-center gap-4 px-3 py-3 rounded-card hover:bg-slate-50 transition-colors">
+                      <span className="text-slate-400 flex-shrink-0">{icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-slate-700 truncate">{item.title}</p>
+                        <p className="text-xs text-slate-400 capitalize">{item.platform}</p>
+                      </div>
+                      <span className="text-xs text-slate-400 flex-shrink-0">{formatRelativeTime(item.occurred_at)}</span>
                     </div>
-                    <span className="text-xs text-slate-600 flex-shrink-0">{formatRelativeTime(item.occurred_at)}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </Card>
 
-            {/* Languages */}
             <Card className="p-6 space-y-4">
-              <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Top Languages</h3>
+              <h3 className="text-sm font-semibold text-slate-800">Top languages</h3>
               <div className="space-y-3">
                 {languages.map((lang) => (
                   <div key={lang.name} className="flex items-center gap-3">
-                    <span className="text-sm text-slate-300 w-24">{lang.name}</span>
-                    <div className="flex-1 h-2 bg-slate-700/50 rounded-full overflow-hidden">
+                    <span className="text-sm text-slate-600 w-24">{lang.name}</span>
+                    <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full ${lang.color} transition-all duration-700`}
                         style={{ width: `${lang.percentage}%` }}
@@ -154,29 +161,26 @@ export default function PublicProfilePage() {
               </div>
             </Card>
 
-            {/* Stats Grid */}
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: 'Commits (30d)', value: '127', icon: '📝' },
-                { label: 'PRs Merged', value: '8', icon: '✅' },
-                { label: 'LeetCode Solved', value: '284', icon: '🧩' },
-                { label: 'Contest Rating', value: '1,680', icon: '🏆' },
-                { label: 'Articles', value: '12', icon: '📰' },
-                { label: 'Streak', value: '15d', icon: '🔥' },
+                { label: 'Commits (30d)', value: '127' },
+                { label: 'PRs merged', value: '8' },
+                { label: 'LeetCode solved', value: '284' },
+                { label: 'Contest rating', value: '1,680' },
+                { label: 'Articles', value: '12' },
+                { label: 'Streak', value: '15d' },
               ].map((stat) => (
                 <Card key={stat.label} className="p-4 text-center" hover>
-                  <span className="text-lg">{stat.icon}</span>
-                  <p className="text-xl font-bold text-white mt-1">{stat.value}</p>
-                  <p className="text-xs text-slate-500">{stat.label}</p>
+                  <p className="text-xl font-semibold text-slate-800">{stat.value}</p>
+                  <p className="text-xs text-slate-500 mt-1">{stat.label}</p>
                 </Card>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="text-center py-6 text-xs text-slate-600">
-          Powered by <span className="text-pulse-400 font-semibold">Pulse</span> · Activity-as-Pedigree
+        <div className="text-center py-6 text-xs text-slate-500">
+          Powered by <span className="text-pulse-600 font-semibold">Pulse</span> &middot; Activity-as-Pedigree
         </div>
       </main>
     </div>

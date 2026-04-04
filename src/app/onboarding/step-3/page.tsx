@@ -12,23 +12,23 @@ const JOB_SEARCH_STATUS = [
 ];
 
 const COMPANY_SIZES = [
-  { label: '🚀 Startup (1-50)', value: 'startup', icon: '🚀' },
-  { label: '📈 Growth (50-200)', value: 'growth', icon: '📈' },
-  { label: '🏢 Mid (200-1000)', value: 'mid', icon: '🏢' },
-  { label: '🏛️ Enterprise (1000+)', value: 'enterprise', icon: '🏛️' },
+  { label: 'Startup (1-50)', value: 'startup' },
+  { label: 'Growth (50-200)', value: 'growth' },
+  { label: 'Mid-size (200-1000)', value: 'mid' },
+  { label: 'Enterprise (1000+)', value: 'enterprise' },
 ];
 
 const INDUSTRIES = [
-  { label: 'SaaS / Cloud', value: 'saas', icon: '☁️' },
-  { label: 'FinTech', value: 'fintech', icon: '💳' },
-  { label: 'EdTech', value: 'edtech', icon: '📚' },
-  { label: 'HealthTech', value: 'healthtech', icon: '🏥' },
-  { label: 'E-commerce', value: 'ecommerce', icon: '🛍️' },
-  { label: 'AI / ML', value: 'ai_ml', icon: '🤖' },
-  { label: 'Gaming', value: 'gaming', icon: '🎮' },
-  { label: 'Social Media', value: 'social', icon: '📱' },
-  { label: 'Cybersecurity', value: 'security', icon: '🔒' },
-  { label: 'Dev Tools', value: 'devtools', icon: '🔧' },
+  { label: 'SaaS / Cloud', value: 'saas' },
+  { label: 'FinTech', value: 'fintech' },
+  { label: 'EdTech', value: 'edtech' },
+  { label: 'HealthTech', value: 'healthtech' },
+  { label: 'E-commerce', value: 'ecommerce' },
+  { label: 'AI / ML', value: 'ai_ml' },
+  { label: 'Gaming', value: 'gaming' },
+  { label: 'Social Media', value: 'social' },
+  { label: 'Cybersecurity', value: 'security' },
+  { label: 'Dev Tools', value: 'devtools' },
 ];
 
 const NOTICE_PERIODS = [
@@ -59,44 +59,38 @@ export default function OnboardingStep3() {
 
   return (
     <OnboardingShell currentStep={3} completedSteps={[1, 2]} profileData={{}}>
-      <div className="space-y-8">
+      <div className="space-y-10">
         {/* Header */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🎯</span>
-            <span className="text-xs font-semibold text-pulse-400 uppercase tracking-wider">Step 3 of 5</span>
-          </div>
-          <h2 className="text-3xl font-bold font-display text-white">Career Path</h2>
-          <p className="text-slate-400 text-lg">
-            Help us match you with the right opportunities. What does your ideal role look like?
+          <p className="text-sm font-medium text-pulse-600">Step 3 of 5</p>
+          <h2 className="text-3xl font-semibold text-slate-800">Where are you headed?</h2>
+          <p className="text-slate-500 text-lg">
+            Help us understand your career goals so we can match you with the right opportunities.
           </p>
         </div>
 
         {/* Job Search Status */}
         <div className="space-y-5">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-            <span className="w-6 h-px bg-slate-700" />
-            Current Status
-          </h3>
+          <h3 className="text-sm font-semibold text-slate-800">Current status</h3>
 
           <Select
-            label="Job Search Status"
+            label="What's your job search status?"
             options={JOB_SEARCH_STATUS}
-            placeholder="What's your current situation?"
+            placeholder="Select your current situation"
             value={formData.job_search_status}
             onChange={(e) => updateField('job_search_status', e.target.value)}
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Select
-              label="Notice Period"
+              label="How soon can you join?"
               options={NOTICE_PERIODS}
-              placeholder="How soon can you join?"
+              placeholder="Select notice period"
               value={formData.notice_period}
               onChange={(e) => updateField('notice_period', e.target.value)}
             />
             <Input
-              label="Preferred Locations"
+              label="Preferred locations"
               placeholder="Bangalore, Remote, Hyderabad..."
               value={formData.preferred_locations}
               onChange={(e) => updateField('preferred_locations', e.target.value)}
@@ -109,9 +103,9 @@ export default function OnboardingStep3() {
               id="relocate"
               checked={formData.willing_to_relocate}
               onChange={(e) => updateField('willing_to_relocate', e.target.checked)}
-              className="rounded border-slate-600 bg-slate-800 text-pulse-600 focus:ring-pulse-500"
+              className="rounded border-slate-300 text-pulse-600 focus:ring-pulse-500"
             />
-            <label htmlFor="relocate" className="text-sm text-slate-300">
+            <label htmlFor="relocate" className="text-sm text-slate-600">
               I&apos;m willing to relocate for the right opportunity
             </label>
           </div>
@@ -119,14 +113,11 @@ export default function OnboardingStep3() {
 
         {/* Salary */}
         <div className="space-y-5">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-            <span className="w-6 h-px bg-slate-700" />
-            Compensation (Optional)
-          </h3>
+          <h3 className="text-sm font-semibold text-slate-800">Expected compensation <span className="text-slate-400 font-normal">(optional)</span></h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
-              label="Minimum Salary (LPA)"
+              label="Minimum salary (LPA)"
               type="number"
               placeholder="e.g. 6"
               value={formData.salary_min}
@@ -134,7 +125,7 @@ export default function OnboardingStep3() {
               hint="Lakhs per annum"
             />
             <Input
-              label="Maximum Salary (LPA)"
+              label="Maximum salary (LPA)"
               type="number"
               placeholder="e.g. 12"
               value={formData.salary_max}
@@ -146,13 +137,10 @@ export default function OnboardingStep3() {
 
         {/* Preferences */}
         <div className="space-y-5">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-            <span className="w-6 h-px bg-slate-700" />
-            Work Preferences
-          </h3>
+          <h3 className="text-sm font-semibold text-slate-800">Work preferences</h3>
 
           <ChipGroup
-            label="Preferred Company Size"
+            label="Preferred company size"
             options={COMPANY_SIZES}
             selected={formData.preferred_company_sizes}
             onChange={(selected) => updateField('preferred_company_sizes', selected)}
@@ -160,28 +148,27 @@ export default function OnboardingStep3() {
           />
 
           <ChipGroup
-            label="Preferred Industries"
+            label="Industries you'd like to explore"
             options={INDUSTRIES}
             selected={formData.preferred_industries}
             onChange={(selected) => updateField('preferred_industries', selected)}
             maxSelections={5}
-            hint="Select up to 5 industries"
+            hint="Pick up to 5 industries"
           />
         </div>
 
         <TipCard
-          icon="🎯"
-          title="Be specific, get matched"
+          title="Specificity helps"
           description="Recruiters use these preferences to filter candidates. The more specific you are, the more relevant the opportunities you'll receive."
         />
 
         {/* Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-slate-800/50">
+        <div className="flex items-center justify-between pt-6 border-t border-slate-200">
           <Button variant="ghost" onClick={() => router.push('/onboarding/step-2')}>
-            ← Back
+            Back
           </Button>
           <Button onClick={() => router.push('/onboarding/step-4')} size="lg">
-            Next: Privacy & Trust
+            Save & continue
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
             </svg>

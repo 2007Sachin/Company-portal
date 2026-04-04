@@ -25,58 +25,46 @@ export default function LoginPage() {
 
     try {
       // TODO: Replace with real Supabase login when credentials are configured
-      // const { data, error } = await signInWithEmail(email, password);
-      // if (error) throw error;
-
-      // Demo mode: simulate login and redirect to dashboard
       await new Promise((resolve) => setTimeout(resolve, 1000));
       router.push('/dashboard');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid email or password');
+      setError(err instanceof Error ? err.message : 'Invalid email or password. Please try again.');
       setIsLoading(false);
     }
   };
 
   const handleGoogleLogin = async () => {
     // TODO: Replace with real Google OAuth when Supabase is configured
-    // const { error } = await signInWithGoogle();
-    // if (error) setError(error.message);
-
-    // Demo mode: redirect to dashboard
     router.push('/dashboard');
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex">
+    <div className="min-h-screen bg-white flex">
       {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 pulse-gradient relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/20" />
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative overflow-hidden">
         <div className="relative z-10 flex flex-col justify-center px-16 space-y-8">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+            <div className="w-12 h-12 rounded-card bg-pulse-600 flex items-center justify-center">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
               </svg>
             </div>
-            <span className="text-3xl font-bold font-display text-white">Pulse</span>
+            <span className="text-3xl font-semibold text-white">Pulse</span>
           </div>
           <div className="space-y-4">
-            <h2 className="text-4xl font-bold text-white leading-tight">
+            <h2 className="text-4xl font-semibold text-white leading-tight">
               Your work is your resume.
             </h2>
-            <p className="text-lg text-white/70 leading-relaxed max-w-md">
+            <p className="text-lg text-slate-400 leading-relaxed max-w-md">
               Connect your GitHub, LeetCode, and Medium to let your real coding activity speak for you.
             </p>
           </div>
-          <div className="flex gap-6 text-white/60 text-sm">
-            <span>✓ Real-time Pulse Score</span>
-            <span>✓ Verified activity</span>
-            <span>✓ Anti-gaming</span>
+          <div className="flex gap-6 text-slate-400 text-sm">
+            <span>Real-time Pulse Score</span>
+            <span>Verified activity</span>
+            <span>Anti-gaming</span>
           </div>
         </div>
-        {/* Decorative elements */}
-        <div className="absolute top-20 right-20 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
-        <div className="absolute bottom-20 left-20 w-48 h-48 rounded-full bg-white/5 blur-2xl" />
       </div>
 
       {/* Right Panel - Form */}
@@ -84,23 +72,23 @@ export default function LoginPage() {
         <div className="w-full max-w-md space-y-8">
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl pulse-gradient flex items-center justify-center">
+            <div className="w-10 h-10 rounded-card bg-pulse-600 flex items-center justify-center">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
               </svg>
             </div>
-            <span className="text-xl font-bold font-display text-white">Pulse</span>
+            <span className="text-xl font-semibold text-slate-800">Pulse</span>
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold font-display text-white">Welcome back</h1>
-            <p className="text-slate-400">Sign in to your Pulse account</p>
+            <h1 className="text-3xl font-semibold text-slate-800">Welcome back</h1>
+            <p className="text-slate-500">Sign in to your Pulse account</p>
           </div>
 
           {/* Google OAuth */}
           <button
             onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-slate-800/80 border border-slate-600/50 rounded-lg text-slate-200 font-medium hover:bg-slate-700/80 hover:border-slate-500/50 transition-all duration-200"
+            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-white border border-slate-300 rounded-input text-slate-700 font-medium hover:bg-slate-50 transition-colors duration-150"
           >
             <svg width="20" height="20" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -113,15 +101,15 @@ export default function LoginPage() {
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-700/50" />
+              <div className="w-full border-t border-slate-200" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-slate-950 px-4 text-slate-500">or sign in with email</span>
+              <span className="bg-white px-4 text-slate-400">or sign in with email</span>
             </div>
           </div>
 
           {error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-400">
+            <div className="p-3 rounded-input bg-red-50 border border-red-200 text-sm text-red-600">
               {error}
             </div>
           )}
@@ -129,7 +117,7 @@ export default function LoginPage() {
           {/* Email Form */}
           <form onSubmit={handleLogin} className="space-y-4">
             <Input
-              label="Email"
+              label="Email address"
               type="email"
               placeholder="you@example.com"
               value={email}
@@ -139,27 +127,27 @@ export default function LoginPage() {
             <Input
               label="Password"
               type="password"
-              placeholder="••••••••"
+              placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
             <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 text-slate-400">
-                <input type="checkbox" className="rounded border-slate-600 bg-slate-800 text-pulse-600 focus:ring-pulse-500" />
+              <label className="flex items-center gap-2 text-slate-600">
+                <input type="checkbox" className="rounded border-slate-300 text-pulse-600 focus:ring-pulse-500" />
                 Remember me
               </label>
-              <Link href="/auth/forgot-password" className="text-pulse-400 hover:text-pulse-300 transition-colors">Forgot password?</Link>
+              <Link href="/auth/forgot-password" className="text-pulse-600 hover:text-pulse-700 transition-colors">Forgot password?</Link>
             </div>
             <Button type="submit" className="w-full" size="lg" isLoading={isLoading}>
-              Sign In
+              Sign in
             </Button>
           </form>
 
           <p className="text-center text-sm text-slate-500">
             Don&apos;t have an account?{' '}
-            <Link href="/auth/signup" className="text-pulse-400 hover:text-pulse-300 font-medium transition-colors">
-              Create your Pulse profile
+            <Link href="/auth/signup" className="text-pulse-600 hover:text-pulse-700 font-medium transition-colors">
+              Create your profile
             </Link>
           </p>
         </div>
