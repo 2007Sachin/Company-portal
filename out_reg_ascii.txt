@@ -1,0 +1,55 @@
+reg : ERROR: The system was unable to find the specified registry key or value.
+At line:1 char:1
++ reg query "HKLM\SOFTWARE\Python" /s > out_reg.txt 2>&1; reg query "HK ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: The syst...y key or value.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+HKEY_CURRENT_USER\SOFTWARE\Python\PyLauncher
+    InstallDir    REG_SZ    C:\Users\A D M I N\AppData\Local\Programs\Python\Launcher\
+    AssociateFiles    REG_DWORD    0x1
+    (Default)    REG_SZ    C:\Users\A D M I N\AppData\Local\Programs\Python\Launcher\py.exe
+
+HKEY_CURRENT_USER\SOFTWARE\Python\PythonCore
+    DisplayName    REG_SZ    Python Software Foundation
+    SupportUrl    REG_SZ    https://www.python.org/
+
+HKEY_CURRENT_USER\SOFTWARE\Python\PythonCore\3.14
+    DisplayName    REG_SZ    Python 3.14 (64-bit)
+    SupportUrl    REG_SZ    https://www.python.org/
+    Version    REG_SZ    3.14.0
+    SysVersion    REG_SZ    3.14
+    SysArchitecture    REG_SZ    64bit
+
+HKEY_CURRENT_USER\SOFTWARE\Python\PythonCore\3.14\Help
+
+HKEY_CURRENT_USER\SOFTWARE\Python\PythonCore\3.14\Help\Main Python Documentation
+    (Default)    REG_SZ    C:\Users\A D M I N\AppData\Local\Programs\Python\Python314\Doc\html\index.html
+
+HKEY_CURRENT_USER\SOFTWARE\Python\PythonCore\3.14\Idle
+    (Default)    REG_SZ    C:\Users\A D M I N\AppData\Local\Programs\Python\Python314\Lib\idlelib\idle.pyw
+
+HKEY_CURRENT_USER\SOFTWARE\Python\PythonCore\3.14\IdleShortcuts
+    (Default)    REG_DWORD    0x1
+
+HKEY_CURRENT_USER\SOFTWARE\Python\PythonCore\3.14\InstalledFeatures
+    Shortcuts    REG_SZ    3.14.150.0
+    exe    REG_SZ    3.14.150.0
+    dev    REG_SZ    3.14.150.0
+    lib    REG_SZ    3.14.150.0
+    test    REG_SZ    3.14.150.0
+    doc_shortcut    REG_SZ    3.14.150.0
+    doc    REG_SZ    3.14.150.0
+    tcltk    REG_SZ    3.14.150.0
+    pip    REG_SZ    3.14.150.0
+    path    REG_SZ    3.14.150.0
+
+HKEY_CURRENT_USER\SOFTWARE\Python\PythonCore\3.14\InstallPath
+    (Default)    REG_SZ    C:\Users\A D M I N\AppData\Local\Programs\Python\Python314\
+    ExecutablePath    REG_SZ    C:\Users\A D M I N\AppData\Local\Programs\Python\Python314\python.exe
+    WindowedExecutablePath    REG_SZ    C:\Users\A D M I N\AppData\Local\Programs\Python\Python314\pythonw.exe
+
+HKEY_CURRENT_USER\SOFTWARE\Python\PythonCore\3.14\PythonPath
+    (Default)    REG_SZ    C:\Users\A D M I N\AppData\Local\Programs\Python\Python314\Lib\;C:\Users\A D M I N\AppData\Local\Programs\Python\Python314\DLLs\
+
