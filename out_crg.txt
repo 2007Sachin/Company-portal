@@ -1,0 +1,11 @@
+Installing MCP server config...
+  Claude Code: configured C:\Users\A D M I N\company\pulse-candidate-app\.mcp.json
+
+Configured 1 platform(s): Claude Code
+Generated skills in C:\Users\A D M I N\company\pulse-candidate-app\.claude\skills
+Injected graph instructions into: AGENTS.md, GEMINI.md, .cursorrules, .windsurfrules
+Installed hooks in C:\Users\A D M I N\company\pulse-candidate-app\.claude\settings.json
+
+Next steps:
+  1. code-review-graph build    # build the knowledge graph
+  2. Restart your AI coding tool to pick up the new config
