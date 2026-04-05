@@ -23,7 +23,7 @@ const activityIcons: Record<string, React.ReactNode> = {
 
 // Mock data
 const mockProfile = {
-  full_name: 'Rahul Kumar',
+  full_name: 'Sachin Kumar',
   professional_headline: 'Full Stack Developer | React & Node.js',
   avatar_url: null,
   location: 'Bangalore, India',
@@ -48,8 +48,8 @@ const mockActivity = [
 ];
 
 const mockNextSteps = [
-  { id: '1', title: 'Complete your bio', description: 'Add a professional bio to increase profile views', action: 'Update profile' },
-  { id: '2', title: 'Add portfolio link', description: 'Showcase your best work with a portfolio URL', action: 'Add link' },
+  { id: '1', title: 'Complete your bio', description: 'Add a professional bio to increase profile views', action: 'Update profile', icon: <FileEdit size={18} className="text-pink-500" />, iconBg: 'bg-pink-50' },
+  { id: '2', title: 'Add portfolio link', description: 'Showcase your best work with a portfolio URL', action: 'Add link', icon: <Briefcase size={18} className="text-green-500" />, iconBg: 'bg-green-50' },
 ];
 
 function getGreeting(): string {
@@ -61,7 +61,7 @@ function getGreeting(): string {
 
 export default function DashboardPage() {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#f8fafc]">
       {/* Top Nav */}
       <nav className="border-b border-slate-200 bg-white sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -81,13 +81,14 @@ export default function DashboardPage() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-        {/* Welcome Header */}
+        {/* Welcome Header - Pathwisse style */}
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <h1 className="text-2xl font-semibold text-slate-800">
-              {getGreeting()}, {mockProfile.full_name.split(' ')[0]}
+            <p className="text-sm text-slate-500">{getGreeting()}</p>
+            <h1 className="text-3xl font-bold text-slate-800">
+              {mockProfile.full_name.split(' ')[0]}
             </h1>
-            <p className="text-slate-500">Here&apos;s how your career journey is shaping up</p>
+            <p className="text-slate-500">Your career growth at a glance.</p>
           </div>
           <Link href="/profile/public">
             <Button variant="secondary" size="sm">
@@ -96,36 +97,86 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {/* Metrics Row */}
+        {/* Career Goal Card - Pathwisse style */}
+        <Card className="p-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-card bg-slate-100 flex items-center justify-center text-pulse-600">
+                <TrendingUp size={20} />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Pulse Score</p>
+                <p className="text-lg font-bold text-slate-800">Full Stack Developer Track</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-bold text-pulse-600">{mockPulseScore.overall}%</p>
+              <p className="text-xs text-slate-500">Overall Progress</p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Metrics Row - Pathwisse style */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
-            label="Pulse Score"
-            value={mockPulseScore.overall}
-            change="+4 this week"
-            changeType="positive"
+            label="Mastery"
+            value={`${mockPulseScore.velocity}%`}
+            change="4/12 stages"
+            changeType="neutral"
             icon={<TrendingUp size={20} />}
           />
           <MetricCard
-            label="Recruiter views"
-            value="28"
-            change="+12 this week"
+            label="Roadmap Progress"
+            value={`${mockPulseScore.consistency}%`}
+            change="+4 this week"
             changeType="positive"
             icon={<User size={20} />}
           />
           <MetricCard
-            label="Profile completeness"
-            value="85%"
-            change="3 fields remaining"
-            changeType="neutral"
-            icon={<FileEdit size={20} />}
-          />
-          <MetricCard
-            label="Activity streak"
-            value="15 days"
-            change="Personal best!"
+            label="Milestones"
+            value="8"
+            change="Completed"
             changeType="positive"
             icon={<Trophy size={20} />}
           />
+          <MetricCard
+            label="Total Hours"
+            value="15.2h"
+            change="Personal best!"
+            changeType="positive"
+            icon={<FileEdit size={20} />}
+          />
+        </div>
+
+        {/* Your Next Step - Pathwisse style */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-bold text-slate-800">Your Next Step</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {mockNextSteps.map((step) => (
+              <Card key={step.id} className="p-5" hover>
+                <div className="space-y-4">
+                  <div className={`w-10 h-10 rounded-card ${step.iconBg} flex items-center justify-center`}>
+                    {step.icon}
+                  </div>
+                  {step.id === '1' && (
+                    <span className="inline-flex px-2.5 py-0.5 rounded-chip text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                      PRIORITY
+                    </span>
+                  )}
+                  <div>
+                    <p className="text-base font-bold text-slate-800">{step.title}</p>
+                    <p className="text-sm text-slate-500 mt-1">{step.description}</p>
+                  </div>
+                  <Button size="sm" variant="primary">
+                    {step.action}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
+                    </svg>
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -149,7 +200,7 @@ export default function DashboardPage() {
           {/* Activity Timeline */}
           <Card className="p-6 space-y-4 lg:col-span-2">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-800">Recent activity</h3>
+              <h3 className="text-sm font-semibold text-slate-800">Recent Activity</h3>
               <Button variant="ghost" size="sm">View all</Button>
             </div>
             <div className="space-y-1">
@@ -178,36 +229,18 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Next Steps & Platforms */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Next Steps */}
-          <Card className="p-6 space-y-4">
-            <h3 className="text-sm font-semibold text-slate-800">Recommended next steps</h3>
-            {mockNextSteps.map((step) => (
-              <div
-                key={step.id}
-                className="flex items-center justify-between p-3 rounded-card bg-slate-50 border border-slate-100"
-              >
-                <div className="space-y-0.5">
-                  <p className="text-sm font-medium text-slate-700">{step.title}</p>
-                  <p className="text-xs text-slate-500">{step.description}</p>
-                </div>
-                <Button size="sm" variant="secondary">{step.action}</Button>
-              </div>
-            ))}
-          </Card>
-
-          {/* Connected Platforms */}
-          <Card className="p-6 space-y-4">
-            <h3 className="text-sm font-semibold text-slate-800">Connected platforms</h3>
+        {/* Connected Platforms */}
+        <Card className="p-6 space-y-4">
+          <h3 className="text-sm font-semibold text-slate-800">Connected platforms</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {[
-              { name: 'GitHub', username: 'rahulkumar', synced: '2 min ago', color: 'bg-slate-700' },
-              { name: 'LeetCode', username: 'rahul_codes', synced: '1 hour ago', color: 'bg-amber-600' },
-              { name: 'Medium', username: 'rahulwrites', synced: '3 hours ago', color: 'bg-green-600' },
+              { name: 'GitHub', username: 'sachinkumar', synced: '2 min ago', color: 'bg-slate-700' },
+              { name: 'LeetCode', username: 'sachin_codes', synced: '1 hour ago', color: 'bg-amber-600' },
+              { name: 'Medium', username: 'sachinwrites', synced: '3 hours ago', color: 'bg-green-600' },
             ].map((platform) => (
               <div
                 key={platform.name}
-                className="flex items-center justify-between p-3 rounded-card bg-slate-50"
+                className="flex items-center justify-between p-3 rounded-card bg-slate-50 border border-slate-100"
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-input ${platform.color} flex items-center justify-center text-white text-xs font-medium`}>
@@ -223,12 +256,11 @@ export default function DashboardPage() {
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
                     Synced
                   </span>
-                  <p className="text-xs text-slate-400">{platform.synced}</p>
                 </div>
               </div>
             ))}
-          </Card>
-        </div>
+          </div>
+        </Card>
       </main>
     </div>
   );

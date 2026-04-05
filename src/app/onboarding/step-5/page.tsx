@@ -20,14 +20,14 @@ export default function OnboardingStep5() {
 
   if (isLaunched) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-6">
+      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center px-6">
         <div className="text-center space-y-6 animate-fade-in max-w-lg">
           <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
             </svg>
           </div>
-          <h1 className="text-3xl font-semibold text-slate-800">
+          <h1 className="text-3xl font-bold text-slate-800">
             You&apos;re live!
           </h1>
           <p className="text-lg text-slate-500">
@@ -51,8 +51,14 @@ export default function OnboardingStep5() {
       <div className="space-y-10">
         {/* Header */}
         <div className="space-y-2">
-          <p className="text-sm font-medium text-pulse-600">Step 5 of 5</p>
-          <h2 className="text-3xl font-semibold text-slate-800">Looking good! Ready to go live?</h2>
+          {/* Segmented progress */}
+          <div className="flex gap-1.5 mb-4">
+            {[1,2,3,4,5].map(s => (
+              <div key={s} className={`flex-1 h-1.5 rounded-full bg-pulse-600`} />
+            ))}
+          </div>
+          <p className="text-sm font-medium text-slate-500">Step 5 of 5</p>
+          <h2 className="text-3xl font-bold text-slate-800">Looking good! Ready to go live?</h2>
           <p className="text-slate-500 text-lg">
             Review your profile and launch when you&apos;re ready.
           </p>

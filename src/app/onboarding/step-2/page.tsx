@@ -93,8 +93,14 @@ export default function OnboardingStep2() {
       <div className="space-y-10">
         {/* Header */}
         <div className="space-y-2">
-          <p className="text-sm font-medium text-pulse-600">Step 2 of 5</p>
-          <h2 className="text-3xl font-semibold text-slate-800">Show what you&apos;ve built</h2>
+          {/* Segmented progress */}
+          <div className="flex gap-1.5 mb-4">
+            {[1,2,3,4,5].map(s => (
+              <div key={s} className={`flex-1 h-1.5 rounded-full ${s <= 2 ? 'bg-pulse-600' : 'bg-slate-200'}`} />
+            ))}
+          </div>
+          <p className="text-sm font-medium text-slate-500">Step 2 of 5</p>
+          <h2 className="text-3xl font-bold text-slate-800">Show what you&apos;ve built</h2>
           <p className="text-slate-500 text-lg">
             Connect your platforms so recruiters see your real work — not just a resume.
           </p>

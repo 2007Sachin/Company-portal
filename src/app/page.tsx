@@ -6,7 +6,7 @@ import { Button } from '@/components/ui';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col">
       {/* Navigation */}
       <nav className="border-b border-slate-200 bg-white sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -33,13 +33,13 @@ export default function HomePage() {
       <main className="flex-1 flex items-center justify-center px-6">
         <div className="max-w-3xl mx-auto text-center space-y-8 animate-fade-in">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-chip bg-pulse-50 border border-pulse-200 text-sm text-pulse-700">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-chip bg-white border border-slate-200 text-sm text-slate-600">
             <span className="w-1.5 h-1.5 rounded-full bg-pulse-600" />
             Now live — Activity-as-Pedigree
           </div>
 
           {/* Headline */}
-          <h1 className="text-4xl md:text-5xl font-semibold text-slate-900 leading-tight tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 leading-tight tracking-tight">
             Your code speaks.{' '}
             <span className="text-pulse-600">Let recruiters listen.</span>
           </h1>
@@ -66,16 +66,21 @@ export default function HomePage() {
             </Button>
           </div>
 
-          {/* Stats */}
-          <div className="flex items-center justify-center gap-12 pt-8 text-center">
+          {/* Feature Cards - Pathwisse style */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-8 text-left">
             {[
-              { value: '40%', label: 'Faster hiring' },
-              { value: '60%', label: 'Interview pass rate' },
-              { value: '10K+', label: 'Active developers' },
-            ].map((stat) => (
-              <div key={stat.label} className="space-y-1">
-                <p className="text-2xl font-semibold text-pulse-600">{stat.value}</p>
-                <p className="text-xs text-slate-500">{stat.label}</p>
+              { icon: '📊', iconBg: 'bg-blue-50 text-blue-600', title: 'Live Pulse Score', desc: 'Real-time score from your coding activity' },
+              { icon: '🔗', iconBg: 'bg-green-50 text-green-600', title: 'Connect platforms', desc: 'GitHub, LeetCode, and Medium in one place' },
+              { icon: '🎯', iconBg: 'bg-amber-50 text-amber-600', title: 'Get discovered', desc: 'Recruiters find you based on real work' },
+            ].map((feature) => (
+              <div key={feature.title} className="bg-white rounded-card border border-slate-200 p-5 flex items-start gap-4">
+                <div className={`w-10 h-10 rounded-card ${feature.iconBg} flex items-center justify-center flex-shrink-0`}>
+                  <span className="text-lg">{feature.icon}</span>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">{feature.title}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{feature.desc}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -83,7 +88,7 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 py-6 px-6">
+      <footer className="border-t border-slate-200 bg-white py-6 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between text-xs text-slate-500">
           <span>&copy; 2025 Pulse. Activity-as-Pedigree.</span>
           <div className="flex gap-4">

@@ -71,8 +71,14 @@ export default function OnboardingStep4() {
       <div className="space-y-10">
         {/* Header */}
         <div className="space-y-2">
-          <p className="text-sm font-medium text-pulse-600">Step 4 of 5</p>
-          <h2 className="text-3xl font-semibold text-slate-800">You&apos;re in control</h2>
+          {/* Segmented progress */}
+          <div className="flex gap-1.5 mb-4">
+            {[1,2,3,4,5].map(s => (
+              <div key={s} className={`flex-1 h-1.5 rounded-full ${s <= 4 ? 'bg-pulse-600' : 'bg-slate-200'}`} />
+            ))}
+          </div>
+          <p className="text-sm font-medium text-slate-500">Step 4 of 5</p>
+          <h2 className="text-3xl font-bold text-slate-800">You&apos;re in control</h2>
           <p className="text-slate-500 text-lg">
             Choose what recruiters can see about you. You can change this anytime.
           </p>
@@ -90,7 +96,7 @@ export default function OnboardingStep4() {
                 onClick={() => updateSetting('profile_visibility', option.value)}
                 className={`p-4 rounded-card border text-left transition-colors duration-150 ${
                   settings.profile_visibility === option.value
-                    ? 'border-pulse-600 bg-pulse-50'
+                    ? 'border-pulse-600 bg-slate-50'
                     : 'border-slate-200 bg-white hover:border-slate-300'
                 }`}
               >

@@ -15,9 +15,9 @@ export function OnboardingSidebar({ currentStep, completedSteps, className }: Si
   const progressPercent = Math.round((completedSteps.length / totalSteps) * 100);
 
   return (
-    <aside className={cn('w-72 bg-slate-900 flex flex-col', className)}>
+    <aside className={cn('w-72 bg-white border-r border-slate-200 flex flex-col', className)}>
       {/* Logo */}
-      <div className="p-6 border-b border-slate-800">
+      <div className="p-6 border-b border-slate-200">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-card bg-pulse-600 flex items-center justify-center">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -25,8 +25,8 @@ export function OnboardingSidebar({ currentStep, completedSteps, className }: Si
             </svg>
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-white">Pulse</h1>
-            <p className="text-xs text-slate-400">Career Passport</p>
+            <h1 className="text-lg font-semibold text-slate-800">Pulse</h1>
+            <p className="text-xs text-slate-500">Career Passport</p>
           </div>
         </div>
       </div>
@@ -43,7 +43,7 @@ export function OnboardingSidebar({ currentStep, completedSteps, className }: Si
               key={step.id}
               className={cn(
                 'flex items-center gap-3 px-4 py-3 rounded-card transition-colors duration-150',
-                isCurrent && 'bg-slate-800',
+                isCurrent && 'bg-slate-50 border border-slate-200',
                 isLocked && 'opacity-40'
               )}
             >
@@ -52,7 +52,7 @@ export function OnboardingSidebar({ currentStep, completedSteps, className }: Si
                 'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0',
                 isCurrent && 'bg-pulse-600 text-white',
                 isCompleted && !isCurrent && 'bg-green-600 text-white',
-                isLocked && 'bg-slate-700 text-slate-500',
+                isLocked && 'bg-slate-100 text-slate-400',
               )}>
                 {isCompleted && !isCurrent ? (
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -67,13 +67,13 @@ export function OnboardingSidebar({ currentStep, completedSteps, className }: Si
               <div className="min-w-0">
                 <p className={cn(
                   'text-sm font-medium truncate',
-                  isCurrent ? 'text-white' : isCompleted ? 'text-slate-300' : 'text-slate-500'
+                  isCurrent ? 'text-slate-800' : isCompleted ? 'text-slate-600' : 'text-slate-400'
                 )}>
                   {step.title}
                 </p>
                 <p className={cn(
                   'text-xs truncate',
-                  isCurrent ? 'text-slate-400' : 'text-slate-600'
+                  isCurrent ? 'text-slate-500' : 'text-slate-400'
                 )}>
                   {step.subtitle}
                 </p>
@@ -84,19 +84,27 @@ export function OnboardingSidebar({ currentStep, completedSteps, className }: Si
       </nav>
 
       {/* Progress */}
-      <div className="p-6 border-t border-slate-800">
+      <div className="p-6 border-t border-slate-200">
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400">Progress</span>
-            <span className="text-xs font-semibold text-pulse-400">{progressPercent}%</span>
+            <span className="text-xs font-medium text-slate-500">Progress</span>
+            <span className="text-xs font-semibold text-pulse-600">{progressPercent}%</span>
           </div>
-          <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full bg-pulse-600 transition-all duration-700 ease-out"
-              style={{ width: `${progressPercent}%` }}
-            />
+          {/* Segmented progress bar */}
+          <div className="flex gap-1.5">
+            {ONBOARDING_STEPS.map((step) => (
+              <div
+                key={step.id}
+                className={cn(
+                  'flex-1 h-1.5 rounded-full transition-all duration-500',
+                  completedSteps.includes(step.id) || currentStep === step.id
+                    ? 'bg-pulse-600'
+                    : 'bg-slate-200'
+                )}
+              />
+            ))}
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-400">
             {completedSteps.length} of {totalSteps} steps completed
           </p>
         </div>

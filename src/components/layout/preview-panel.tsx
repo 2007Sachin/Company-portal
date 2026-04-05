@@ -20,7 +20,7 @@ export function ProfilePreviewPanel({ profileData, className }: ProfilePreviewPa
   const avatarUrl = profileData.avatar_url as string | undefined;
 
   return (
-    <aside className={cn('w-80 border-l border-slate-200 bg-white overflow-y-auto scrollbar-thin', className)}>
+    <aside className={cn('w-80 border-l border-slate-200 bg-[#f8fafc] overflow-y-auto scrollbar-thin', className)}>
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="space-y-1">
@@ -29,7 +29,7 @@ export function ProfilePreviewPanel({ profileData, className }: ProfilePreviewPa
         </div>
 
         {/* Preview Card */}
-        <div className="rounded-card shadow-card overflow-hidden">
+        <div className="rounded-card border border-slate-200 bg-white overflow-hidden">
           {/* Banner */}
           <div className="h-20 bg-pulse-600 relative">
             <div className="absolute -bottom-8 left-4">
@@ -59,7 +59,7 @@ export function ProfilePreviewPanel({ profileData, className }: ProfilePreviewPa
             {targetRoles.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {targetRoles.slice(0, 3).map((role) => (
-                  <span key={role} className="px-2 py-0.5 text-xs rounded-chip bg-pulse-50 text-pulse-700 border border-pulse-200">
+                  <span key={role} className="px-2 py-0.5 text-xs rounded-chip bg-slate-50 text-slate-700 border border-slate-200">
                     {role}
                   </span>
                 ))}
@@ -84,10 +84,10 @@ export function ProfilePreviewPanel({ profileData, className }: ProfilePreviewPa
         </div>
 
         {/* Completion */}
-        <div className="rounded-card shadow-card p-4 space-y-3">
+        <div className="rounded-card border border-slate-200 bg-white p-4 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-slate-600">Profile completeness</span>
-            <span className="text-xs font-semibold text-pulse-600">{completion}%</span>
+            <span className="text-xs font-semibold text-slate-800">{completion}%</span>
           </div>
           <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
             <div
@@ -98,7 +98,7 @@ export function ProfilePreviewPanel({ profileData, className }: ProfilePreviewPa
         </div>
 
         {/* Tip */}
-        <div className="rounded-card bg-pulse-50 border-l-4 border-l-pulse-600 p-4 space-y-1">
+        <div className="rounded-card bg-slate-50 border border-slate-200 p-4 space-y-1">
           <p className="text-xs font-semibold text-slate-700">Quick tip</p>
           <p className="text-xs text-slate-600 leading-relaxed">
             Profiles with a professional photo get 3x more recruiter views. Upload one to stand out.

@@ -28,8 +28,8 @@ export function Chip({ label, icon, isActive, onClick, className, size = 'md' }:
         'transition-colors duration-150 cursor-pointer select-none',
         sizes[size],
         isActive
-          ? 'bg-pulse-50 border-pulse-600 text-pulse-700'
-          : 'bg-white border-slate-300 text-slate-600 hover:border-slate-400 hover:text-slate-700',
+          ? 'bg-pulse-600 border-pulse-600 text-white'
+          : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50',
         className
       )}
     >

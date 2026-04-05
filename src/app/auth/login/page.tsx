@@ -39,27 +39,27 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex">
+    <div className="min-h-screen bg-[#f8fafc] flex">
       {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-pulse-600 relative overflow-hidden">
         <div className="relative z-10 flex flex-col justify-center px-16 space-y-8">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-card bg-pulse-600 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-card bg-white/10 flex items-center justify-center">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
               </svg>
             </div>
-            <span className="text-3xl font-semibold text-white">Pulse</span>
+            <span className="text-3xl font-bold text-white">Pulse</span>
           </div>
           <div className="space-y-4">
-            <h2 className="text-4xl font-semibold text-white leading-tight">
+            <h2 className="text-4xl font-bold text-white leading-tight">
               Your work is your resume.
             </h2>
-            <p className="text-lg text-slate-400 leading-relaxed max-w-md">
+            <p className="text-lg text-white/70 leading-relaxed max-w-md">
               Connect your GitHub, LeetCode, and Medium to let your real coding activity speak for you.
             </p>
           </div>
-          <div className="flex gap-6 text-slate-400 text-sm">
+          <div className="flex gap-6 text-white/60 text-sm">
             <span>Real-time Pulse Score</span>
             <span>Verified activity</span>
             <span>Anti-gaming</span>
@@ -81,14 +81,14 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-3xl font-semibold text-slate-800">Welcome back</h1>
+            <h1 className="text-3xl font-bold text-slate-800">Welcome back</h1>
             <p className="text-slate-500">Sign in to your Pulse account</p>
           </div>
 
           {/* Google OAuth */}
           <button
             onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-white border border-slate-300 rounded-input text-slate-700 font-medium hover:bg-slate-50 transition-colors duration-150"
+            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-white border border-slate-200 rounded-input text-slate-700 font-medium hover:bg-slate-50 hover:border-slate-300 transition-all duration-150"
           >
             <svg width="20" height="20" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -104,7 +104,7 @@ export default function LoginPage() {
               <div className="w-full border-t border-slate-200" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-4 text-slate-400">or sign in with email</span>
+              <span className="bg-[#f8fafc] px-4 text-slate-400">or sign in with email</span>
             </div>
           </div>
 
@@ -134,7 +134,7 @@ export default function LoginPage() {
             />
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 text-slate-600">
-                <input type="checkbox" className="rounded border-slate-300 text-pulse-600 focus:ring-pulse-500" />
+                <input type="checkbox" className="rounded border-slate-200 text-pulse-600 focus:ring-pulse-500" />
                 Remember me
               </label>
               <Link href="/auth/forgot-password" className="text-pulse-600 hover:text-pulse-700 transition-colors">Forgot password?</Link>
