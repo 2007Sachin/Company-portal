@@ -32,7 +32,7 @@ export default function RecruiterSearchPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between px-8 py-5">
+      <header className="flex items-center justify-between px-8 py-5 relative z-10">
         <Link href="/recruiter/login" className="flex items-center gap-2 group">
           <div className="w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center">
             <Activity className="w-4 h-4 text-white" strokeWidth={2.5} />
