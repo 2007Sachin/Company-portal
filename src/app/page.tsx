@@ -49,7 +49,7 @@ export default function HomePage() {
             Access the Precision Search Engine. Hire top 5% talent verified by real data.
           </p>
           <Link
-            href="/recruiter/dashboard"
+            href="/recruiter/login"
             className="bg-white text-slate-900 rounded-full px-8 py-3 font-medium block text-center w-full hover:bg-slate-100 transition-colors"
           >
             <span className="inline-flex items-center justify-center gap-2">
