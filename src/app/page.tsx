@@ -2,98 +2,65 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui';
+import { Users, Search, ArrowRight, Activity } from 'lucide-react';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Navigation */}
-      <nav className="border-b border-slate-200 bg-white sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-card bg-pulse-600 flex items-center justify-center">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-              </svg>
-            </div>
-            <span className="text-xl font-semibold text-slate-800">Pulse</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link href="/auth/login">
-              <Button variant="ghost" size="sm">Sign in</Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button variant="primary" size="sm">Get started</Button>
-            </Link>
+    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-slate-50">
+      {/* Brand Header */}
+      <div className="text-center mb-12">
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="w-11 h-11 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20">
+            <Activity className="w-6 h-6 text-white" />
           </div>
         </div>
-      </nav>
+        <h1 className="text-4xl font-bold text-slate-900 mb-2">Project Pulse</h1>
+        <p className="text-slate-500">Signal Over Noise. Choose your portal to continue.</p>
+      </div>
 
-      {/* Hero */}
-      <main className="flex-1 flex items-center justify-center px-6">
-        <div className="max-w-3xl mx-auto text-center space-y-8 animate-fade-in">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-chip bg-pulse-50 border border-pulse-200 text-sm text-pulse-700">
-            <span className="w-1.5 h-1.5 rounded-full bg-pulse-600" />
-            Now live — Activity-as-Pedigree
+      {/* Split Decision Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
+        {/* Candidate Card */}
+        <div className="bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/50 hover:scale-105 transition-transform duration-300 group">
+          <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-6 group-hover:bg-blue-100 transition-colors">
+            <Users className="w-7 h-7 text-blue-600" />
           </div>
-
-          {/* Headline */}
-          <h1 className="text-4xl md:text-5xl font-semibold text-slate-900 leading-tight tracking-tight">
-            Your code speaks.{' '}
-            <span className="text-pulse-600">Let recruiters listen.</span>
-          </h1>
-
-          {/* Subheadline */}
-          <p className="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
-            Replace your static resume with a <strong className="text-slate-700">live Pulse Score</strong>.
-            Connect GitHub, LeetCode, and Medium to let your real coding activity do the talking.
+          <h2 className="text-2xl font-bold text-slate-900">For Candidates</h2>
+          <p className="text-slate-600 mt-4 mb-8 leading-relaxed">
+            Access your Verified Portfolio, track your Pulse Score, and apply to high-signal roles.
           </p>
-
-          {/* CTA */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
-            <Link href="/auth/signup">
-              <Button size="lg">
-                Create your Pulse profile
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14" />
-                  <path d="m12 5 7 7-7 7" />
-                </svg>
-              </Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button variant="secondary" size="lg">
-                See how it works
-              </Button>
-            </Link>
-          </div>
-
-          {/* Stats */}
-          <div className="flex items-center justify-center gap-12 pt-8 text-center">
-            {[
-              { value: '40%', label: 'Faster hiring' },
-              { value: '60%', label: 'Interview pass rate' },
-              { value: '10K+', label: 'Active developers' },
-            ].map((stat) => (
-              <div key={stat.label} className="space-y-1">
-                <p className="text-2xl font-semibold text-pulse-600">{stat.value}</p>
-                <p className="text-xs text-slate-500">{stat.label}</p>
-              </div>
-            ))}
-          </div>
+          <Link
+            href="/auth/login"
+            className="bg-blue-600 text-white rounded-full px-8 py-3 font-medium block text-center w-full hover:bg-blue-700 transition-colors"
+          >
+            <span className="inline-flex items-center justify-center gap-2">
+              Enter as Candidate <ArrowRight className="w-4 h-4" />
+            </span>
+          </Link>
         </div>
-      </main>
+
+        {/* Recruiter Card */}
+        <div className="bg-slate-900 text-white rounded-3xl p-8 shadow-xl hover:scale-105 transition-transform duration-300 group">
+          <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center mb-6 group-hover:bg-slate-700 transition-colors">
+            <Search className="w-7 h-7 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold">For Recruiters</h2>
+          <p className="text-slate-400 mt-4 mb-8 leading-relaxed">
+            Access the Precision Search Engine. Hire top 5% talent verified by real data.
+          </p>
+          <Link
+            href="/recruiter/dashboard"
+            className="bg-white text-slate-900 rounded-full px-8 py-3 font-medium block text-center w-full hover:bg-slate-100 transition-colors"
+          >
+            <span className="inline-flex items-center justify-center gap-2">
+              Enter as Recruiter <ArrowRight className="w-4 h-4" />
+            </span>
+          </Link>
+        </div>
+      </div>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 py-6 px-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between text-xs text-slate-500">
-          <span>&copy; 2025 Pulse. Activity-as-Pedigree.</span>
-          <div className="flex gap-4">
-            <Link href="/privacy" className="hover:text-slate-700 transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-slate-700 transition-colors">Terms</Link>
-          </div>
-        </div>
-      </footer>
+      <p className="mt-16 text-xs text-slate-400">&copy; 2025 Project Pulse. Activity-as-Pedigree.</p>
     </div>
   );
 }
