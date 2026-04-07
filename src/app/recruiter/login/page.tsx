@@ -14,7 +14,7 @@ export default function RecruiterLoginPage() {
     setLoadingBtn(method);
     // Simulate auth delay
     await new Promise((resolve) => setTimeout(resolve, 1200));
-    router.push('/recruiter/dashboard');
+    router.push('/recruiter/search');
   };
 
   return (
