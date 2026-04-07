@@ -62,7 +62,7 @@ export default function OnboardingStep3() {
       <div className="space-y-10">
         {/* Header */}
         <div className="space-y-2">
-          <p className="text-sm font-medium text-pulse-600">Step 3 of 5</p>
+          <p className="text-sm font-medium text-pulse-600">Step 3 of 4</p>
           <h2 className="text-3xl font-semibold text-slate-800">Where are you headed?</h2>
           <p className="text-slate-500 text-lg">
             Help us understand your career goals so we can match you with the right opportunities.

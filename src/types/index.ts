@@ -173,8 +173,7 @@ export const ONBOARDING_STEPS: Omit<OnboardingStep, 'isCompleted' | 'isCurrent'>
   { id: 1, title: 'About You', subtitle: 'The basics', icon: '1' },
   { id: 2, title: 'Your Work', subtitle: 'Connect platforms', icon: '2' },
   { id: 3, title: 'Career Goals', subtitle: 'Where you\'re headed', icon: '3' },
-  { id: 4, title: 'Privacy', subtitle: 'You\'re in control', icon: '4' },
-  { id: 5, title: 'Launch', subtitle: 'Go live', icon: '5' },
+  { id: 4, title: 'Launch', subtitle: 'Go live', icon: '4' },
 ];
 
 // --- Dashboard ---
