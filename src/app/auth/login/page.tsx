@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button, Input } from '@/components/ui';
+import { Users, Search } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [role, setRole] = useState<'candidate' | 'recruiter'>('candidate');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +28,11 @@ export default function LoginPage() {
     try {
       // TODO: Replace with real Supabase login when credentials are configured
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      router.push('/dashboard');
+      if (role === 'recruiter') {
+        router.push('/recruiter/search');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid email or password. Please try again.');
       setIsLoading(false);
@@ -35,7 +41,11 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     // TODO: Replace with real Google OAuth when Supabase is configured
-    router.push('/dashboard');
+    if (role === 'recruiter') {
+      router.push('/recruiter/dashboard');
+    } else {
+      router.push('/dashboard');
+    }
   };
 
   return (
@@ -44,7 +54,7 @@ export default function LoginPage() {
       <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative overflow-hidden">
         <div className="relative z-10 flex flex-col justify-center px-16 space-y-8">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-card bg-pulse-600 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
               </svg>
@@ -53,16 +63,30 @@ export default function LoginPage() {
           </div>
           <div className="space-y-4">
             <h2 className="text-4xl font-semibold text-white leading-tight">
-              Your work is your resume.
+              {role === 'candidate'
+                ? 'Your work is your resume.'
+                : 'Hire verified talent.'}
             </h2>
             <p className="text-lg text-slate-400 leading-relaxed max-w-md">
-              Connect your GitHub, LeetCode, and Medium to let your real coding activity speak for you.
+              {role === 'candidate'
+                ? 'Connect your GitHub, LeetCode, and Medium to let your real coding activity speak for you.'
+                : 'Access the Precision Search Engine. Source top 5% developers verified by real activity data.'}
             </p>
           </div>
           <div className="flex gap-6 text-slate-400 text-sm">
-            <span>Real-time Pulse Score</span>
-            <span>Verified activity</span>
-            <span>Anti-gaming</span>
+            {role === 'candidate' ? (
+              <>
+                <span>Real-time Pulse Score</span>
+                <span>Verified activity</span>
+                <span>Anti-gaming</span>
+              </>
+            ) : (
+              <>
+                <span>Kanban Pipeline</span>
+                <span>Data-verified profiles</span>
+                <span>1-click outreach</span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -72,7 +96,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md space-y-8">
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-card bg-pulse-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
               </svg>
@@ -85,10 +109,42 @@ export default function LoginPage() {
             <p className="text-slate-500">Sign in to your Pulse account</p>
           </div>
 
+          {/* ═══ ROLE TOGGLE SWITCH ═══ */}
+          <div className="relative bg-slate-100 rounded-full p-1 flex">
+            {/* Sliding background pill */}
+            <div
+              className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full transition-all duration-300 ease-in-out shadow-sm ${
+                role === 'candidate'
+                  ? 'left-1 bg-white'
+                  : 'left-[calc(50%+2px)] bg-white'
+              }`}
+            />
+            <button
+              type="button"
+              onClick={() => setRole('candidate')}
+              className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-colors duration-300 ${
+                role === 'candidate' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-500'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              Candidate
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole('recruiter')}
+              className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-colors duration-300 ${
+                role === 'recruiter' ? 'text-slate-900' : 'text-slate-400 hover:text-slate-500'
+              }`}
+            >
+              <Search className="w-4 h-4" />
+              Recruiter
+            </button>
+          </div>
+
           {/* Google OAuth */}
           <button
             onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-white border border-slate-300 rounded-input text-slate-700 font-medium hover:bg-slate-50 transition-colors duration-150"
+            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-700 font-medium hover:bg-slate-50 transition-colors duration-150"
           >
             <svg width="20" height="20" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -109,7 +165,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="p-3 rounded-input bg-red-50 border border-red-200 text-sm text-red-600">
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-600">
               {error}
             </div>
           )}
@@ -134,19 +190,19 @@ export default function LoginPage() {
             />
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 text-slate-600">
-                <input type="checkbox" className="rounded border-slate-300 text-pulse-600 focus:ring-pulse-500" />
+                <input type="checkbox" className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
                 Remember me
               </label>
-              <Link href="/auth/forgot-password" className="text-pulse-600 hover:text-pulse-700 transition-colors">Forgot password?</Link>
+              <Link href="/auth/forgot-password" className="text-blue-600 hover:text-blue-700 transition-colors">Forgot password?</Link>
             </div>
             <Button type="submit" className="w-full" size="lg" isLoading={isLoading}>
-              Sign in
+              {role === 'candidate' ? 'Sign in as Candidate' : 'Sign in as Recruiter'}
             </Button>
           </form>
 
           <p className="text-center text-sm text-slate-500">
             Don&apos;t have an account?{' '}
-            <Link href="/auth/signup" className="text-pulse-600 hover:text-pulse-700 font-medium transition-colors">
+            <Link href="/auth/signup" className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
               Create your profile
             </Link>
           </p>
