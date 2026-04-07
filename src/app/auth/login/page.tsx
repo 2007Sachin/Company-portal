@@ -29,7 +29,7 @@ export default function LoginPage() {
       // TODO: Replace with real Supabase login when credentials are configured
       await new Promise((resolve) => setTimeout(resolve, 1000));
       if (role === 'recruiter') {
-        router.push('/recruiter/dashboard');
+        router.push('/recruiter/search');
       } else {
         router.push('/dashboard');
       }

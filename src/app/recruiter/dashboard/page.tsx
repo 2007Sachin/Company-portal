@@ -11,10 +11,10 @@ export default function RecruiterDashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <Link
-            href="/"
+            href="/recruiter/search"
             className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 transition-colors mb-3"
           >
-            <ArrowLeft className="w-4 h-4" /> Back to Portal
+            <ArrowLeft className="w-4 h-4" /> Back to Search
           </Link>
           <h1 className="text-3xl font-bold text-slate-900">Candidate Pipeline</h1>
           <p className="text-slate-500 mt-1">Active Req: Senior Product Analyst</p>
