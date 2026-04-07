@@ -344,23 +344,101 @@ export default function TalentDiscoveryPage() {
         </div>
       </main>
       
-      {/* Mock Full Profile Modal Overlay (Hidden by default) */}
+      {/* Slide-Over candidate profile drawer */}
       {selectedCandidate && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-end backdrop-blur-sm">
-          <div className="bg-white w-full max-w-xl h-full shadow-2xl p-8 overflow-y-auto animate-in slide-in-from-right">
-             <div className="flex justify-between items-center mb-8">
-               <h2 className="text-2xl font-bold">{selectedCandidate.name}</h2>
-               <button onClick={() => setSelectedCandidate(null)} className="p-2 bg-slate-100 rounded-full hover:bg-slate-200">
-                  <X className="w-5 h-5 text-slate-600" />
-               </button>
-             </div>
-             <p className="text-lg text-slate-600 mb-6">{selectedCandidate.headline}</p>
-             <p className="whitespace-pre-wrap text-slate-700">{selectedCandidate.about}</p>
-             <div className="mt-8">
-                <button onClick={() => setSelectedCandidate(null)} className="px-6 py-3 bg-slate-900 text-white rounded-xl text-sm font-medium hover:bg-slate-800 transition-colors">
-                   Close Profile
-                </button>
-             </div>
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex justify-end">
+          {/* Drawer Panel */}
+          <div className="fixed inset-y-0 right-0 w-full max-w-2xl bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 z-50 overflow-hidden">
+            
+            {/* Modal Header */}
+            <div className="px-8 py-6 border-b border-slate-100 flex items-start justify-between bg-white z-10 flex-shrink-0">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900">{selectedCandidate.name}</h2>
+                <div className="flex items-center gap-3 mt-2">
+                  <span className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Pulse Score:</span>
+                  <span className="text-xl font-black text-indigo-600">{selectedCandidate.pulseScore}</span>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedCandidate(null)} 
+                className="p-2 bg-slate-100/80 rounded-full hover:bg-slate-200 transition-colors text-slate-500 hover:text-slate-900"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Content (scrollable) */}
+            <div className="p-8 space-y-10 flex-1 overflow-y-auto">
+              
+              {/* About Section */}
+              <section className="space-y-3">
+                <h3 className="text-sm font-bold tracking-widest text-slate-400 uppercase">About</h3>
+                <p className="text-slate-700 leading-relaxed text-lg">{selectedCandidate.about}</p>
+              </section>
+
+              {/* Tech Stack */}
+              <section className="space-y-3">
+                <h3 className="text-sm font-bold tracking-widest text-slate-400 uppercase">Tech Stack</h3>
+                <div className="flex flex-wrap gap-2">
+                  {selectedCandidate.skills.map((skill: string, index: number) => (
+                    <span key={index} className="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl text-sm font-semibold border border-indigo-100">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </section>
+
+              {/* Stats Grid */}
+              <section className="space-y-3">
+                <h3 className="text-sm font-bold tracking-widest text-slate-400 uppercase">Quick Stats</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4">
+                    <p className="text-xs font-semibold text-slate-400 uppercase mb-1">Experience</p>
+                    <p className="text-base font-bold text-slate-900">{selectedCandidate.experience}</p>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4">
+                    <p className="text-xs font-semibold text-slate-400 uppercase mb-1">Notice Period</p>
+                    <p className="text-base font-bold text-slate-900">{selectedCandidate.noticePeriod}</p>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4">
+                    <p className="text-xs font-semibold text-slate-400 uppercase mb-1">Location</p>
+                    <p className="text-base font-bold text-slate-900">{selectedCandidate.location}</p>
+                  </div>
+                </div>
+              </section>
+
+              {/* Mock Verification */}
+              <section className="space-y-3 pb-8">
+                <h3 className="text-sm font-bold tracking-widest text-slate-400 uppercase">Verified Platforms</h3>
+                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-emerald-600" />
+                    <span className="font-semibold text-emerald-900">GitHub Verified</span>
+                    <span className="text-emerald-700 text-sm ml-auto border border-emerald-200 bg-emerald-100/50 px-2 py-0.5 rounded-lg">Top 10%</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-emerald-600" />
+                    <span className="font-semibold text-emerald-900">LeetCode Verified</span>
+                    <span className="text-emerald-700 text-sm ml-auto border border-emerald-200 bg-emerald-100/50 px-2 py-0.5 rounded-lg">150+ solved</span>
+                  </div>
+                </div>
+              </section>
+
+            </div>
+
+            {/* Modal Footer (Sticky) */}
+            <div className="p-6 bg-white border-t border-slate-100 flex-shrink-0">
+              <button 
+                onClick={() => {
+                  handleAddToPipeline(selectedCandidate.id);
+                  setSelectedCandidate(null);
+                }}
+                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-slate-900 text-white rounded-xl text-base font-bold hover:bg-slate-800 transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-slate-900/30 focus:ring-offset-2"
+              >
+                <Plus className="w-5 h-5" /> Shortlist & Add to Pipeline
+              </button>
+            </div>
+
           </div>
         </div>
       )}
