@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button, Card } from '@/components/ui';
 import { Avatar } from '@/components/ui/avatar';
 import { getActivityIcon, formatRelativeTime } from '@/lib/utils';
-import { GitCommit, GitMerge, CheckCircle, FileText, Trophy, TrendingUp, FileEdit, User, Code, ArrowRight } from 'lucide-react';
+import { GitCommit, GitMerge, CheckCircle, FileText, Trophy, TrendingUp, FileEdit, User, Code, ArrowRight, LogOut } from 'lucide-react';
 
 // Icon mapping for activity types
 const activityIcons: Record<string, React.ReactNode> = {
@@ -80,7 +80,11 @@ export default function DashboardPage() {
             <Link href="/settings">
               <Button variant="ghost" size="sm">Settings</Button>
             </Link>
+            <div className="h-6 w-px bg-slate-200 ml-2 mx-1"></div>
             <Avatar src={null} name={mockProfile.full_name} size="sm" />
+            <Link href="/auth/login" className="text-slate-400 hover:text-red-500 transition-colors ml-2" title="Log out">
+              <LogOut size={18} />
+            </Link>
           </div>
         </div>
       </nav>

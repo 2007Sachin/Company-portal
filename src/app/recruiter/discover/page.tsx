@@ -18,7 +18,8 @@ import {
   CheckCircle2,
   AlertCircle,
   ArrowLeft,
-  Check
+  Check,
+  LogOut
 } from 'lucide-react';
 
 const mockCandidates = [
@@ -112,8 +113,13 @@ export default function TalentDiscoveryPage() {
           >
             Go to Pipeline <ArrowRight className="w-4 h-4" />
           </Link>
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold shadow-sm cursor-pointer hover:opacity-90 transition-opacity">
-            R
+          <div className="flex items-center gap-4 pl-2 border-l border-slate-200">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold shadow-sm cursor-pointer hover:opacity-90 transition-opacity">
+              R
+            </div>
+            <Link href="/auth/login" className="text-slate-400 hover:text-red-500 transition-colors" title="Log out">
+              <LogOut className="w-5 h-5" />
+            </Link>
           </div>
         </div>
       </header>
