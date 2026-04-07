@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { ONBOARDING_STEPS } from '@/types';
 
@@ -11,6 +12,7 @@ interface SidebarProps {
 }
 
 export function OnboardingSidebar({ currentStep, completedSteps, className }: SidebarProps) {
+  const router = useRouter();
   const totalSteps = ONBOARDING_STEPS.length;
   const progressPercent = Math.round((completedSteps.length / totalSteps) * 100);
 
@@ -41,10 +43,12 @@ export function OnboardingSidebar({ currentStep, completedSteps, className }: Si
           return (
             <div
               key={step.id}
+              onClick={() => (isCompleted || isCurrent) ? router.push(`/onboarding/step-${step.id}`) : undefined}
               className={cn(
                 'flex items-center gap-3 px-4 py-3 rounded-card transition-colors duration-150',
                 isCurrent && 'bg-slate-800',
-                isLocked && 'opacity-40'
+                isLocked && 'opacity-40',
+                (isCompleted || isCurrent) && 'cursor-pointer hover:bg-slate-800/60'
               )}
             >
               {/* Step indicator */}

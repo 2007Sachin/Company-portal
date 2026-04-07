@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { Card, ScoreRing, ProgressBar, Button } from '@/components/ui';
 import { Avatar } from '@/components/ui/avatar';
 import { getActivityIcon, formatRelativeTime } from '@/lib/utils';
@@ -58,16 +59,15 @@ export default function PublicProfilePage() {
       <nav className="border-b border-slate-200 bg-white sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-input bg-pulse-600 flex items-center justify-center">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-              </svg>
-            </div>
-            <span className="text-sm font-semibold text-slate-800">Pulse</span>
+            <Link href="/dashboard" className="text-sm text-slate-500 hover:text-slate-700 transition-colors mr-3">
+              ← Dashboard
+            </Link>
           </div>
-          <Button size="sm" variant="secondary">
-            Create your profile
-          </Button>
+          <Link href="/auth/signup">
+            <Button size="sm" variant="secondary">
+              Create your profile
+            </Button>
+          </Link>
         </div>
       </nav>
 
@@ -88,8 +88,8 @@ export default function PublicProfilePage() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button size="sm" variant="primary">Contact</Button>
-                <Button size="sm" variant="ghost">Share</Button>
+                <Button size="sm" variant="primary" onClick={() => window.location.href = 'mailto:rahul@example.com'}>Contact</Button>
+                <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText(window.location.href); }}>Share</Button>
               </div>
             </div>
             {profile.bio && (

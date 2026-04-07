@@ -61,9 +61,11 @@ export default function HomePage() {
                 </svg>
               </Button>
             </Link>
-            <Button variant="secondary" size="lg">
-              See how it works
-            </Button>
+            <Link href="/auth/signup">
+              <Button variant="secondary" size="lg">
+                See how it works
+              </Button>
+            </Link>
           </div>
 
           {/* Stats */}
