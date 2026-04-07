@@ -17,7 +17,7 @@ export default function RecruiterSearchPage() {
     setIsSubmitting(true);
     // Simulate AI processing
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    router.push('/recruiter/dashboard');
+    router.push('/recruiter/discover');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
