@@ -3,16 +3,31 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Linkedin, Mail, Plug, ArrowLeft, Activity, Loader2 } from 'lucide-react';
+import { Linkedin, Mail, Plug, ArrowLeft, Activity, Loader2, Eye, EyeOff } from 'lucide-react';
 
 export default function RecruiterLoginPage() {
   const router = useRouter();
-  const [hoveredBtn, setHoveredBtn] = useState<string | null>(null);
   const [loadingBtn, setLoadingBtn] = useState<string | null>(null);
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
 
   const handleAuth = async (method: string) => {
     setLoadingBtn(method);
-    // Simulate auth delay
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+    router.push('/recruiter/search');
+  };
+
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    if (!email.trim() || !password.trim()) {
+      setError('Please fill in all fields');
+      return;
+    }
+    setLoadingBtn('email-submit');
     await new Promise((resolve) => setTimeout(resolve, 1200));
     router.push('/recruiter/search');
   };
@@ -41,7 +56,7 @@ export default function RecruiterLoginPage() {
           {/* Logo */}
           <div className="flex items-center justify-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center">
-              <Activity className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
+              <Activity className="w-4 h-4 text-white" strokeWidth={2.5} />
             </div>
             <span className="text-xl font-bold text-gray-900 tracking-tight">Pulse.</span>
           </div>
@@ -56,13 +71,11 @@ export default function RecruiterLoginPage() {
             </p>
           </div>
 
-          {/* Auth Buttons */}
+          {/* Auth Buttons & Form */}
           <div className="space-y-3">
             {/* LinkedIn */}
             <button
               onClick={() => handleAuth('linkedin')}
-              onMouseEnter={() => setHoveredBtn('linkedin')}
-              onMouseLeave={() => setHoveredBtn(null)}
               disabled={loadingBtn !== null}
               className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-[#0A66C2] text-white rounded-xl font-medium text-sm
                          hover:bg-[#004182] focus:outline-none focus:ring-2 focus:ring-[#0A66C2]/40 focus:ring-offset-2
@@ -77,27 +90,90 @@ export default function RecruiterLoginPage() {
               Continue with LinkedIn
             </button>
 
-            {/* Work Email */}
-            <button
-              onClick={() => handleAuth('email')}
-              onMouseEnter={() => setHoveredBtn('email')}
-              onMouseLeave={() => setHoveredBtn(null)}
-              disabled={loadingBtn !== null}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white text-gray-700 rounded-xl font-medium text-sm
-                         border border-gray-200 hover:border-gray-300 hover:bg-gray-50
-                         focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2
-                         transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {loadingBtn === 'email' ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Mail className="w-5 h-5 text-gray-400" />
-              )}
-              Continue with Work Email
-            </button>
-
             {/* Divider */}
-            <div className="relative py-2">
+            <div className="relative py-1">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-100" />
+              </div>
+              <div className="relative flex justify-center">
+                <span className="bg-white px-3 text-xs text-gray-400 uppercase tracking-wider font-medium">or sign in with email</span>
+              </div>
+            </div>
+
+            {/* Email / Password Form */}
+            {error && (
+              <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-sm text-red-600">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleEmailLogin} className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Work Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@company.com"
+                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400
+                               focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300 focus:bg-white
+                               transition-all duration-200"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400
+                               focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300 focus:bg-white
+                               transition-all duration-200"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-sm pt-1">
+                <label className="flex items-center gap-2 text-gray-500 cursor-pointer">
+                  <input type="checkbox" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" />
+                  Remember me
+                </label>
+                <Link href="/auth/forgot-password" className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
+                  Forgot password?
+                </Link>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loadingBtn !== null}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-900 text-white rounded-xl font-medium text-sm
+                           hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:ring-offset-2
+                           transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+              >
+                {loadingBtn === 'email-submit' ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : null}
+                Sign in as Recruiter
+              </button>
+            </form>
+
+            {/* ATS Divider */}
+            <div className="relative py-1">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-100" />
               </div>
@@ -109,8 +185,6 @@ export default function RecruiterLoginPage() {
             {/* ATS Integration */}
             <button
               onClick={() => handleAuth('ats')}
-              onMouseEnter={() => setHoveredBtn('ats')}
-              onMouseLeave={() => setHoveredBtn(null)}
               disabled={loadingBtn !== null}
               className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl font-medium text-sm
                          bg-indigo-50 text-indigo-700 border border-indigo-100
