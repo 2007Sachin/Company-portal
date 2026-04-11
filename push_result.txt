@@ -1,2 +1,0 @@
-To https://github.com/2007Sachin/Company-portal.git
-   be0e557..ca1ac4a  master -> master

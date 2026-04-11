@@ -1,8 +1,0 @@
-cmd : 'C:\Users\A' is not recognized as an internal or external command,
-At line:1 char:1
-+ cmd /c "C:\Users\A D M I N\AppData\Local\Programs\Python\Python314\py ...
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: ('C:\Users\A' is...ternal command,:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 
-operable program or batch file.
