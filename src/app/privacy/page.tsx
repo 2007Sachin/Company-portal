@@ -2,11 +2,11 @@ import Link from 'next/link';
 
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-white text-slate-800">
+    <main className="min-h-screen bg-[#f8fafc] text-slate-800">
       <div className="max-w-3xl mx-auto px-6 py-12 space-y-8">
         <header className="space-y-2">
-          <p className="text-xs uppercase tracking-wider text-pulse-600 font-medium">Pulse Policy</p>
-          <h1 className="text-3xl font-semibold">Privacy Policy</h1>
+          <p className="text-xs uppercase tracking-wider text-slate-500 font-medium">Pulse Policy</p>
+          <h1 className="text-3xl font-bold">Privacy Policy</h1>
           <p className="text-slate-500">
             This demo portal explains how profile data is handled in the candidate app experience.
           </p>

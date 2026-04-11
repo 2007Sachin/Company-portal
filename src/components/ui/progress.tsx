@@ -80,7 +80,7 @@ export function ScoreRing({ score, size = 120, strokeWidth = 8, showLabel = true
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#4f46e5"
+          stroke="#1e293b"
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={offset}

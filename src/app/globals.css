@@ -4,11 +4,11 @@
 
 @layer base {
   :root {
-    --pulse-primary: 79 70 229;
+    --pulse-primary: 30 41 59;
     --pulse-success: 22 163 74;
     --pulse-warning: 217 119 6;
     --pulse-danger: 220 38 38;
-    --radius: 8px;
+    --radius: 12px;
   }
 
   * {
@@ -23,37 +23,37 @@
 
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: white;
+    background: #f8fafc;
     color: theme('colors.slate.800');
   }
 
   ::selection {
-    background: rgb(var(--pulse-primary) / 0.15);
-    color: theme('colors.pulse.900');
+    background: rgb(var(--pulse-primary) / 0.12);
+    color: theme('colors.slate.900');
   }
 }
 
 @layer components {
   /* ── Cards ── */
   .pulse-card {
-    @apply bg-white rounded-card shadow-card;
+    @apply bg-white rounded-card border border-slate-200;
   }
 
   .pulse-card-hover {
-    @apply pulse-card transition-shadow duration-200 hover:shadow-card-hover;
+    @apply pulse-card transition-all duration-200 hover:shadow-card-hover hover:border-slate-300;
   }
 
   /* ── Inputs ── */
   .pulse-input {
-    @apply w-full px-3 py-2.5 bg-white border border-slate-300 rounded-input text-slate-800
-      placeholder:text-slate-400 focus:outline-none focus:border-pulse-600 focus:ring-2 focus:ring-pulse-600/20
+    @apply w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-input text-slate-800
+      placeholder:text-slate-400 focus:outline-none focus:border-pulse-600 focus:ring-2 focus:ring-pulse-600/10
       transition-colors duration-150;
   }
 
   /* ── Buttons ── */
   .pulse-button {
     @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium rounded-input
-      transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2
+      transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2
       disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
@@ -62,8 +62,8 @@
   }
 
   .pulse-button-secondary {
-    @apply pulse-button bg-white text-slate-700 border border-slate-300
-      hover:bg-slate-50 focus:ring-slate-400;
+    @apply pulse-button bg-white text-slate-700 border border-slate-200
+      hover:bg-slate-50 hover:border-slate-300 focus:ring-slate-400;
   }
 
   .pulse-button-ghost {
@@ -73,26 +73,26 @@
   /* ── Chips ── */
   .pulse-chip {
     @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-chip text-sm font-medium
-      border transition-colors duration-150 cursor-pointer select-none;
+      border transition-all duration-150 cursor-pointer select-none;
   }
 
   .pulse-chip-inactive {
-    @apply pulse-chip bg-white border-slate-300 text-slate-600
-      hover:border-slate-400 hover:text-slate-700;
+    @apply pulse-chip bg-white border-slate-200 text-slate-600
+      hover:border-slate-300 hover:bg-slate-50;
   }
 
   .pulse-chip-active {
-    @apply pulse-chip bg-pulse-50 border-pulse-600 text-pulse-700;
+    @apply pulse-chip bg-pulse-600 border-pulse-600 text-white;
   }
 
   /* ── Sidebar ── */
   .pulse-sidebar {
-    @apply fixed left-0 top-0 h-full w-64 bg-slate-900 flex flex-col;
+    @apply fixed left-0 top-0 h-full w-64 bg-white border-r border-slate-200 flex flex-col;
   }
 
   /* ── Badges ── */
   .pulse-badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded-chip text-xs font-medium;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-chip text-xs font-medium;
   }
 
   .pulse-badge-success {
@@ -104,13 +104,18 @@
   }
 
   .pulse-badge-info {
-    @apply pulse-badge bg-pulse-50 text-pulse-700 border border-pulse-200;
+    @apply pulse-badge bg-blue-50 text-blue-700 border border-blue-200;
   }
 
   /* ── Score Ring ── */
   .pulse-score-ring {
     transform: rotate(-90deg);
     transform-origin: 50% 50%;
+  }
+
+  /* ── Progress Bar (segmented Pathwisse-style) ── */
+  .pulse-progress-segment {
+    @apply h-1 rounded-full transition-all duration-500;
   }
 }
 

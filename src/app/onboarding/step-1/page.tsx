@@ -49,24 +49,28 @@ export default function OnboardingStep1() {
   return (
     <OnboardingShell currentStep={1} completedSteps={[]} profileData={formData}>
       <div className="space-y-10">
-        <div className="flex justify-between items-start gap-6">
-          {/* Header */}
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-pulse-600">Step 1 of 4</p>
-            <h2 className="text-3xl font-semibold text-slate-800">Let&apos;s build your career passport</h2>
-            <p className="text-slate-500 text-lg">
-              We&apos;ll use this to match you with the right opportunities.
-            </p>
+        {/* Header */}
+        <div className="space-y-2">
+          {/* Segmented progress */}
+          <div className="flex gap-1.5 mb-4">
+            {[1,2,3,4,5].map(s => (
+              <div key={s} className={`flex-1 h-1.5 rounded-full ${s <= 1 ? 'bg-pulse-600' : 'bg-slate-200'}`} />
+            ))}
           </div>
+          <p className="text-sm font-medium text-slate-500">Step 1 of 5</p>
+          <h2 className="text-3xl font-bold text-slate-800">Let&apos;s build your career passport</h2>
+          <p className="text-slate-500 text-lg">
+            We&apos;ll use this to match you with the right opportunities.
+          </p>
+        </div>
 
-          {/* Avatar */}
-          <div className="flex-shrink-0">
-            <AvatarUpload
-              currentUrl={formData.avatar_url || null}
-              name={formData.full_name || 'User'}
-              onUpload={handleAvatarUpload}
-            />
-          </div>
+        {/* Avatar */}
+        <div className="flex justify-center">
+          <AvatarUpload
+            currentUrl={formData.avatar_url || null}
+            name={formData.full_name || 'User'}
+            onUpload={handleAvatarUpload}
+          />
         </div>
 
         {/* Personal Info */}
@@ -178,10 +182,7 @@ export default function OnboardingStep1() {
         />
 
         {/* Actions */}
-        <div className="flex items-center justify-between pt-6 border-t border-slate-200">
-          <Button variant="ghost" onClick={() => router.push('/')}>
-            Cancel
-          </Button>
+        <div className="flex items-center justify-end pt-6 border-t border-slate-200">
           <Button onClick={handleNext} size="lg">
             Save & continue
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

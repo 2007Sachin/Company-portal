@@ -15,7 +15,7 @@ const activityIcons: Record<string, React.ReactNode> = {
 };
 
 const profile = {
-  full_name: 'Rahul Kumar',
+  full_name: 'Sachin Kumar',
   professional_headline: 'Full Stack Developer | React & Node.js',
   avatar_url: null,
   location: 'Bangalore, India',
@@ -54,7 +54,7 @@ const languages = [
 
 export default function PublicProfilePage() {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#f8fafc]">
       {/* Nav */}
       <nav className="border-b border-slate-200 bg-white sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
@@ -79,7 +79,7 @@ export default function PublicProfilePage() {
             <div className="flex flex-col md:flex-row md:items-end gap-4 -mt-12">
               <Avatar src={null} name={profile.full_name} size="xl" className="ring-4 ring-white" />
               <div className="flex-1 pb-1 space-y-1">
-                <h1 className="text-2xl font-semibold text-slate-800">{profile.full_name}</h1>
+                <h1 className="text-2xl font-bold text-slate-800">{profile.full_name}</h1>
                 <p className="text-sm text-slate-500">{profile.professional_headline}</p>
                 <div className="flex flex-wrap gap-3 text-xs text-slate-500 pt-1">
                   <span>{profile.location}</span>
@@ -97,7 +97,7 @@ export default function PublicProfilePage() {
             )}
             <div className="flex flex-wrap gap-2 mt-4">
               {profile.target_roles.map((role) => (
-                <span key={role} className="px-3 py-1 text-xs rounded-chip bg-pulse-50 text-pulse-700 border border-pulse-200">
+                <span key={role} className="px-3 py-1 text-xs rounded-chip bg-slate-50 text-slate-700 border border-slate-200">
                   {role}
                 </span>
               ))}
@@ -171,7 +171,7 @@ export default function PublicProfilePage() {
                 { label: 'Streak', value: '15d' },
               ].map((stat) => (
                 <Card key={stat.label} className="p-4 text-center" hover>
-                  <p className="text-xl font-semibold text-slate-800">{stat.value}</p>
+                  <p className="text-xl font-bold text-slate-800">{stat.value}</p>
                   <p className="text-xs text-slate-500 mt-1">{stat.label}</p>
                 </Card>
               ))}

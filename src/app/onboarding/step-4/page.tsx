@@ -3,141 +3,190 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { OnboardingShell } from '@/components/layout';
-import { Button, Card, ScoreRing, TipCard } from '@/components/ui';
+import { Button, Card, TipCard } from '@/components/ui';
+
+interface PrivacyToggleProps {
+  label: string;
+  description: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  required?: boolean;
+}
+
+function PrivacyToggle({ label, description, checked, onChange, required }: PrivacyToggleProps) {
+  return (
+    <div className="flex items-start justify-between gap-4 py-4">
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium text-slate-700">{label}</p>
+          {required && <span className="text-xs text-amber-600 font-medium">Required</span>}
+        </div>
+        <p className="text-xs text-slate-500 leading-relaxed">{description}</p>
+      </div>
+      <button
+        type="button"
+        onClick={() => !required && onChange(!checked)}
+        className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${
+          checked ? 'bg-pulse-600' : 'bg-slate-300'
+        } ${required ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+      >
+        <span
+          className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${
+            checked ? 'translate-x-5' : 'translate-x-0'
+          }`}
+        />
+      </button>
+    </div>
+  );
+}
 
 export default function OnboardingStep4() {
   const router = useRouter();
-  const [isLaunching, setIsLaunching] = useState(false);
-  const [isLaunched, setIsLaunched] = useState(false);
+  const [settings, setSettings] = useState({
+    profile_visibility: 'public' as 'public' | 'recruiters_only' | 'private',
+    show_pulse_score: true,
+    show_activity_timeline: true,
+    show_github_activity: true,
+    show_leetcode_stats: true,
+    show_medium_articles: true,
+    allow_recruiter_contact: true,
+    show_email: false,
+    show_phone: false,
+    data_retention_consent: true,
+    marketing_consent: false,
+  });
 
-  const handleLaunch = async () => {
-    setIsLaunching(true);
-    // TODO: Save all data, mark onboarding complete
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsLaunched(true);
-    setIsLaunching(false);
+  const updateSetting = (key: string, value: unknown) => {
+    setSettings((prev) => ({ ...prev, [key]: value }));
   };
 
-  if (isLaunched) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-6">
-        <div className="text-center space-y-6 animate-fade-in max-w-lg">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
-            </svg>
-          </div>
-          <h1 className="text-3xl font-semibold text-slate-800">
-            You&apos;re live!
-          </h1>
-          <p className="text-lg text-slate-500">
-            Your Pulse profile is now active. Recruiters can discover you based on your real coding activity.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Button size="lg" onClick={() => router.push('/dashboard')}>
-              Go to dashboard
-            </Button>
-            <Button variant="secondary" size="lg" onClick={() => { navigator.clipboard.writeText(window.location.origin + '/profile/public'); alert('Profile link copied!'); }}>
-              Share your profile
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const visibilityOptions = [
+    { value: 'public', label: 'Public', desc: 'Anyone can see your profile' },
+    { value: 'recruiters_only', label: 'Recruiters only', desc: 'Only verified recruiters' },
+    { value: 'private', label: 'Private', desc: 'Hidden from search' },
+  ];
 
   return (
     <OnboardingShell currentStep={4} completedSteps={[1, 2, 3]} profileData={{}}>
       <div className="space-y-10">
         {/* Header */}
         <div className="space-y-2">
-          <p className="text-sm font-medium text-pulse-600">Step 4 of 4</p>
-          <h2 className="text-3xl font-semibold text-slate-800">Looking good! Ready to go live?</h2>
+          {/* Segmented progress */}
+          <div className="flex gap-1.5 mb-4">
+            {[1,2,3,4,5].map(s => (
+              <div key={s} className={`flex-1 h-1.5 rounded-full ${s <= 4 ? 'bg-pulse-600' : 'bg-slate-200'}`} />
+            ))}
+          </div>
+          <p className="text-sm font-medium text-slate-500">Step 4 of 5</p>
+          <h2 className="text-3xl font-bold text-slate-800">You&apos;re in control</h2>
           <p className="text-slate-500 text-lg">
-            Review your profile and launch when you&apos;re ready.
+            Choose what recruiters can see about you. You can change this anytime.
           </p>
         </div>
 
-        {/* Profile Preview */}
-        <Card className="overflow-hidden">
-          {/* Banner */}
-          <div className="h-28 bg-pulse-600 relative">
-            <div className="absolute bottom-4 left-6 flex items-end gap-4">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pulse-400 to-purple-500 ring-4 ring-white flex items-center justify-center text-2xl font-semibold text-white">
-                RK
-              </div>
-              <div className="pb-1">
-                <h3 className="text-xl font-semibold text-white">Rahul Kumar</h3>
-                <p className="text-sm text-white/80">Full Stack Developer | React &amp; Node.js</p>
-              </div>
-            </div>
+        {/* Profile Visibility */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-slate-800">Who can see your profile?</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {visibilityOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => updateSetting('profile_visibility', option.value)}
+                className={`p-4 rounded-card border text-left transition-colors duration-150 ${
+                  settings.profile_visibility === option.value
+                    ? 'border-pulse-600 bg-slate-50'
+                    : 'border-slate-200 bg-white hover:border-slate-300'
+                }`}
+              >
+                <p className="text-sm font-semibold text-slate-700">{option.label}</p>
+                <p className="text-xs text-slate-500 mt-1">{option.desc}</p>
+              </button>
+            ))}
           </div>
+        </div>
 
-          {/* Details */}
-          <div className="p-6 space-y-6">
-            <div className="flex flex-wrap gap-4 text-sm text-slate-500">
-              <span>Bangalore, India</span>
-              <span>B.Tech, Computer Science</span>
-              <span className="text-green-600">Actively looking</span>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {['Full Stack Developer', 'Backend Developer', 'DevOps Engineer'].map((role) => (
-                <span key={role} className="px-3 py-1 text-xs rounded-chip bg-pulse-50 text-pulse-700 border border-pulse-200">
-                  {role}
-                </span>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
-              <div className="flex items-center gap-4">
-                <ScoreRing score={72} size={80} strokeWidth={6} />
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">Pulse Score</p>
-                  <p className="text-xs text-slate-500">Based on your connected platforms</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-slate-500">Connected platforms</p>
-                <div className="flex gap-2">
-                  {['GitHub', 'LeetCode', 'Medium'].map((p) => (
-                    <span key={p} className="px-2.5 py-1 text-xs rounded-chip bg-green-50 text-green-700 border border-green-200">
-                      {p}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* What to Show */}
+        <Card className="divide-y divide-slate-100 px-5">
+          <h3 className="text-sm font-semibold text-slate-800 pt-5 pb-2">What to show</h3>
+          <PrivacyToggle
+            label="Pulse Score"
+            description="Show your overall score and trend on your profile"
+            checked={settings.show_pulse_score}
+            onChange={(v) => updateSetting('show_pulse_score', v)}
+          />
+          <PrivacyToggle
+            label="Activity timeline"
+            description="Show your recent coding activity (commits, PRs, solves)"
+            checked={settings.show_activity_timeline}
+            onChange={(v) => updateSetting('show_activity_timeline', v)}
+          />
+          <PrivacyToggle
+            label="GitHub activity"
+            description="Display your repositories, commits, and contributions"
+            checked={settings.show_github_activity}
+            onChange={(v) => updateSetting('show_github_activity', v)}
+          />
+          <PrivacyToggle
+            label="LeetCode stats"
+            description="Show problems solved, ratings, and streak data"
+            checked={settings.show_leetcode_stats}
+            onChange={(v) => updateSetting('show_leetcode_stats', v)}
+          />
+          <PrivacyToggle
+            label="Medium articles"
+            description="Display your published articles and engagement"
+            checked={settings.show_medium_articles}
+            onChange={(v) => updateSetting('show_medium_articles', v)}
+          />
         </Card>
 
-        {/* Checklist */}
-        <Card className="p-5 space-y-4">
-          <h3 className="text-sm font-semibold text-slate-800">Launch checklist</h3>
-          {[
-            { label: 'Profile information completed', done: true },
-            { label: 'At least 1 platform connected', done: true },
-            { label: 'Career preferences set', done: true },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center gap-3">
-              <div className={`w-5 h-5 rounded-full flex items-center justify-center ${item.done ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-400'}`}>
-                {item.done ? (
-                  <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-                    <path d="M13 4L6 11L3 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                ) : (
-                  <span className="w-2 h-2 rounded-full bg-slate-300" />
-                )}
-              </div>
-              <span className={`text-sm ${item.done ? 'text-slate-700' : 'text-slate-400'}`}>{item.label}</span>
-            </div>
-          ))}
+        {/* Contact Preferences */}
+        <Card className="divide-y divide-slate-100 px-5">
+          <h3 className="text-sm font-semibold text-slate-800 pt-5 pb-2">Contact preferences</h3>
+          <PrivacyToggle
+            label="Allow recruiter contact"
+            description="Let verified recruiters reach out to you through Pulse"
+            checked={settings.allow_recruiter_contact}
+            onChange={(v) => updateSetting('allow_recruiter_contact', v)}
+          />
+          <PrivacyToggle
+            label="Show email address"
+            description="Display your email on your public profile"
+            checked={settings.show_email}
+            onChange={(v) => updateSetting('show_email', v)}
+          />
+          <PrivacyToggle
+            label="Show phone number"
+            description="Display your phone number on your public profile"
+            checked={settings.show_phone}
+            onChange={(v) => updateSetting('show_phone', v)}
+          />
+        </Card>
+
+        {/* Consent */}
+        <Card className="divide-y divide-slate-100 px-5">
+          <h3 className="text-sm font-semibold text-slate-800 pt-5 pb-2">Data & consent</h3>
+          <PrivacyToggle
+            label="Data processing consent"
+            description="Required — Allow Pulse to process your platform data to generate your score (DPDP Act compliant)"
+            checked={settings.data_retention_consent}
+            onChange={(v) => updateSetting('data_retention_consent', v)}
+            required
+          />
+          <PrivacyToggle
+            label="Feature updates & tips"
+            description="Receive occasional updates about new features and career opportunities"
+            checked={settings.marketing_consent}
+            onChange={(v) => updateSetting('marketing_consent', v)}
+          />
         </Card>
 
         <TipCard
-          title="Almost there!"
-          description="Once you launch, your profile will be visible to recruiters. You can always update your information and privacy settings from the dashboard settings."
-          variant="success"
+          title="Your data, your rules"
+          description="Pulse is DPDP Act compliant. You can change these settings anytime, and request full data deletion at any point. We never sell your data."
+          variant="info"
         />
 
         {/* Actions */}
@@ -145,8 +194,11 @@ export default function OnboardingStep4() {
           <Button variant="ghost" onClick={() => router.push('/onboarding/step-3')}>
             Back
           </Button>
-          <Button onClick={handleLaunch} size="lg" isLoading={isLaunching}>
-            Launch my profile
+          <Button onClick={() => router.push('/onboarding/step-5')} size="lg">
+            Save & continue
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
+            </svg>
           </Button>
         </div>
       </div>

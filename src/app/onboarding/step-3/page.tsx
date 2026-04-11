@@ -62,8 +62,14 @@ export default function OnboardingStep3() {
       <div className="space-y-10">
         {/* Header */}
         <div className="space-y-2">
-          <p className="text-sm font-medium text-pulse-600">Step 3 of 4</p>
-          <h2 className="text-3xl font-semibold text-slate-800">Where are you headed?</h2>
+          {/* Segmented progress */}
+          <div className="flex gap-1.5 mb-4">
+            {[1,2,3,4,5].map(s => (
+              <div key={s} className={`flex-1 h-1.5 rounded-full ${s <= 3 ? 'bg-pulse-600' : 'bg-slate-200'}`} />
+            ))}
+          </div>
+          <p className="text-sm font-medium text-slate-500">Step 3 of 5</p>
+          <h2 className="text-3xl font-bold text-slate-800">Where are you headed?</h2>
           <p className="text-slate-500 text-lg">
             Help us understand your career goals so we can match you with the right opportunities.
           </p>
@@ -103,7 +109,7 @@ export default function OnboardingStep3() {
               id="relocate"
               checked={formData.willing_to_relocate}
               onChange={(e) => updateField('willing_to_relocate', e.target.checked)}
-              className="rounded border-slate-300 text-pulse-600 focus:ring-pulse-500"
+              className="rounded border-slate-200 text-pulse-600 focus:ring-pulse-500"
             />
             <label htmlFor="relocate" className="text-sm text-slate-600">
               I&apos;m willing to relocate for the right opportunity

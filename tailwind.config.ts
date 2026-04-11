@@ -10,17 +10,17 @@ const config: Config = {
     extend: {
       colors: {
         pulse: {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
-          950: '#1e1b4b',
+          50: '#f0f4f8',
+          100: '#d9e2ec',
+          200: '#bcccdc',
+          300: '#9fb3c8',
+          400: '#627d98',
+          500: '#486581',
+          600: '#1e293b',
+          700: '#172033',
+          800: '#11182a',
+          900: '#0b1120',
+          950: '#060a14',
         },
       },
       fontFamily: {
@@ -39,14 +39,14 @@ const config: Config = {
         '5xl': ['3.052rem', { lineHeight: '1.1' }],   // ~49px
       },
       boxShadow: {
-        'card': '0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06)',
-        'card-hover': '0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06)',
-        'elevated': '0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.05)',
+        'card': '0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03)',
+        'card-hover': '0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04)',
+        'elevated': '0 10px 25px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.04)',
       },
       borderRadius: {
-        'card': '8px',
-        'input': '6px',
-        'chip': '4px',
+        'card': '12px',
+        'input': '8px',
+        'chip': '6px',
       },
       animation: {
         'fade-in': 'fade-in 0.4s ease-out',

@@ -13,8 +13,8 @@ export function Card({ children, className, hover }: CardProps) {
   return (
     <div
       className={cn(
-        'bg-white rounded-card shadow-card',
-        hover && 'transition-shadow duration-200 hover:shadow-card-hover',
+        'bg-white rounded-card border border-slate-200',
+        hover && 'transition-all duration-200 hover:shadow-card-hover hover:border-slate-300',
         className
       )}
     >
@@ -32,7 +32,7 @@ interface TipCardProps {
 
 export function TipCard({ title, description, variant = 'info', className }: TipCardProps) {
   const variants = {
-    info: 'bg-pulse-50 border-l-pulse-600',
+    info: 'bg-slate-50 border-l-pulse-600',
     success: 'bg-green-50 border-l-green-600',
     warning: 'bg-amber-50 border-l-amber-600',
   };
@@ -76,7 +76,7 @@ export function MetricCard({ label, value, change, changeType = 'neutral', icon,
           )}
         </div>
         {icon && (
-          <div className="w-10 h-10 rounded-card bg-pulse-50 flex items-center justify-center text-pulse-600">
+          <div className="w-10 h-10 rounded-card bg-slate-100 flex items-center justify-center text-pulse-600">
             {icon}
           </div>
         )}
