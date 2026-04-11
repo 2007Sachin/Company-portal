@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Clock, Star, Send, ChevronRight, User, Shield } from 'lucide-react';
+import { ArrowLeft, Clock, Star, Send, ChevronRight, User, Shield, LogOut } from 'lucide-react';
 
 export default function RecruiterDashboardPage() {
   return (
@@ -11,15 +11,15 @@ export default function RecruiterDashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <Link
-            href="/recruiter/search"
+            href="/recruiter/discover"
             className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 transition-colors mb-3"
           >
-            <ArrowLeft className="w-4 h-4" /> Back to Search
+            <ArrowLeft className="w-4 h-4" /> Back to Discovery
           </Link>
           <h1 className="text-3xl font-bold text-slate-900">Candidate Pipeline</h1>
           <p className="text-slate-500 mt-1">Active Req: Senior Product Analyst</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-6">
           <span className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 rounded-full px-4 py-2 text-sm font-medium">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -27,6 +27,14 @@ export default function RecruiterDashboardPage() {
             </span>
             Live Sync
           </span>
+          <div className="flex items-center gap-4 pl-6 border-l border-slate-200">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold shadow-sm cursor-pointer hover:opacity-90 transition-opacity">
+              R
+            </div>
+            <Link href="/auth/login" className="text-slate-400 hover:text-red-500 transition-colors" title="Log out">
+              <LogOut className="w-5 h-5" />
+            </Link>
+          </div>
         </div>
       </div>
 

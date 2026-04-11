@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Sparkles, Link2, User, Keyboard, Activity, ArrowRight } from 'lucide-react';
+import { Sparkles, Link2, User, Keyboard, Activity, ArrowRight, LogOut } from 'lucide-react';
 
 export default function RecruiterSearchPage() {
   const router = useRouter();
@@ -17,7 +17,7 @@ export default function RecruiterSearchPage() {
     setIsSubmitting(true);
     // Simulate AI processing
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    router.push('/recruiter/dashboard');
+    router.push('/recruiter/discover');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -32,7 +32,7 @@ export default function RecruiterSearchPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between px-8 py-5">
+      <header className="flex items-center justify-between px-8 py-5 relative z-10">
         <Link href="/recruiter/login" className="flex items-center gap-2 group">
           <div className="w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center">
             <Activity className="w-4 h-4 text-white" strokeWidth={2.5} />
@@ -48,8 +48,13 @@ export default function RecruiterSearchPage() {
           >
             Pipeline
           </Link>
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold shadow-sm">
-            R
+          <div className="flex items-center gap-4 pl-2 border-l border-gray-200">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold shadow-sm">
+              R
+            </div>
+            <Link href="/auth/login" className="text-gray-400 hover:text-red-500 transition-colors" title="Log out">
+              <LogOut className="w-5 h-5" />
+            </Link>
           </div>
         </div>
       </header>
