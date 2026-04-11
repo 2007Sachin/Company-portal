@@ -9,11 +9,18 @@ export default function OnboardingStep5() {
   const router = useRouter();
   const [isLaunching, setIsLaunching] = useState(false);
   const [isLaunched, setIsLaunched] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+
+  const handleShare = () => {
+    navigator.clipboard.writeText('https://pulse.app/profile/rahulkumar');
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
 
   const handleLaunch = async () => {
     setIsLaunching(true);
-    // TODO: Save all data, mark onboarding complete
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Functional mock for profile launch
+    await new Promise((resolve) => setTimeout(resolve, 2400));
     setIsLaunched(true);
     setIsLaunching(false);
   };
@@ -34,14 +41,19 @@ export default function OnboardingStep5() {
             Your Pulse profile is now active. Recruiters can discover you based on your real coding activity.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Button size="lg" onClick={() => router.push('/dashboard')}>
+            <Button size="lg" className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200" onClick={() => router.push('/dashboard')}>
               Go to dashboard
             </Button>
-            <Button variant="secondary" size="lg">
-              Share your profile
+            <Button variant="secondary" size="lg" onClick={handleShare}>
+              {showToast ? 'Link copied!' : 'Share your profile'}
             </Button>
           </div>
         </div>
+        {showToast && (
+          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 bg-slate-900 text-white text-sm font-bold rounded-full shadow-2xl animate-slide-up z-50">
+            Profile link copied to clipboard! 🚀
+          </div>
+        )}
       </div>
     );
   }
@@ -67,9 +79,9 @@ export default function OnboardingStep5() {
         {/* Profile Preview */}
         <Card className="overflow-hidden">
           {/* Banner */}
-          <div className="h-28 bg-pulse-600 relative">
+          <div className="h-28 bg-blue-600 relative">
             <div className="absolute bottom-4 left-6 flex items-end gap-4">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pulse-400 to-purple-500 ring-4 ring-white flex items-center justify-center text-2xl font-semibold text-white">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 ring-4 ring-white flex items-center justify-center text-2xl font-semibold text-white shadow-lg">
                 RK
               </div>
               <div className="pb-1">

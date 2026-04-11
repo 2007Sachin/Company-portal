@@ -48,66 +48,94 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex">
-      {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-pulse-600 relative overflow-hidden">
-        <div className="relative z-10 flex flex-col justify-center px-16 space-y-8">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-card bg-white/10 flex items-center justify-center">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <div className="min-h-screen bg-slate-50 flex">
+      {/* Left Panel - Branding (Matching Landing Page Aesthetic) */}
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative overflow-hidden">
+        {/* Abstract background decorative elements */}
+        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[100px]" />
+        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[80px]" />
+        
+        <div className="relative z-10 flex flex-col justify-between p-16 w-full">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
               </svg>
             </div>
-            <span className="text-3xl font-bold text-white">Pulse</span>
-          </div>
-          <div className="space-y-4">
-            <h2 className="text-4xl font-bold text-white leading-tight">
-              Build your career passport
+            <span className="text-2xl font-bold tracking-tight text-white">Pulse</span>
+          </Link>
+
+          <div className="space-y-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-bold text-blue-400 uppercase tracking-widest">
+                Activity-as-Pedigree
+            </div>
+            <h2 className="text-5xl font-extrabold text-white leading-tight tracking-tight">
+              Build your <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">career passport.</span>
             </h2>
-            <p className="text-lg text-white/70 leading-relaxed max-w-md">
+            <p className="text-xl text-slate-400 leading-relaxed max-w-md">
               Join thousands of developers who showcase their real coding activity instead of static resumes.
             </p>
+            
+            {/* Minimal feature list preview */}
+            <div className="space-y-4 max-w-sm">
+                {[
+                    "Connect GitHub, LeetCode, Medium",
+                    "Live Pulse Score updated in real-time",
+                    "Get discovered by high-intent recruiters"
+                ].map(feature => (
+                    <div key={feature} className="flex items-center gap-3 text-slate-300 font-medium">
+                        <div className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center flex-shrink-0">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                        </div>
+                        {feature}
+                    </div>
+                ))}
+            </div>
           </div>
 
-          {/* Feature list */}
-          <div className="space-y-3 max-w-sm text-sm text-white/70">
-            <div className="flex items-center gap-3">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/80 flex-shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
-              <span>Connect GitHub, LeetCode, Medium</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/80 flex-shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
-              <span>Get a live Pulse Score updated in real-time</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/80 flex-shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
-              <span>Get discovered by top recruiters</span>
-            </div>
+          <div className="flex gap-6 text-slate-500 text-sm font-medium">
+            <span>&copy; 2025 Pulse</span>
+            <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
           </div>
         </div>
       </div>
 
       {/* Right Panel - Form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white">
         <div className="w-full max-w-md space-y-8">
-          <div className="lg:hidden flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-card bg-pulse-600 flex items-center justify-center">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+          {/* Mobile logo */}
+          <div className="flex items-center justify-between mb-8">
+            <Link 
+              href="/" 
+              className="flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors group"
+            >
+              <svg className="group-hover:-translate-x-0.5 transition-transform" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5m7 7-7-7 7-7" />
               </svg>
+              Back to Home
+            </Link>
+            
+            <div className="lg:hidden flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                </svg>
+              </div>
+              <span className="text-xl font-bold text-slate-900">Pulse</span>
             </div>
-            <span className="text-xl font-semibold text-slate-800">Pulse</span>
           </div>
 
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-slate-800">Create your account</h1>
-            <p className="text-slate-500">Start building your live developer profile</p>
+          <div className="space-y-3">
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Create your account</h1>
+            <p className="text-slate-500 font-medium">Start building your live developer profile</p>
           </div>
 
-          {/* Google OAuth */}
+          {/* Social Signup */}
           <button
             onClick={handleGoogleSignup}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-white border border-slate-200 rounded-input text-slate-700 font-medium hover:bg-slate-50 hover:border-slate-300 transition-all duration-150"
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 font-semibold hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 shadow-sm"
           >
             <svg width="20" height="20" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -120,61 +148,72 @@ export default function SignupPage() {
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200" />
+              <div className="w-full border-t border-slate-100" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-[#f8fafc] px-4 text-slate-400">or sign up with email</span>
+              <span className="bg-white px-4 text-slate-400 font-bold uppercase tracking-wider">or sign up with email</span>
             </div>
           </div>
 
           {error && (
-            <div className="p-3 rounded-input bg-red-50 border border-red-200 text-sm text-red-600">
+            <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-sm text-red-600 font-medium">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSignup} className="space-y-4">
-            <Input
-              label="Your name"
-              type="text"
-              placeholder="Sachin Kumar"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              required
-            />
-            <Input
-              label="Email address"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <Input
-              label="Password"
-              type="password"
-              placeholder="At least 8 characters"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              hint="Use a mix of letters, numbers, and symbols"
-              required
-            />
-            <Button type="submit" className="w-full" size="lg" isLoading={isLoading}>
-              Create your account
+          <form onSubmit={handleSignup} className="space-y-5">
+            <div className="space-y-4">
+              <Input
+                label="Your name"
+                type="text"
+                placeholder="Sachin Kumar"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                className="rounded-xl"
+              />
+              <Input
+                label="Email address"
+                type="email"
+                placeholder="name@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="rounded-xl"
+              />
+              <Input
+                label="Password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="rounded-xl"
+                hint="At least 8 characters"
+              />
+            </div>
+
+            <Button 
+                type="submit" 
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200" 
+                size="lg" 
+                isLoading={isLoading}
+            >
+              Start for Free
             </Button>
           </form>
 
-          <p className="text-center text-sm text-slate-500">
+          <p className="text-center text-sm text-slate-500 font-medium">
             Already have an account?{' '}
-            <Link href="/auth/login" className="text-pulse-600 hover:text-pulse-700 font-medium transition-colors">
+            <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 font-bold transition-colors">
               Sign in
             </Link>
           </p>
 
-          <p className="text-center text-xs text-slate-400">
+          <p className="text-center text-xs text-slate-400 leading-relaxed px-4">
             By signing up, you agree to our{' '}
-            <Link href="/terms" className="text-slate-500 hover:text-slate-700">Terms of Service</Link> and{' '}
-            <Link href="/privacy" className="text-slate-500 hover:text-slate-700">Privacy Policy</Link>
+            <Link href="/terms" className="text-slate-500 hover:text-slate-700 underline underline-offset-2">Terms of Service</Link> and{' '}
+            <Link href="/privacy" className="text-slate-500 hover:text-slate-700 underline underline-offset-2">Privacy Policy</Link>
           </p>
         </div>
       </div>

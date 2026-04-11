@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --pulse-primary: 30 41 59;
+    --pulse-primary: 37 99 235; /* blue-600 */
     --pulse-success: 22 163 74;
     --pulse-warning: 217 119 6;
     --pulse-danger: 220 38 38;

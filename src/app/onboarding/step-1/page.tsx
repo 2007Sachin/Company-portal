@@ -182,7 +182,10 @@ export default function OnboardingStep1() {
         />
 
         {/* Actions */}
-        <div className="flex items-center justify-end pt-6 border-t border-slate-200">
+        <div className="flex items-center justify-between pt-6 border-t border-slate-200">
+          <Button variant="ghost" onClick={() => router.push('/auth/signup')}>
+            Back
+          </Button>
           <Button onClick={handleNext} size="lg">
             Save & continue
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -13,7 +13,7 @@ interface OnboardingShellProps {
 export function OnboardingShell({ currentStep, completedSteps, profileData, children }: OnboardingShellProps) {
   const router = useRouter();
   return (
-    <div className="min-h-screen flex bg-[#f8fafc]">
+    <div className="min-h-screen flex bg-slate-50">
       {/* Left Sidebar */}
       <OnboardingSidebar currentStep={currentStep} completedSteps={completedSteps} className="hidden lg:flex" />
 
