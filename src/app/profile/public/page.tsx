@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Card, ScoreRing, ProgressBar, Button } from '@/components/ui';
 import { Avatar } from '@/components/ui/avatar';
 import { getActivityIcon, formatRelativeTime } from '@/lib/utils';
-import { GitCommit, GitMerge, CheckCircle, FileText } from 'lucide-react';
+import { GitCommit, GitMerge, CheckCircle, FileText, ArrowLeft } from 'lucide-react';
 
 const activityIcons: Record<string, React.ReactNode> = {
   GitCommit: <GitCommit size={18} />,
@@ -59,8 +59,12 @@ export default function PublicProfilePage() {
       <nav className="border-b border-slate-200 bg-white sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Link href="/dashboard" className="text-sm text-slate-500 hover:text-slate-700 transition-colors mr-3">
-              ← Dashboard
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors group"
+            >
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+              Dashboard
             </Link>
           </div>
           <Link href="/auth/signup">
