@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button, Card, MetricCard, ScoreRing, ProgressBar, TipCard } from '@/components/ui';
 import { Avatar } from '@/components/ui/avatar';
 import { getActivityIcon, formatRelativeTime } from '@/lib/utils';
-import { GitCommit, GitMerge, CheckCircle, FileText, Trophy, TrendingUp, Briefcase, FileEdit, User } from 'lucide-react';
+import { GitCommit, GitMerge, CheckCircle, FileText, Trophy, TrendingUp, Briefcase, FileEdit, User, Settings } from 'lucide-react';
 
 // Icon mapping for activity types
 const activityIcons: Record<string, React.ReactNode> = {
@@ -48,8 +48,8 @@ const mockActivity = [
 ];
 
 const mockNextSteps = [
-  { id: '1', title: 'Complete your bio', description: 'Add a professional bio to increase profile views', action: 'Update profile', icon: <FileEdit size={18} className="text-pink-500" />, iconBg: 'bg-pink-50' },
-  { id: '2', title: 'Add portfolio link', description: 'Showcase your best work with a portfolio URL', action: 'Add link', icon: <Briefcase size={18} className="text-green-500" />, iconBg: 'bg-green-50' },
+  { id: '1', title: 'Complete your bio', description: 'Add a professional bio to increase profile views', action: 'Update profile', href: '/settings', icon: <FileEdit size={18} className="text-pink-500" />, iconBg: 'bg-pink-50' },
+  { id: '2', title: 'Add portfolio link', description: 'Showcase your best work with a portfolio URL', action: 'Add link', href: '/settings', icon: <Briefcase size={18} className="text-green-500" />, iconBg: 'bg-green-50' },
 ];
 
 function getGreeting(): string {
@@ -74,8 +74,15 @@ export default function DashboardPage() {
             <span className="text-xl font-semibold text-slate-800">Pulse</span>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm">Settings</Button>
-            <Avatar src={null} name={mockProfile.full_name} size="sm" />
+            <Link href="/settings">
+              <Button variant="ghost" size="sm">
+                <Settings size={16} className="mr-1.5" />
+                Settings
+              </Button>
+            </Link>
+            <Link href="/profile/public">
+              <Avatar src={null} name={mockProfile.full_name} size="sm" className="cursor-pointer hover:ring-2 hover:ring-pulse-400 hover:ring-offset-1 transition-all" />
+            </Link>
           </div>
         </div>
       </nav>
@@ -167,12 +174,14 @@ export default function DashboardPage() {
                     <p className="text-base font-bold text-slate-800">{step.title}</p>
                     <p className="text-sm text-slate-500 mt-1">{step.description}</p>
                   </div>
-                  <Button size="sm" variant="primary">
-                    {step.action}
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
-                    </svg>
-                  </Button>
+                  <Link href={step.href}>
+                    <Button size="sm" variant="primary">
+                      {step.action}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
+                      </svg>
+                    </Button>
+                  </Link>
                 </div>
               </Card>
             ))}
@@ -201,7 +210,9 @@ export default function DashboardPage() {
           <Card className="p-6 space-y-4 lg:col-span-2">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-slate-800">Recent Activity</h3>
-              <Button variant="ghost" size="sm">View all</Button>
+              <Link href="/profile/public">
+                <Button variant="ghost" size="sm">View all</Button>
+              </Link>
             </div>
             <div className="space-y-1">
               {mockActivity.map((activity) => {
