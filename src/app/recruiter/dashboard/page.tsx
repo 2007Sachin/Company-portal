@@ -19,15 +19,15 @@ export default function RecruiterDashboardPage() {
           <h1 className="text-3xl font-bold text-slate-900">Candidate Pipeline</h1>
           <p className="text-slate-500 mt-1">Active Req: Senior Product Analyst</p>
         </div>
-        <div className="flex items-center gap-6">
-          <span className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 rounded-full px-4 py-2 text-sm font-medium">
+        <div className="flex items-center gap-3 sm:gap-6">
+          <span className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 rounded-full px-3 sm:px-4 py-2 text-sm font-medium">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
             Live Sync
           </span>
-          <div className="flex items-center gap-4 pl-6 border-l border-slate-200">
+          <div className="flex items-center gap-3 sm:gap-4 pl-3 sm:pl-6 border-l border-slate-200">
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold shadow-sm cursor-pointer hover:opacity-90 transition-opacity">
               R
             </div>
@@ -42,7 +42,7 @@ export default function RecruiterDashboardPage() {
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6 h-auto lg:h-[75vh]">
 
         {/* Column 1: SAVED FOR REVIEW */}
-        <div className="bg-slate-100 rounded-3xl p-6 h-full flex flex-col gap-4">
+        <div className="bg-slate-100 rounded-3xl p-6 h-full flex flex-col gap-4 overflow-y-auto">
           <h3 className="text-sm font-bold tracking-widest text-slate-500 uppercase">Saved (3)</h3>
 
           {/* Card 1 */}
@@ -119,7 +119,7 @@ export default function RecruiterDashboardPage() {
         </div>
 
         {/* Column 2: THE SHORTLIST */}
-        <div className="bg-slate-100/80 rounded-3xl p-6 h-full flex flex-col gap-4">
+        <div className="bg-slate-100/80 rounded-3xl p-6 h-full flex flex-col gap-4 overflow-y-auto">
           <h3 className="text-sm font-bold tracking-widest text-blue-600 uppercase">Shortlisted (1)</h3>
 
           {/* VIP Card */}
@@ -161,7 +161,7 @@ export default function RecruiterDashboardPage() {
         </div>
 
         {/* Column 3: INTERVIEW REQUESTED */}
-        <div className="bg-slate-50 rounded-3xl p-6 h-full flex flex-col gap-4 opacity-75">
+        <div className="bg-slate-50 rounded-3xl p-6 h-full flex flex-col gap-4 opacity-75 overflow-y-auto">
           <h3 className="text-sm font-bold tracking-widest text-slate-400 uppercase">Pending (1)</h3>
 
           {/* Pending Card */}
