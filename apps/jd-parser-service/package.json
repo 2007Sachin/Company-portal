@@ -1,0 +1,13 @@
+{
+  "name": "@pulse/jd-parser-service",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'jd-parser-service: not yet implemented'",
+    "build": "echo 'jd-parser-service: not yet implemented'",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  }
+}

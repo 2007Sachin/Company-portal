@@ -1,0 +1,13 @@
+{
+  "name": "@pulse/notification-service",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'notification-service: not yet implemented'",
+    "build": "echo 'notification-service: not yet implemented'",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  }
+}
