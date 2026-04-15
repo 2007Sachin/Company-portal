@@ -33,6 +33,15 @@ const nextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: '/recruiter/login',
+        destination: '/auth/login',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

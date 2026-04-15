@@ -19,6 +19,16 @@ export interface AuthUser {
  *   router.get('/protected', verifyToken, handler);
  */
 export async function verifyToken(req: Request, res: Response, next: NextFunction): Promise<void> {
+  // --- MOCK OVERRIDE ---
+  (req as any).user = {
+    id: 'mock-recruiter-id',
+    email: 'recruiter@example.com',
+    role: 'recruiter',
+    created_at: new Date().toISOString()
+  } as AuthUser;
+  next();
+  return;
+  // ---------------------
   try {
     const authHeader = req.headers.authorization;
 

@@ -47,8 +47,7 @@ export default function OnboardingStep4() {
     show_pulse_score: true,
     show_activity_timeline: true,
     show_github_activity: true,
-    show_leetcode_stats: true,
-    show_medium_articles: true,
+
     allow_recruiter_contact: true,
     show_email: false,
     show_phone: false,
@@ -128,18 +127,7 @@ export default function OnboardingStep4() {
             checked={settings.show_github_activity}
             onChange={(v) => updateSetting('show_github_activity', v)}
           />
-          <PrivacyToggle
-            label="LeetCode stats"
-            description="Show problems solved, ratings, and streak data"
-            checked={settings.show_leetcode_stats}
-            onChange={(v) => updateSetting('show_leetcode_stats', v)}
-          />
-          <PrivacyToggle
-            label="Medium articles"
-            description="Display your published articles and engagement"
-            checked={settings.show_medium_articles}
-            onChange={(v) => updateSetting('show_medium_articles', v)}
-          />
+
         </Card>
 
         {/* Contact Preferences */}

@@ -118,7 +118,7 @@ export default function OnboardingStep5() {
               <div className="space-y-2">
                 <p className="text-xs font-medium text-slate-500">Connected platforms</p>
                 <div className="flex gap-2">
-                  {['GitHub', 'LeetCode', 'Medium'].map((p) => (
+                  {['GitHub'].map((p) => (
                     <span key={p} className="px-2.5 py-1 text-xs rounded-chip bg-green-50 text-green-700 border border-green-200">
                       {p}
                     </span>
