@@ -1,0 +1,78 @@
+# ============================================
+# Pulse Platform — Development Overrides
+# ============================================
+# Usage:
+#   docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# Enables hot-reload for all Node.js services
+# by mounting source code as volumes and using
+# NODE_ENV=development.
+# ============================================
+
+version: "3.8"
+
+services:
+  # ── Frontend — hot reload with next dev ──
+  web:
+    build:
+      context: ../apps/web
+      target: dev
+    volumes:
+      - ../apps/web/src:/app/src
+      - ../apps/web/public:/app/public
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
+
+  # ── Auth Service — hot reload ────────────
+  auth-service:
+    build:
+      context: ../apps/auth-service
+      target: dev
+    volumes:
+      - ../apps/auth-service/src:/app/src
+    environment:
+      - NODE_ENV=development
+    command: npx tsx watch src/index.ts
+
+  # ── JD Parser — hot reload (Python) ──────
+  jd-parser:
+    build:
+      context: ../apps/jd-parser-service
+      target: dev
+    volumes:
+      - ../apps/jd-parser-service/src:/app/src
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ── Candidate Service — hot reload ───────
+  candidate-service:
+    build:
+      context: ../apps/candidate-service
+      target: dev
+    volumes:
+      - ../apps/candidate-service/src:/app/src
+    environment:
+      - NODE_ENV=development
+    command: npx tsx watch src/index.ts
+
+  # ── Pipeline Service — hot reload ────────
+  pipeline-service:
+    build:
+      context: ../apps/pipeline-service
+      target: dev
+    volumes:
+      - ../apps/pipeline-service/src:/app/src
+    environment:
+      - NODE_ENV=development
+    command: npx tsx watch src/index.ts
+
+  # ── Notification Service — hot reload ────
+  notification-service:
+    build:
+      context: ../apps/notification-service
+      target: dev
+    volumes:
+      - ../apps/notification-service/src:/app/src
+    environment:
+      - NODE_ENV=development
+    command: npx tsx watch src/index.ts
