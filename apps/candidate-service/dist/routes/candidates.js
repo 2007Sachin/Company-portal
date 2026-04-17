@@ -21,6 +21,15 @@ const candidateSchema = zod_1.z.object({
 });
 // ── GET /candidates (Discovery) ─────────────
 exports.candidatesRouter.get('/', async (req, res) => {
+    // --- MOCK OVERRIDE ---
+    const mockCandidates = [
+        { id: 'c-1', headline: 'Senior Frontend Developer', pulse_score: 950, experience_years: 6, notice_period_days: 15, skills: ['React', 'Next.js', 'TypeScript', 'Tailwind'], github_verified: true, leetcode_verified: true, has_video_pitch: true, location: 'San Francisco, CA', created_at: new Date().toISOString() },
+        { id: 'c-2', headline: 'Backend Engineer', pulse_score: 820, experience_years: 4, notice_period_days: 30, skills: ['Node.js', 'Express', 'PostgreSQL', 'Docker'], github_verified: true, leetcode_verified: false, has_video_pitch: false, location: 'Remote', created_at: new Date().toISOString() },
+        { id: 'c-3', headline: 'Full Stack Ninja', pulse_score: 750, experience_years: 3, notice_period_days: 0, skills: ['React', 'Python', 'Django', 'AWS'], github_verified: false, leetcode_verified: false, has_video_pitch: false, location: 'New York, NY', created_at: new Date().toISOString() },
+    ];
+    res.json({ candidates: mockCandidates, total: mockCandidates.length });
+    return;
+    // ---------------------
     try {
         const { skills, min_score, max_score, max_notice_period, min_experience, max_experience, search } = req.query;
         const supabase = (0, supabase_1.getSupabase)();
@@ -60,6 +69,10 @@ exports.candidatesRouter.get('/', async (req, res) => {
 });
 // ── GET /candidates/:id ─────────────────────
 exports.candidatesRouter.get('/:id', shared_utils_1.verifyToken, async (req, res) => {
+    // --- MOCK OVERRIDE ---
+    res.json({ id: req.params.id, headline: 'Mock Candidate', pulse_score: 900, experience_years: 5, notice_period_days: 15, skills: ['React', 'Node'], github_verified: true, leetcode_verified: true, has_video_pitch: true, location: 'Remote', created_at: new Date().toISOString() });
+    return;
+    // ---------------------
     try {
         const { id } = req.params;
         const supabase = (0, supabase_1.getSupabase)();
@@ -81,6 +94,10 @@ exports.candidatesRouter.get('/:id', shared_utils_1.verifyToken, async (req, res
 });
 // ── POST /candidates ────────────────────────
 exports.candidatesRouter.post('/', shared_utils_1.verifyToken, async (req, res) => {
+    // --- MOCK OVERRIDE ---
+    res.status(201).json({ id: 'c-new', ...req.body, created_at: new Date().toISOString() });
+    return;
+    // ---------------------
     try {
         const parsed = candidateSchema.safeParse(req.body);
         if (!parsed.success) {
@@ -112,6 +129,10 @@ exports.candidatesRouter.post('/', shared_utils_1.verifyToken, async (req, res) 
 });
 // ── PUT /candidates/:id ─────────────────────
 exports.candidatesRouter.put('/:id', shared_utils_1.verifyToken, async (req, res) => {
+    // --- MOCK OVERRIDE ---
+    res.json({ id: req.params.id, ...req.body, updated_at: new Date().toISOString() });
+    return;
+    // ---------------------
     try {
         const { id } = req.params;
         const parsed = candidateSchema.partial().safeParse(req.body);
@@ -140,6 +161,10 @@ exports.candidatesRouter.put('/:id', shared_utils_1.verifyToken, async (req, res
 });
 // ── GET /candidates/:id/score ───────────────
 exports.candidatesRouter.get('/:id/score', shared_utils_1.verifyToken, async (req, res) => {
+    // --- MOCK OVERRIDE ---
+    res.json({ pulse_score: 850 });
+    return;
+    // ---------------------
     try {
         const { id } = req.params;
         const supabase = (0, supabase_1.getSupabase)();

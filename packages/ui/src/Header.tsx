@@ -11,6 +11,9 @@ interface HeaderProps {
 export function Header({ title, backTo }: HeaderProps) {
   const router = useRouter();
 
+  const isRecruiter = typeof window !== 'undefined' && window.location.pathname.startsWith('/recruiter');
+  const dashboardLink = isRecruiter ? '/recruiter/dashboard' : '/candidate/dashboard';
+
   return (
     <header className="h-16 flex items-center justify-between sticky top-0 z-50 bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8">
       <div className="flex items-center gap-6">
@@ -31,22 +34,16 @@ export function Header({ title, backTo }: HeaderProps) {
           </button>
         )}
         {!backTo && (
-          <span className="text-sm font-medium text-gray-500">
+          <Link href={dashboardLink} className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
             {title}
-          </span>
+          </Link>
         )}
       </div>
 
       <div className="flex items-center gap-6">
-        <Link 
-          href="/recruiter/dashboard" 
-          className="flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors bg-indigo-50 px-4 h-9 rounded-xl"
-        >
-          Pipeline
-        </Link>
         <div className="flex items-center gap-4 pl-4 border-l border-gray-200">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-semibold shadow-sm cursor-pointer hover:opacity-90 transition-opacity">
-            R
+            {isRecruiter ? 'R' : 'C'}
           </div>
           <Link href="/auth/login" className="text-gray-400 hover:text-red-500 transition-colors" title="Log out">
             <LogOut className="w-5 h-5" />

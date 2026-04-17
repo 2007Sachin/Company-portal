@@ -32,3 +32,46 @@ export type User = {
   role: 'recruiter' | 'candidate';
   created_at: string;
 }
+
+// ── Candidate-Side Types ───────────────────────────────────
+
+export type ProfileView = {
+  id: string;
+  candidate_id: string;
+  recruiter_id: string;
+  viewed_at: string;
+}
+
+export type CandidateMatch = {
+  id: string;
+  candidate_id: string;
+  jd_id: string | null;
+  match_score: number;
+  matched_skills: string[];
+  created_at: string;
+}
+
+export type DailyChallenge = {
+  id: string;
+  candidate_id: string;
+  challenge_type: string;
+  challenge_data: Record<string, unknown>;
+  completed_at: string | null;
+  created_at: string;
+}
+
+export type CandidateStreak = {
+  candidate_id: string;
+  current_streak: number;
+  longest_streak: number;
+  last_activity_date: string | null;
+}
+
+export type AgentSuggestion = {
+  id: string;
+  candidate_id: string;
+  agent_type: string;
+  suggestion: Record<string, unknown>;
+  status: 'pending' | 'accepted' | 'dismissed';
+  created_at: string;
+}

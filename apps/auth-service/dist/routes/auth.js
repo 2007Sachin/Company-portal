@@ -9,6 +9,14 @@ exports.authRouter = (0, express_1.Router)();
 // POST /auth/login
 // ─────────────────────────────────────────────
 exports.authRouter.post('/login', async (req, res) => {
+    // --- MOCK OVERRIDE ---
+    res.json({
+        token: 'mock-jwt-token',
+        refresh_token: 'mock-refresh-token',
+        user: { id: `mock-${req.body.role || 'candidate'}-id`, email: req.body.email || 'user@example.com', role: req.body.role || 'candidate', created_at: new Date().toISOString() },
+    });
+    return;
+    // ---------------------
     try {
         const { email, password } = req.body;
         if (!email || !password) {
@@ -47,6 +55,14 @@ exports.authRouter.post('/login', async (req, res) => {
 // POST /auth/signup
 // ─────────────────────────────────────────────
 exports.authRouter.post('/signup', async (req, res) => {
+    // --- MOCK OVERRIDE ---
+    res.status(201).json({
+        token: 'mock-jwt-token',
+        refresh_token: 'mock-refresh-token',
+        user: { id: 'mock-recruiter-id', email: req.body.email || 'user@example.com', role: req.body.role || 'candidate', created_at: new Date().toISOString() },
+    });
+    return;
+    // ---------------------
     try {
         const { email, password, role } = req.body;
         if (!email || !password) {
@@ -118,6 +134,10 @@ exports.authRouter.post('/signup', async (req, res) => {
 // POST /auth/logout
 // ─────────────────────────────────────────────
 exports.authRouter.post('/logout', verifyToken_1.verifyToken, async (req, res) => {
+    // --- MOCK OVERRIDE ---
+    res.json({ success: true });
+    return;
+    // ---------------------
     try {
         const supabase = (0, supabase_1.getSupabase)();
         const userId = req.user.id;
@@ -138,6 +158,10 @@ exports.authRouter.post('/logout', verifyToken_1.verifyToken, async (req, res) =
 // GET /auth/me
 // ─────────────────────────────────────────────
 exports.authRouter.get('/me', verifyToken_1.verifyToken, async (req, res) => {
+    // --- MOCK OVERRIDE ---
+    res.json({ user: req.user });
+    return;
+    // ---------------------
     try {
         const user = req.user;
         // Optionally enrich with profile data from the users table
@@ -160,6 +184,14 @@ exports.authRouter.get('/me', verifyToken_1.verifyToken, async (req, res) => {
 // POST /auth/refresh
 // ─────────────────────────────────────────────
 exports.authRouter.post('/refresh', async (req, res) => {
+    // --- MOCK OVERRIDE ---
+    res.json({
+        token: 'mock-jwt-token',
+        refresh_token: 'mock-refresh-token',
+        user: { id: `mock-${req.body.role || 'candidate'}-id`, email: 'user@example.com', role: req.body.role || 'candidate', created_at: new Date().toISOString() },
+    });
+    return;
+    // ---------------------
     try {
         const { refresh_token } = req.body;
         if (!refresh_token) {

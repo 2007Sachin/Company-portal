@@ -22,6 +22,7 @@ services:
       - candidate-service
       - pipeline-service
       - notification-service
+      - copilot-service
     restart: unless-stopped
     networks:
       - pulse-network
@@ -97,6 +98,7 @@ services:
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
       - JWT_SECRET=${JWT_SECRET}
+      - COPILOT_SERVICE_URL=${COPILOT_SERVICE_URL}
     restart: unless-stopped
     networks:
       - pulse-network
@@ -137,6 +139,22 @@ services:
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
       - JWT_SECRET=${JWT_SECRET}
+    restart: unless-stopped
+    networks:
+      - pulse-network
+
+  # ──────────────────────────────────────
+  # Copilot Service — Python / FastAPI
+  # ──────────────────────────────────────
+  copilot-service:
+    build:
+      context: ../apps/copilot-service
+      dockerfile: Dockerfile
+    container_name: pulse-copilot
+    ports:
+      - "3005:3005"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
     restart: unless-stopped
     networks:
       - pulse-network

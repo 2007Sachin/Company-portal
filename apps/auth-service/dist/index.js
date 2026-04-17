@@ -8,7 +8,7 @@ const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const auth_1 = require("./routes/auth");
 const health_1 = require("./routes/health");
-dotenv_1.default.config();
+dotenv_1.default.config({ path: '../../.env' });
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3001;
 // ── Middleware ─────────────────────────────

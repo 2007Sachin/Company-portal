@@ -31,6 +31,14 @@ const nextConfig = {
         source: '/api/pipeline/:path*',
         destination: 'http://localhost:3003/pipeline/:path*',
       },
+      {
+        source: '/api/copilot/:path*',
+        destination: 'http://localhost:3005/copilot/:path*',
+      },
+      {
+        source: '/api/jd/:path*',
+        destination: 'http://localhost:8000/:path*',
+      },
     ];
   },
   async redirects() {

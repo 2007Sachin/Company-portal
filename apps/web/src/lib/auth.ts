@@ -84,10 +84,10 @@ async function authFetch<T>(path: string, options: RequestInit = {}): Promise<T>
 
 // ── Auth operations ───────────────────────
 
-export async function login(email: string, password: string): Promise<AuthResponse> {
+export async function login(email: string, password: string, role?: string): Promise<AuthResponse> {
   const data = await authFetch<AuthResponse>('/login', {
     method: 'POST',
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, role }),
   });
 
   storeSession(data);

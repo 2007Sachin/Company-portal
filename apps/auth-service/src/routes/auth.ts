@@ -12,7 +12,7 @@ authRouter.post('/login', async (req: Request, res: Response) => {
   res.json({
     token: 'mock-jwt-token',
     refresh_token: 'mock-refresh-token',
-    user: { id: 'mock-recruiter-id', email: req.body.email || 'user@example.com', role: 'recruiter', created_at: new Date().toISOString() },
+    user: { id: `mock-${req.body.role || 'candidate'}-id`, email: req.body.email || 'user@example.com', role: req.body.role || 'candidate', created_at: new Date().toISOString() },
   });
   return;
   // ---------------------
@@ -208,7 +208,7 @@ authRouter.post('/refresh', async (req: Request, res: Response) => {
   res.json({
     token: 'mock-jwt-token',
     refresh_token: 'mock-refresh-token',
-    user: { id: 'mock-recruiter-id', email: 'user@example.com', role: 'recruiter', created_at: new Date().toISOString() },
+    user: { id: `mock-${req.body.role || 'candidate'}-id`, email: 'user@example.com', role: req.body.role || 'candidate', created_at: new Date().toISOString() },
   });
   return;
   // ---------------------

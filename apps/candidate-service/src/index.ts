@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { healthRouter } from './routes/health';
 import { candidatesRouter } from './routes/candidates';
+import { meRouter } from './routes/me';
 
 dotenv.config({ path: '../../.env' });
 
@@ -20,6 +21,7 @@ app.use((req, _res, next) => {
   next();
 });
 
+app.use('/candidates/me', meRouter);
 app.use('/candidates', candidatesRouter);
 app.use('/', healthRouter);
 

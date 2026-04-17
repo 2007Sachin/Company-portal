@@ -1,9 +1,9 @@
 {
-  "name": "@pulse/jd-parser-service",
+  "name": "@pulse/copilot-service",
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "python -m uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload",
+    "dev": "python -m uvicorn src.main:app --host 0.0.0.0 --port 3005 --reload",
     "build": "pip install -r requirements.txt",
     "lint": "python -m py_compile src/main.py"
   },

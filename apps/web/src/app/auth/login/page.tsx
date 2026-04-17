@@ -28,7 +28,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const data = await login(email, password);
+      const data = await login(email, password, userType);
       const role = data.user?.role || userType;
       router.push(role === 'candidate' ? '/dashboard' : '/recruiter/dashboard');
     } catch (err) {
