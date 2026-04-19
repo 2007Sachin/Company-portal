@@ -10,6 +10,21 @@ exports.pipelineRouter = (0, express_1.Router)();
 exports.pipelineRouter.use(shared_utils_1.verifyToken);
 // ── GET /pipeline ───────────────────────────
 exports.pipelineRouter.get('/', async (req, res) => {
+    // --- MOCK OVERRIDE ---
+    const mockCandidatesMap = {
+        'c-1': { id: 'c-1', headline: 'Senior Frontend Developer', pulse_score: 950, experience_years: 6, notice_period_days: 15, skills: ['React', 'Next.js'], github_verified: true, leetcode_verified: true, location: 'San Francisco, CA' },
+        'c-2': { id: 'c-2', headline: 'Backend Engineer', pulse_score: 820, experience_years: 4, notice_period_days: 30, skills: ['Node.js', 'PostgreSQL'], github_verified: true, leetcode_verified: false, location: 'Remoate' }
+    };
+    res.json({
+        saved: [
+            { id: 'p-1', stage: 'saved', notes: '', candidate_id: 'c-1', candidates: mockCandidatesMap['c-1'], created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            { id: 'p-2', stage: 'saved', notes: 'Call next week', candidate_id: 'c-2', candidates: mockCandidatesMap['c-2'], created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+        ],
+        shortlisted: [],
+        pending: []
+    });
+    return;
+    // ---------------------
     try {
         const user = req.user;
         const supabase = (0, supabase_1.getSupabase)();
@@ -30,10 +45,11 @@ exports.pipelineRouter.get('/', async (req, res) => {
             res.status(500).json({ error: error.message });
             return;
         }
+        const pipelineDataArr = pipelineData || [];
         const grouped = {
-            saved: pipelineData.filter(d => d.stage === 'saved'),
-            shortlisted: pipelineData.filter(d => d.stage === 'shortlisted'),
-            pending: pipelineData.filter(d => d.stage === 'pending')
+            saved: pipelineDataArr.filter(d => d.stage === 'saved'),
+            shortlisted: pipelineDataArr.filter(d => d.stage === 'shortlisted'),
+            pending: pipelineDataArr.filter(d => d.stage === 'pending')
         };
         res.json(grouped);
     }
@@ -48,6 +64,10 @@ const addSchema = zod_1.z.object({
     stage: zod_1.z.enum(['saved', 'shortlisted', 'pending'])
 });
 exports.pipelineRouter.post('/add', async (req, res) => {
+    // --- MOCK OVERRIDE ---
+    res.status(201).json({ id: `p-${Date.now()}`, candidate_id: req.body.candidate_id, recruiter_id: 'mock-recruiter-id', stage: req.body.stage, created_at: new Date().toISOString() });
+    return;
+    // ---------------------
     try {
         const user = req.user;
         const parsed = addSchema.safeParse(req.body);
@@ -96,6 +116,10 @@ const moveSchema = zod_1.z.object({
     stage: zod_1.z.enum(['saved', 'shortlisted', 'pending'])
 });
 exports.pipelineRouter.put('/:id/move', async (req, res) => {
+    // --- MOCK OVERRIDE ---
+    res.json({ id: req.params.id, stage: req.body.stage, updated_at: new Date().toISOString() });
+    return;
+    // ---------------------
     try {
         const { id } = req.params;
         const user = req.user;
@@ -143,6 +167,10 @@ const notesSchema = zod_1.z.object({
     notes: zod_1.z.string()
 });
 exports.pipelineRouter.put('/:id/notes', async (req, res) => {
+    // --- MOCK OVERRIDE ---
+    res.json({ id: req.params.id, notes: req.body.notes, updated_at: new Date().toISOString() });
+    return;
+    // ---------------------
     try {
         const { id } = req.params;
         const user = req.user;
@@ -185,6 +213,10 @@ exports.pipelineRouter.put('/:id/notes', async (req, res) => {
 });
 // ── DELETE /pipeline/:id ────────────────────
 exports.pipelineRouter.delete('/:id', async (req, res) => {
+    // --- MOCK OVERRIDE ---
+    res.json({ success: true });
+    return;
+    // ---------------------
     try {
         const { id } = req.params;
         const user = req.user;

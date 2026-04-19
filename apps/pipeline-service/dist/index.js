@@ -8,7 +8,7 @@ const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const health_1 = require("./routes/health");
 const pipeline_1 = require("./routes/pipeline");
-dotenv_1.default.config();
+dotenv_1.default.config({ path: '../../.env' });
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3003;
 app.use((0, cors_1.default)({

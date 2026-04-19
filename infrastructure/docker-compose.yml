@@ -32,8 +32,11 @@ services:
   # ──────────────────────────────────────
   web:
     build:
-      context: ../apps/web
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
     container_name: pulse-web
     ports:
       - "3000:3000"
@@ -50,8 +53,8 @@ services:
   # ──────────────────────────────────────
   auth-service:
     build:
-      context: ../apps/auth-service
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: apps/auth-service/Dockerfile
     container_name: pulse-auth
     ports:
       - "3001:3001"
@@ -87,8 +90,8 @@ services:
   # ──────────────────────────────────────
   candidate-service:
     build:
-      context: ../apps/candidate-service
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: apps/candidate-service/Dockerfile
     container_name: pulse-candidate
     ports:
       - "3002:3002"
@@ -98,7 +101,7 @@ services:
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
       - JWT_SECRET=${JWT_SECRET}
-      - COPILOT_SERVICE_URL=${COPILOT_SERVICE_URL}
+      - COPILOT_SERVICE_URL=http://pulse-copilot:3005
     restart: unless-stopped
     networks:
       - pulse-network
@@ -108,8 +111,8 @@ services:
   # ──────────────────────────────────────
   pipeline-service:
     build:
-      context: ../apps/pipeline-service
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: apps/pipeline-service/Dockerfile
     container_name: pulse-pipeline
     ports:
       - "3003:3003"
@@ -128,8 +131,8 @@ services:
   # ──────────────────────────────────────
   notification-service:
     build:
-      context: ../apps/notification-service
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: apps/notification-service/Dockerfile
     container_name: pulse-notification
     ports:
       - "3004:3004"

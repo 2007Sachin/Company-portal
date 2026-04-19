@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
-import { getSupabase } from '../lib/supabase';
+import { getSupabase } from '../lib/supabase.js';
 import { verifyToken, AuthUser } from '@pulse/shared-utils';
 
 export const pipelineRouter = Router();
@@ -44,14 +44,16 @@ pipelineRouter.get('/', async (req: Request, res: Response): Promise<void> => {
 
     if (error) {
       console.error('Fetch pipeline error:', error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: (error as any).message });
       return;
     }
 
+    const pipelineDataArr = pipelineData || [];
+
     const grouped = {
-      saved: pipelineData.filter(d => d.stage === 'saved'),
-      shortlisted: pipelineData.filter(d => d.stage === 'shortlisted'),
-      pending: pipelineData.filter(d => d.stage === 'pending')
+      saved: pipelineDataArr.filter(d => d.stage === 'saved'),
+      shortlisted: pipelineDataArr.filter(d => d.stage === 'shortlisted'),
+      pending: pipelineDataArr.filter(d => d.stage === 'pending')
     };
 
     res.json(grouped);
@@ -77,7 +79,7 @@ pipelineRouter.post('/add', async (req: Request, res: Response): Promise<void> =
     const parsed = addSchema.safeParse(req.body);
 
     if (!parsed.success) {
-      res.status(400).json({ error: 'Validation failed', details: parsed.error.issues });
+      res.status(400).json({ error: 'Validation failed', details: (parsed as any).error.issues });
       return;
     }
 
@@ -87,7 +89,7 @@ pipelineRouter.post('/add', async (req: Request, res: Response): Promise<void> =
     const { data: existing, error: findError } = await supabase
       .from('pipeline')
       .select('id')
-      .eq('candidate_id', parsed.data.candidate_id)
+      .eq('candidate_id', parsed.data!.candidate_id)
       .eq('recruiter_id', user.id)
       .single();
 
@@ -100,9 +102,9 @@ pipelineRouter.post('/add', async (req: Request, res: Response): Promise<void> =
     const { data: inserted, error: insertError } = await supabase
       .from('pipeline')
       .insert([{
-        candidate_id: parsed.data.candidate_id,
+        candidate_id: parsed.data!.candidate_id,
         recruiter_id: user.id,
-        stage: parsed.data.stage,
+        stage: parsed.data!.stage,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }])
@@ -111,7 +113,7 @@ pipelineRouter.post('/add', async (req: Request, res: Response): Promise<void> =
 
     if (insertError) {
       console.error('Insert pipeline error:', insertError);
-      res.status(400).json({ error: insertError.message });
+      res.status(400).json({ error: (insertError as any).message });
       return;
     }
 
@@ -138,7 +140,7 @@ pipelineRouter.put('/:id/move', async (req: Request, res: Response): Promise<voi
     const parsed = moveSchema.safeParse(req.body);
 
     if (!parsed.success) {
-      res.status(400).json({ error: 'Validation failed', details: parsed.error.issues });
+      res.status(400).json({ error: 'Validation failed', details: (parsed as any).error.issues });
       return;
     }
 
@@ -161,7 +163,7 @@ pipelineRouter.put('/:id/move', async (req: Request, res: Response): Promise<voi
     const { data: updated, error: updateError } = await supabase
       .from('pipeline')
       .update({
-        stage: parsed.data.stage,
+        stage: parsed.data!.stage,
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
@@ -170,7 +172,7 @@ pipelineRouter.put('/:id/move', async (req: Request, res: Response): Promise<voi
 
     if (updateError) {
       console.error('Update pipeline stage error:', updateError);
-      res.status(400).json({ error: updateError.message });
+      res.status(400).json({ error: (updateError as any).message });
       return;
     }
 
@@ -197,7 +199,7 @@ pipelineRouter.put('/:id/notes', async (req: Request, res: Response): Promise<vo
     const parsed = notesSchema.safeParse(req.body);
 
     if (!parsed.success) {
-      res.status(400).json({ error: 'Validation failed', details: parsed.error.issues });
+      res.status(400).json({ error: 'Validation failed', details: (parsed as any).error.issues });
       return;
     }
 
@@ -218,7 +220,7 @@ pipelineRouter.put('/:id/notes', async (req: Request, res: Response): Promise<vo
     const { data: updated, error: updateError } = await supabase
       .from('pipeline')
       .update({
-        notes: parsed.data.notes,
+        notes: parsed.data!.notes,
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
@@ -227,7 +229,7 @@ pipelineRouter.put('/:id/notes', async (req: Request, res: Response): Promise<vo
 
     if (updateError) {
       console.error('Update pipeline notes error:', updateError);
-      res.status(400).json({ error: updateError.message });
+      res.status(400).json({ error: (updateError as any).message });
       return;
     }
 
@@ -259,7 +261,7 @@ pipelineRouter.delete('/:id', async (req: Request, res: Response): Promise<void>
 
     if (deleteError) {
       console.error('Delete pipeline error:', deleteError);
-      res.status(400).json({ error: deleteError.message });
+      res.status(400).json({ error: (deleteError as any).message });
       return;
     }
 

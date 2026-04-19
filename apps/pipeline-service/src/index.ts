@@ -1,8 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { healthRouter } from './routes/health';
-import { pipelineRouter } from './routes/pipeline';
+import { healthRouter } from './routes/health.js';
+import { pipelineRouter } from './routes/pipeline.js';
 
 dotenv.config({ path: '../../.env' });
 

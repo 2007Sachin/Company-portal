@@ -1,8 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { authRouter } from './routes/auth';
-import { healthRouter } from './routes/health';
+import { authRouter } from './routes/auth.js';
+import { healthRouter } from './routes/health.js';
 
 dotenv.config({ path: '../../.env' });
 

@@ -39,10 +39,10 @@ exports.authRouter.post('/login', async (req, res) => {
             token: session.access_token,
             refresh_token: session.refresh_token,
             user: {
-                id: user.id,
-                email: user.email,
+                id: user.id || '',
+                email: user.email || '',
                 role: user.user_metadata?.role || 'candidate',
-                created_at: user.created_at,
+                created_at: user.created_at || new Date().toISOString(),
             },
         });
     }
@@ -101,7 +101,7 @@ exports.authRouter.post('/signup', async (req, res) => {
             email,
             password,
         });
-        if (signInError) {
+        if (signInError || !signInData.session) {
             // User was created but sign-in failed — still return success
             res.status(201).json({
                 token: null,

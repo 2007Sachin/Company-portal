@@ -196,7 +196,7 @@ exports.candidatesRouter.get('/:id/score', shared_utils_1.verifyToken, async (re
             .eq('id', id);
         if (updateError) {
             console.error('Failed to update score:', updateError);
-            res.status(500).json({ error: 'Failed to save updated score' });
+            res.status(500).json({ error: updateError.message });
             return;
         }
         res.json({ pulse_score: score });

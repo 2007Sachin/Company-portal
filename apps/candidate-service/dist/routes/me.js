@@ -4,6 +4,7 @@ exports.meRouter = void 0;
 const express_1 = require("express");
 const zod_1 = require("zod");
 const supabase_1 = require("../lib/supabase");
+const proof_1 = require("../lib/proof");
 const shared_utils_1 = require("@pulse/shared-utils");
 exports.meRouter = (0, express_1.Router)();
 // All /candidates/me routes require authentication
@@ -12,6 +13,78 @@ exports.meRouter.use(shared_utils_1.verifyToken);
 function getUser(req) {
     return req.user;
 }
+// ── GET /candidates/me/dashboard ───────────────────────────
+// Aggregated endpoint for the Career Cockpit
+exports.meRouter.get('/dashboard', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const supabase = (0, supabase_1.getSupabase)();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const [candidateRes, streakRes, deltaRes, challengeRes, eventsRes, gridRes, matchesRes, interestsRes, historyRes] = await Promise.all([
+            // 1. Profile
+            supabase.from('candidates').select('*').eq('id', user.id).single(),
+            // 2. Streak
+            supabase.from('candidate_streaks').select('*').eq('candidate_id', user.id).maybeSingle(),
+            // 3. 7d Delta
+            supabase.from('proof_events').select('score_impact').eq('candidate_id', user.id).gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+            // 4. Today's Challenge
+            supabase.from('daily_challenges').select('*').eq('candidate_id', user.id).gte('created_at', today.toISOString()).maybeSingle(),
+            // 5. Recent Events
+            supabase.from('proof_events').select('*').eq('candidate_id', user.id).order('created_at', { ascending: false }).limit(20),
+            // 6. 12w Grid (we aggregate in JS after fetch for simplicity, or use custom RPC)
+            supabase.from('proof_events').select('created_at').eq('candidate_id', user.id).gte('created_at', new Date(Date.now() - 84 * 24 * 60 * 60 * 1000).toISOString()),
+            // 7. Top Matches
+            supabase.from('candidate_matches').select('*, parsed_jds(*)').eq('candidate_id', user.id).is('dismissed_at', null).order('match_score', { ascending: false }).limit(3),
+            // 8. Recent Interests
+            supabase.from('recruiter_interest').select('*, parsed_jds(*)').eq('candidate_id', user.id).order('created_at', { ascending: false }).limit(3),
+            // 9. 14d Score History
+            supabase.from('proof_events').select('created_at, score_impact').eq('candidate_id', user.id).gte('created_at', new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()).order('created_at', { ascending: true })
+        ]);
+        // Handle initial score and delta
+        const currentScore = candidateRes.data?.pulse_score || 0;
+        const weeklyDelta = deltaRes.data?.reduce((sum, e) => sum + (e.score_impact || 0), 0) || 0;
+        // Process history for sparkline
+        // We start from current score and work backwards
+        let tempScore = currentScore;
+        const historyMap = {};
+        const eventsForHistory = [...(historyRes.data || [])].reverse();
+        // Fill last 14 days
+        for (let i = 0; i < 14; i++) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dayStr = d.toISOString().slice(0, 10);
+            historyMap[dayStr] = tempScore;
+            // Subtract impacts from this day
+            const dayEvents = eventsForHistory.filter(e => e.created_at.startsWith(dayStr));
+            dayEvents.forEach(e => { tempScore -= (e.score_impact || 0); });
+        }
+        // Process grid
+        const gridMap = {};
+        gridRes.data?.forEach(e => {
+            const day = e.created_at.slice(0, 10);
+            gridMap[day] = (gridMap[day] || 0) + 1;
+        });
+        res.json({
+            candidate: candidateRes.data,
+            streak: streakRes.data || { current_streak: 0, longest_streak: 0 },
+            score: {
+                current: currentScore,
+                delta_7d: weeklyDelta,
+                history_14d: Object.entries(historyMap).map(([day, val]) => ({ day, value: val })).reverse()
+            },
+            daily_challenge: challengeRes.data,
+            proof_events_recent: eventsRes.data || [],
+            proof_grid_12w: Object.entries(gridMap).map(([day, count]) => ({ day, count })),
+            top_matches: matchesRes.data || [],
+            recent_interests: interestsRes.data || []
+        });
+    }
+    catch (err) {
+        console.error('[GET /candidates/me/dashboard]', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 // ── GET /candidates/me ─────────────────────────────────────
 // Returns the current candidate's profile from the candidates table.
 exports.meRouter.get('/', async (req, res) => {
@@ -37,6 +110,7 @@ exports.meRouter.get('/', async (req, res) => {
 // ── PUT /candidates/me ─────────────────────────────────────
 // Updates the current candidate's profile.
 const updateProfileSchema = zod_1.z.object({
+    full_name: zod_1.z.string().optional(),
     headline: zod_1.z.string().optional(),
     experience_years: zod_1.z.number().int().optional(),
     notice_period_days: zod_1.z.number().int().optional(),
@@ -45,6 +119,7 @@ const updateProfileSchema = zod_1.z.object({
     leetcode_verified: zod_1.z.boolean().optional(),
     has_video_pitch: zod_1.z.boolean().optional(),
     location: zod_1.z.string().optional(),
+    onboarding_step: zod_1.z.number().int().optional(),
 }).strict();
 exports.meRouter.put('/', async (req, res) => {
     try {
@@ -109,16 +184,21 @@ exports.meRouter.get('/views', async (req, res) => {
     }
 });
 // ── GET /candidates/me/matches ─────────────────────────────
-// Returns candidate_matches ordered by match_score descending.
+// Returns candidate_matches joined with parsed_jds.
 exports.meRouter.get('/matches', async (req, res) => {
     try {
         const user = getUser(req);
         const supabase = (0, supabase_1.getSupabase)();
-        const { data, error } = await supabase
+        const { saved } = req.query;
+        let query = supabase
             .from('candidate_matches')
-            .select('*')
+            .select('*, parsed_jds(*)')
             .eq('candidate_id', user.id)
-            .order('match_score', { ascending: false });
+            .is('dismissed_at', null);
+        if (saved === 'true') {
+            query = query.not('saved_at', 'is', null);
+        }
+        const { data, error } = await query.order('match_score', { ascending: false });
         if (error) {
             console.error('[GET /candidates/me/matches]', error);
             res.status(500).json({ error: error.message });
@@ -128,6 +208,103 @@ exports.meRouter.get('/matches', async (req, res) => {
     }
     catch (err) {
         console.error('[GET /candidates/me/matches]', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// ── GET /candidates/me/interests ───────────────────────────
+// GET inbound recruiter signals (Who likes me?)
+exports.meRouter.get('/interests', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const supabase = (0, supabase_1.getSupabase)();
+        const { status } = req.query;
+        let query = supabase
+            .from('recruiter_interest')
+            .select('*, parsed_jds(*)')
+            .eq('candidate_id', user.id);
+        if (status && status !== 'all') {
+            query = query.eq('status', status);
+        }
+        const { data, error } = await query.order('created_at', { ascending: false });
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        res.json(data);
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// ── PUT /candidates/me/interests/:id/respond ───────────────
+exports.meRouter.put('/interests/:id/respond', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const { id } = req.params;
+        const { status } = req.body; // 'accepted' | 'declined'
+        const supabase = (0, supabase_1.getSupabase)();
+        const { data, error } = await supabase
+            .from('recruiter_interest')
+            .update({
+            status,
+            responded_at: new Date().toISOString()
+        })
+            .eq('id', id)
+            .eq('candidate_id', user.id)
+            .select()
+            .single();
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        res.json(data);
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// ── PUT /candidates/me/matches/:id/save ────────────────────
+exports.meRouter.put('/matches/:id/save', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const { id } = req.params;
+        const { saved } = req.body; // boolean
+        const supabase = (0, supabase_1.getSupabase)();
+        const { data, error } = await supabase
+            .from('candidate_matches')
+            .update({ saved_at: saved ? new Date().toISOString() : null })
+            .eq('id', id)
+            .eq('candidate_id', user.id)
+            .select()
+            .single();
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        res.json(data);
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// ── PUT /candidates/me/matches/:id/dismiss ─────────────────
+exports.meRouter.put('/matches/:id/dismiss', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const { id } = req.params;
+        const supabase = (0, supabase_1.getSupabase)();
+        const { error } = await supabase
+            .from('candidate_matches')
+            .update({ dismissed_at: new Date().toISOString() })
+            .eq('id', id)
+            .eq('candidate_id', user.id);
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        res.json({ success: true });
+    }
+    catch (err) {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -160,14 +337,17 @@ exports.meRouter.get('/challenge/today', async (req, res) => {
     try {
         const user = getUser(req);
         const supabase = (0, supabase_1.getSupabase)();
-        const today = new Date().toISOString().slice(0, 10); // YRRR-MM-DD
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = tomorrow.toISOString().slice(0, 10);
         // 1. Check if challenge already exists for today
         const { data: existing, error: fetchError } = await supabase
             .from('daily_challenges')
             .select('*')
             .eq('candidate_id', user.id)
-            .gte('created_at', `${today}T00:00:00Z`)
-            .lt('created_at', `${today}T23:59:59Z`)
+            .gte('created_at', `${todayStr}T00:00:00Z`)
+            .lt('created_at', `${tomorrowStr}T00:00:00Z`)
             .maybeSingle();
         if (existing) {
             res.json(existing);
@@ -213,7 +393,7 @@ exports.meRouter.get('/challenge/today', async (req, res) => {
     }
 });
 // ── POST /candidates/me/challenges/complete ────────────────
-// Marks today's challenge as completed and updates the streak. Standardized logic.
+// Marks today's challenge as completed and updates the streak.
 const completeChallengeSchema = zod_1.z.object({
     challenge_id: zod_1.z.string().uuid(),
 });
@@ -246,10 +426,9 @@ exports.meRouter.post('/challenges/complete', async (req, res) => {
             .from('candidate_streaks')
             .select('*')
             .eq('candidate_id', user.id)
-            .single();
+            .maybeSingle();
         let newCurrent = 1;
         if (streak && streak.last_activity_date) {
-            const lastDate = new Date(streak.last_activity_date);
             const yesterday = new Date(now);
             yesterday.setDate(yesterday.getDate() - 1);
             const yesterdayStr = yesterday.toISOString().slice(0, 10);
@@ -259,7 +438,6 @@ exports.meRouter.post('/challenges/complete', async (req, res) => {
             else if (streak.last_activity_date === todayStr) {
                 newCurrent = streak.current_streak; // Already done today
             }
-            // else if streak.last_activity_date was older than yesterday, it resets to 1 (which it is by default)
         }
         const newLongest = Math.max(newCurrent, (streak?.longest_streak || 0));
         const { data: updatedStreak, error: streakError } = await supabase
@@ -306,7 +484,6 @@ exports.meRouter.get('/challenges', async (req, res) => {
     }
 });
 // ── GET /candidates/me/suggestions ─────────────────────────
-// Returns pending agent suggestions for the current candidate.
 exports.meRouter.get('/suggestions', async (req, res) => {
     try {
         const user = getUser(req);
@@ -330,7 +507,6 @@ exports.meRouter.get('/suggestions', async (req, res) => {
     }
 });
 // ── PUT /candidates/me/suggestions/:id ─────────────────────
-// Updates an agent suggestion status (accepted / dismissed).
 const updateSuggestionSchema = zod_1.z.object({
     status: zod_1.z.enum(['accepted', 'dismissed']),
 });
@@ -362,87 +538,513 @@ exports.meRouter.put('/suggestions/:id', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-// ── POST /candidates/me/recompute-matches ──────────────────
-// Manually triggers a re-scan of the latest 50 parsed JDs.
-exports.meRouter.post('/recompute-matches', async (req, res) => {
+// ── POST /candidates/me/opportunities/recompute ─────────────
+exports.meRouter.post('/opportunities/recompute', async (req, res) => {
     try {
         const user = getUser(req);
         const supabase = (0, supabase_1.getSupabase)();
-        const COPILOT_SERVICE_URL = process.env.COPILOT_SERVICE_URL || 'http://copilot-service:3005';
-        // 1. Get candidate profile
-        const { data: candidate, error: candError } = await supabase
-            .from('candidates')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-        if (candError || !candidate) {
+        const COPILOT_SERVICE_URL = process.env.COPILOT_SERVICE_URL || 'http://localhost:3005';
+        // 1. Fetch Candidate + Extras
+        const [{ data: candidate }, { data: goals }, { data: repos }] = await Promise.all([
+            supabase.from('candidates').select('*').eq('id', user.id).single(),
+            supabase.from('candidate_goals').select('*').eq('candidate_id', user.id).maybeSingle(),
+            supabase.from('github_repos').select('*').eq('candidate_id', user.id).limit(10)
+        ]);
+        if (!candidate) {
             res.status(404).json({ error: 'Candidate not found' });
             return;
         }
-        // 2. Fetch latest 50 parsed JDs
+        // 2. Fetch last 50 JDs
         const { data: jds, error: jdsError } = await supabase
             .from('parsed_jds')
             .select('*')
             .order('created_at', { ascending: false })
             .limit(50);
         if (jdsError) {
-            console.error('[POST /recompute-matches] jds fetch error:', jdsError);
             res.status(500).json({ error: jdsError.message });
             return;
         }
-        const matchesToUpsert = [];
-        // 3. Loop through JDs and call copilot-service
-        const batchSize = 10;
-        for (let i = 0; i < (jds?.length || 0); i += batchSize) {
-            const batch = jds.slice(i, i + batchSize);
-            const results = await Promise.all(batch.map(async (jd) => {
-                try {
-                    // Using global fetch (Node 18+)
-                    const response = await fetch(`${COPILOT_SERVICE_URL}/copilot/match-score`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            candidate,
-                            parsed_jd: jd,
-                            is_bulk: true
-                        })
-                    });
-                    if (!response.ok)
-                        return null;
-                    const result = (await response.json());
-                    if (result.match_score >= 70) {
-                        return {
-                            candidate_id: candidate.id,
-                            jd_id: jd.id,
-                            match_score: result.match_score,
-                            matched_skills: result.matched_skills,
-                            created_at: new Date().toISOString()
-                        };
-                    }
-                }
-                catch (err) {
-                    console.error(`Error matching against JD ${jd.id}:`, err);
-                }
-                return null;
-            }));
-            results.forEach(m => { if (m)
-                matchesToUpsert.push(m); });
-        }
-        // 4. Upsert into candidate_matches
+        // 3. Batch Ranking via Copilot
+        const payload = {
+            candidate: {
+                id: candidate.id,
+                headline: candidate.headline || "",
+                pulse_score: candidate.pulse_score || 0,
+                experience_years: candidate.experience_years || 0,
+                notice_period_days: candidate.notice_period_days || 30,
+                skills: candidate.skills || [],
+                github_verified: candidate.github_verified || false,
+                leetcode_verified: candidate.leetcode_verified || false,
+                has_video_pitch: candidate.has_video_pitch || false,
+                location: candidate.location || ""
+            },
+            candidate_goals: goals,
+            github_repos: (repos || []).map(r => ({
+                repo_name: r.repo_name,
+                stars: r.stars,
+                inferred_skills: r.inferred_skills
+            })),
+            parsed_jds: jds
+        };
+        const copRes = await fetch(`${COPILOT_SERVICE_URL}/copilot/rank-opportunities`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (!copRes.ok)
+            throw new Error('Copilot ranking failed');
+        const rankedData = (await copRes.json()).ranked;
+        const matchesToUpsert = rankedData
+            .filter((r) => r.match_score >= 60)
+            .map((r) => ({
+            candidate_id: user.id,
+            jd_id: r.jd_id,
+            match_score: r.match_score,
+            matched_skills: r.matched_skills,
+            missing_skills: r.missing_skills,
+            why_you: r.why_you,
+            growth_opportunity: r.growth_opportunity,
+            updated_at: new Date().toISOString()
+        }));
         if (matchesToUpsert.length > 0) {
-            const { error: upsertError } = await supabase
+            await supabase
                 .from('candidate_matches')
                 .upsert(matchesToUpsert, { onConflict: 'candidate_id,jd_id' });
-            if (upsertError) {
-                console.error('[POST /recompute-matches] upsert error:', upsertError);
-                res.status(500).json({ error: upsertError.message });
-                return;
-            }
         }
         res.json({ success: true, matches_found: matchesToUpsert.length });
     }
     catch (err) {
-        console.error('[POST /candidates/me/recompute-matches]', err);
+        console.error('[POST /candidates/me/opportunities/recompute]', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// ── POST /candidates/me/interests ──────────────────────────
+// Express Interest: Candidate -> Recruiter application
+exports.meRouter.post('/interests', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const { jd_id, message } = req.body;
+        const supabase = (0, supabase_1.getSupabase)();
+        // 1. Find recruiter_id for this JD
+        const { data: jd, error: jdError } = await supabase
+            .from('parsed_jds')
+            .select('recruiter_id')
+            .eq('id', jd_id)
+            .single();
+        if (jdError || !jd) {
+            res.status(404).json({ error: 'Job description not found' });
+            return;
+        }
+        // 2. Insert into candidate_interest (application)
+        const { data, error } = await supabase
+            .from('candidate_interest')
+            .insert({
+            candidate_id: user.id,
+            recruiter_id: jd.recruiter_id || '00000000-0000-0000-0000-000000000000', // fallback if not field yet
+            jd_id,
+            message,
+            status: 'pending'
+        })
+            .select()
+            .single();
+        if (error) {
+            // Handle unique constraint if they already applied
+            if (error.code === '23505') {
+                res.status(409).json({ error: 'Already applied' });
+                return;
+            }
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        res.json(data);
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// ── PUT /candidates/me/goals ───────────────────────────────
+const upsertGoalsSchema = zod_1.z.object({
+    target_roles: zod_1.z.array(zod_1.z.string()),
+    target_locations: zod_1.z.array(zod_1.z.string()),
+    comp_min: zod_1.z.number().int().optional(),
+    comp_max: zod_1.z.number().int().optional(),
+    comp_currency: zod_1.z.string().default('INR'),
+    notice_period_days: zod_1.z.number().int().optional(),
+    what_learning: zod_1.z.array(zod_1.z.string()),
+});
+exports.meRouter.put('/goals', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const parsed = upsertGoalsSchema.safeParse(req.body);
+        if (!parsed.success) {
+            res.status(400).json({ error: 'Validation failed', details: parsed.error.issues });
+            return;
+        }
+        const supabase = (0, supabase_1.getSupabase)();
+        const { data, error } = await supabase
+            .from('candidate_goals')
+            .upsert({
+            candidate_id: user.id,
+            ...parsed.data,
+            updated_at: new Date().toISOString()
+        }, { onConflict: 'candidate_id' })
+            .select()
+            .single();
+        if (error) {
+            console.error('[PUT /candidates/me/goals]', error);
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        res.json(data);
+    }
+    catch (err) {
+        console.error('[PUT /candidates/me/goals]', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// ── POST /candidates/me/github/scan ────────────────────────
+const githubScanSchema = zod_1.z.object({
+    username: zod_1.z.string(),
+});
+exports.meRouter.post('/github/scan', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const parsed = githubScanSchema.safeParse(req.body);
+        if (!parsed.success) {
+            res.status(400).json({ error: 'Username required' });
+            return;
+        }
+        const { username } = parsed.data;
+        // v1: Use unauthenticated GitHub API (limited to 60 requests/hr)
+        // In production, we would use the candidate's GitHub OAuth token.
+        const reposRes = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=5`);
+        if (!reposRes.ok) {
+            res.status(404).json({ error: 'GitHub user not found or API limit reached' });
+            return;
+        }
+        const githubRepos = (await reposRes.json());
+        const inferredSkills = new Set();
+        const processedRepos = await Promise.all(githubRepos.map(async (repo) => {
+            // Fetch languages
+            const langRes = await fetch(repo.languages_url);
+            const languages = langRes.ok ? await langRes.json() : {};
+            Object.keys(languages).forEach(l => inferredSkills.add(l));
+            // Fetch README snippet (first 1000 chars)
+            const readmeRes = await fetch(`https://api.github.com/repos/${repo.full_name}/readme`, {
+                headers: { Accept: 'application/vnd.github.v3.raw' }
+            });
+            const readme = readmeRes.ok ? await readmeRes.text() : '';
+            return {
+                candidate_id: user.id,
+                repo_url: repo.html_url,
+                repo_name: repo.name,
+                stars: repo.stargazers_count,
+                inferred_skills: Object.keys(languages),
+                ai_generated_readme: readme.slice(0, 1000),
+                last_synced_at: new Date().toISOString()
+            };
+        }));
+        // Batch insert into github_repos
+        const supabase = (0, supabase_1.getSupabase)();
+        const { error: insertError } = await supabase
+            .from('github_repos')
+            .upsert(processedRepos, { onConflict: 'candidate_id,repo_url' });
+        if (insertError) {
+            console.error('[POST /github/scan] insert error:', insertError);
+        }
+        res.json({
+            repos: processedRepos,
+            inferred_skills: Array.from(inferredSkills)
+        });
+    }
+    catch (err) {
+        console.error('[POST /candidates/me/github/scan]', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// ── POST /candidates/me/storage/sign ───────────────────────
+const storageSignSchema = zod_1.z.object({
+    bucket: zod_1.z.enum(['video-pitches', 'case-study-files', 'profile-avatars']),
+    file_name: zod_1.z.string(),
+    content_type: zod_1.z.string().optional(),
+});
+exports.meRouter.post('/storage/sign', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const parsed = storageSignSchema.safeParse(req.body);
+        if (!parsed.success) {
+            res.status(400).json({ error: 'Invalid storage request' });
+            return;
+        }
+        const { bucket, file_name } = parsed.data;
+        const supabase = (0, supabase_1.getSupabase)();
+        // Path includes user ID for RLS enforcement
+        const filePath = `${user.id}/${file_name}`;
+        const { data, error } = await supabase.storage
+            .from(bucket)
+            .createSignedUrl(filePath, 3600); // 1 hour validity
+        if (error) {
+            console.error('[POST /storage/sign]', error);
+            res.status(500).json({ error: error.message });
+            return;
+        }
+        res.json({ signedUrl: data.signedUrl, path: filePath });
+    }
+    catch (err) {
+        console.error('[POST /candidates/me/storage/sign]', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// ── GitHub Repos ──────────────────────────────────────────
+exports.meRouter.get('/github-repos', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const supabase = (0, supabase_1.getSupabase)();
+        const { data, error } = await supabase
+            .from('github_repos')
+            .select('*')
+            .eq('candidate_id', user.id)
+            .order('stars', { ascending: false });
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        res.json(data);
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+exports.meRouter.put('/github-repos/:id', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const { id } = req.params;
+        const { is_featured, ai_generated_readme } = req.body;
+        const supabase = (0, supabase_1.getSupabase)();
+        const { data, error } = await supabase
+            .from('github_repos')
+            .update({ is_featured, ai_generated_readme })
+            .eq('id', id)
+            .eq('candidate_id', user.id)
+            .select()
+            .single();
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        // Emit event if README was generated or featured was toggled
+        if (ai_generated_readme || is_featured !== undefined) {
+            await (0, proof_1.emitProofEvent)(user.id, 'readme_generated', { repo_id: id }, is_featured ? 3 : 0);
+        }
+        res.json(data);
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// ── Case Studies ──────────────────────────────────────────
+exports.meRouter.get('/case-studies', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const supabase = (0, supabase_1.getSupabase)();
+        const { data, error } = await supabase
+            .from('case_studies')
+            .select('*')
+            .eq('candidate_id', user.id)
+            .order('created_at', { ascending: false });
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        res.json(data);
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+exports.meRouter.post('/case-studies', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const supabase = (0, supabase_1.getSupabase)();
+        const { data, error } = await supabase
+            .from('case_studies')
+            .insert({ ...req.body, candidate_id: user.id })
+            .select()
+            .single();
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        await (0, proof_1.emitProofEvent)(user.id, 'case_study_added', { study_id: data.id }, 5);
+        res.json(data);
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+exports.meRouter.delete('/case-studies/:id', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const { id } = req.params;
+        const supabase = (0, supabase_1.getSupabase)();
+        const { error } = await supabase
+            .from('case_studies')
+            .delete()
+            .eq('id', id)
+            .eq('candidate_id', user.id);
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        await (0, proof_1.recalculatePulseScore)(user.id);
+        res.json({ success: true });
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// ── Mock Interviews ───────────────────────────────────────
+exports.meRouter.get('/mock-interviews', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const supabase = (0, supabase_1.getSupabase)();
+        const { data, error } = await supabase
+            .from('mock_interviews')
+            .select('*')
+            .eq('candidate_id', user.id)
+            .order('created_at', { ascending: false });
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        res.json(data);
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+exports.meRouter.post('/mock-interviews', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const supabase = (0, supabase_1.getSupabase)();
+        const { data, error } = await supabase
+            .from('mock_interviews')
+            .insert({ ...req.body, candidate_id: user.id })
+            .select()
+            .single();
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        await (0, proof_1.emitProofEvent)(user.id, 'mock_interview_completed', { interview_id: data.id }, 0);
+        res.json(data);
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+exports.meRouter.put('/mock-interviews/:id/share', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const { id } = req.params;
+        const token = Math.random().toString(36).substring(2, 15);
+        const supabase = (0, supabase_1.getSupabase)();
+        const { data, error } = await supabase
+            .from('mock_interviews')
+            .update({ shareable_token: token })
+            .eq('id', id)
+            .eq('candidate_id', user.id)
+            .select()
+            .single();
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        res.json(data);
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// ── Skill Assessments ─────────────────────────────────────
+exports.meRouter.get('/skill-assessments', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const supabase = (0, supabase_1.getSupabase)();
+        const { data, error } = await supabase
+            .from('skill_assessments')
+            .select('*')
+            .eq('candidate_id', user.id)
+            .order('created_at', { ascending: false });
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        res.json(data);
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+exports.meRouter.post('/skill-assessments', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const supabase = (0, supabase_1.getSupabase)();
+        const { data, error } = await supabase
+            .from('skill_assessments')
+            .insert({ ...req.body, candidate_id: user.id })
+            .select()
+            .single();
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        if (data.score >= 70) {
+            await (0, proof_1.emitProofEvent)(user.id, 'skill_assessment_passed', { skill: data.skill, score: data.score }, 5);
+        }
+        res.json(data);
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// ── Video Pitch ───────────────────────────────────────────
+exports.meRouter.get('/video-pitch', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const supabase = (0, supabase_1.getSupabase)();
+        const { data, error } = await supabase
+            .from('video_pitches')
+            .select('*')
+            .eq('candidate_id', user.id)
+            .maybeSingle();
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        res.json(data);
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+exports.meRouter.post('/video-pitch', async (req, res) => {
+    try {
+        const user = getUser(req);
+        const supabase = (0, supabase_1.getSupabase)();
+        const { data, error } = await supabase
+            .from('video_pitches')
+            .upsert({ ...req.body, candidate_id: user.id }, { onConflict: 'candidate_id' })
+            .select()
+            .single();
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        await (0, proof_1.emitProofEvent)(user.id, 'video_pitch_added', { video_url: data.video_url }, 10);
+        res.json(data);
+    }
+    catch (err) {
         res.status(500).json({ error: 'Internal server error' });
     }
 });

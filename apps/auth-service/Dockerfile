@@ -1,29 +1,41 @@
-# ── Build stage ─────────────────────────────
-FROM node:20-alpine AS build
+FROM node:20-alpine AS builder
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
 
-# ── Production stage ────────────────────────
-FROM node:20-alpine AS production
+# Copy root lockfile and package.json
+COPY package.json package-lock.json ./
+# Copy workspace packages
+COPY packages ./packages
+# Copy all app package.jsons to satisfy workspaces
+COPY apps/web/package.json ./apps/web/
+COPY apps/auth-service/package.json ./apps/auth-service/
+COPY apps/candidate-service/package.json ./apps/candidate-service/
+COPY apps/pipeline-service/package.json ./apps/pipeline-service/
+COPY apps/notification-service/package.json ./apps/notification-service/
+COPY apps/copilot-service/package.json ./apps/copilot-service/
+COPY apps/jd-parser-service/package.json ./apps/jd-parser-service/
+
+RUN npm ci
+
+# Copy service code
+COPY apps/auth-service ./apps/auth-service
+
+# Build shared packages
+RUN npm run build --workspace=@pulse/shared-utils
+RUN npm run build --workspace=@pulse/shared-types
+
+# Build the service
+RUN npm run build --workspace=@pulse/auth-service
+
+# Production stage
+FROM node:20-alpine
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci --omit=dev
-COPY --from=build /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/apps/auth-service/dist ./dist
+COPY --from=builder /app/apps/auth-service/package.json ./package.json
+
 ENV NODE_ENV=production
 ENV PORT=3001
 EXPOSE 3001
-CMD ["node", "dist/index.js"]
 
-# ── Development stage ───────────────────────
-FROM node:20-alpine AS dev
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-ENV NODE_ENV=development
-ENV PORT=3001
-EXPOSE 3001
-CMD ["npx", "tsx", "watch", "src/index.ts"]
+CMD ["node", "dist/index.js"]

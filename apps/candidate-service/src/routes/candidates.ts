@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
-import { getSupabase } from '../lib/supabase';
+import { getSupabase } from '../lib/supabase.js';
 import { verifyToken } from '@pulse/shared-utils';
 
 export const candidatesRouter = Router();
@@ -67,7 +67,7 @@ candidatesRouter.get('/', async (req: Request, res: Response): Promise<void> => 
 
     if (error) {
       console.error('Fetch candidates error:', error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: (error as any).message });
       return;
     }
 
@@ -116,7 +116,7 @@ candidatesRouter.post('/', verifyToken, async (req: Request, res: Response): Pro
     const parsed = candidateSchema.safeParse(req.body);
 
     if (!parsed.success) {
-      res.status(400).json({ error: 'Validation failed', details: parsed.error.issues });
+      res.status(400).json({ error: 'Validation failed', details: (parsed as any).error.issues });
       return;
     }
 
@@ -135,7 +135,7 @@ candidatesRouter.post('/', verifyToken, async (req: Request, res: Response): Pro
 
     if (error) {
       console.error('Insert candidate error:', error);
-      res.status(400).json({ error: error.message });
+      res.status(400).json({ error: (error as any).message });
       return;
     }
 
@@ -157,21 +157,21 @@ candidatesRouter.put('/:id', verifyToken, async (req: Request, res: Response): P
     const parsed = candidateSchema.partial().safeParse(req.body);
 
     if (!parsed.success) {
-      res.status(400).json({ error: 'Validation failed', details: parsed.error.issues });
+      res.status(400).json({ error: 'Validation failed', details: (parsed as any).error.issues });
       return;
     }
 
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('candidates')
-      .update(parsed.data)
+      .update(parsed.data!)
       .eq('id', id)
       .select()
       .single();
 
     if (error) {
       console.error('Update candidate error:', error);
-      res.status(400).json({ error: error.message });
+      res.status(400).json({ error: (error as any).message });
       return;
     }
 
@@ -206,11 +206,11 @@ candidatesRouter.get('/:id/score', verifyToken, async (req: Request, res: Respon
  
      // Calculate Score
      let score = 50;
-     if (candidate.github_verified) score += 20;
-     if (candidate.leetcode_verified) score += 15;
-     if (candidate.has_video_pitch) score += 10;
+     if (candidate!.github_verified) score += 20;
+     if (candidate!.leetcode_verified) score += 15;
+     if (candidate!.has_video_pitch) score += 10;
      
-     const skillsCount = Array.isArray(candidate.skills) ? candidate.skills.length : 0;
+     const skillsCount = Array.isArray(candidate!.skills) ? (candidate!.skills as any[]).length : 0;
      score += Math.min(skillsCount * 5, 25);
      
      score = Math.min(score, 100);
@@ -223,7 +223,7 @@ candidatesRouter.get('/:id/score', verifyToken, async (req: Request, res: Respon
        
      if (updateError) {
         console.error('Failed to update score:', updateError);
-        res.status(500).json({ error: 'Failed to save updated score' });
+        res.status(500).json({ error: (updateError as any).message });
         return;
      }
  

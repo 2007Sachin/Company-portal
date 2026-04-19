@@ -9,6 +9,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const health_1 = require("./routes/health");
 const candidates_1 = require("./routes/candidates");
 const me_1 = require("./routes/me");
+const recruiter_1 = require("./routes/recruiter");
 dotenv_1.default.config({ path: '../../.env' });
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3002;
@@ -22,6 +23,7 @@ app.use((req, _res, next) => {
     next();
 });
 app.use('/candidates/me', me_1.meRouter);
+app.use('/recruiters', recruiter_1.recruiterRouter);
 app.use('/candidates', candidates_1.candidatesRouter);
 app.use('/', health_1.healthRouter);
 app.listen(PORT, () => {

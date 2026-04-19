@@ -1,9 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { healthRouter } from './routes/health';
-import { candidatesRouter } from './routes/candidates';
-import { meRouter } from './routes/me';
+import { healthRouter } from './routes/health.js';
+import { candidatesRouter } from './routes/candidates.js';
+import { meRouter } from './routes/me.js';
+import { recruiterRouter } from './routes/recruiter.js';
 
 dotenv.config({ path: '../../.env' });
 
@@ -22,6 +23,7 @@ app.use((req, _res, next) => {
 });
 
 app.use('/candidates/me', meRouter);
+app.use('/recruiters', recruiterRouter);
 app.use('/candidates', candidatesRouter);
 app.use('/', healthRouter);
 

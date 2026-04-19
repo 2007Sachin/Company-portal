@@ -1,13 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { 
-    Flame, 
-    Award, 
-    Calendar, 
-    ChevronLeft, 
-    Zap, 
+import {
+    Flame,
+    Award,
+    Calendar,
+    Zap,
     Trophy,
     CheckCircle2,
     XCircle
@@ -66,12 +64,9 @@ export default function StreakCalendarPage() {
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col font-sans">
-            <Header title="My Growth Streak" />
+            <Header title="My Growth Streak" backTo="/candidate/dashboard" />
 
             <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
-                <Link href="/candidate/dashboard" className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 mb-6 transition-colors font-medium">
-                    <ChevronLeft className="w-4 h-4" /> Back to Dashboard
-                </Link>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                     <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center text-center">

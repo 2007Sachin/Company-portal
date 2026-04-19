@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   transpilePackages: ['@pulse/shared-types', '@pulse/shared-utils', '@pulse/ui'],
   images: {
     remotePatterns: [
@@ -47,6 +48,11 @@ const nextConfig = {
         source: '/recruiter/login',
         destination: '/auth/login',
         permanent: true,
+      },
+      {
+        source: '/recruiter/pipeline',
+        destination: '/recruiter/dashboard',
+        permanent: false,
       },
     ];
   },

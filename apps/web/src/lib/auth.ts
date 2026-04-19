@@ -46,12 +46,16 @@ function storeSession(data: AuthResponse) {
   if (data.refresh_token) {
     localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh_token);
   }
+  document.cookie = `pulse_token=${data.token}; path=/; SameSite=Strict`;
+  document.cookie = `pulse_role=${data.user.role}; path=/; SameSite=Strict`;
 }
 
 function clearSession() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  document.cookie = 'pulse_token=; path=/; max-age=0';
+  document.cookie = 'pulse_role=; path=/; max-age=0';
 }
 
 // ── API helpers ───────────────────────────

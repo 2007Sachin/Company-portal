@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const d=require\\('./package.json'\\); console.log\\(JSON.stringify\\(d.workspaces, null, 2\\)\\)\")",
+      "Bash(docker compose *)",
+      "Bash(npm run *)",
+      "Bash(netstat -ano)",
+      "Bash(curl -s http://localhost:3001/health)",
+      "Bash(curl -s http://localhost:3002/health)",
+      "Bash(curl -s http://localhost:3003/health)",
+      "Bash(curl -s http://localhost:3004/health)",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(curl -s http://localhost:3005/health)",
+      "Bash(curl -s http://localhost:3005/ -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s http://localhost:3006/ -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s --max-time 2 http://localhost:__TRACKED_VAR__/health)",
+      "Bash(curl -s --max-time 2 http://localhost:3000/)",
+      "Bash(curl -s --max-time 2 http://localhost:8000/health)",
+      "Bash(tasklist /FI \"PID eq 10816\" /FO LIST)",
+      "Bash(tasklist /FI \"PID eq 26832\" /FO LIST)"
+    ]
+  }
+}

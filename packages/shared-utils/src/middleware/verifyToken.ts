@@ -19,20 +19,11 @@ export interface AuthUser {
  *   router.get('/protected', verifyToken, handler);
  */
 export async function verifyToken(req: Request, res: Response, next: NextFunction): Promise<void> {
-  // --- MOCK OVERRIDE ---
-  (req as any).user = {
-    id: 'mock-recruiter-id',
-    email: 'recruiter@example.com',
-    role: 'recruiter',
-    created_at: new Date().toISOString()
-  } as AuthUser;
-  next();
-  return;
-  // ---------------------
   try {
-    const authHeader = req.headers.authorization;
+    // Definitive string coercion to bypass narrowing issues across different tsc environments
+    const authHeader = String(req.headers.authorization || '');
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader.startsWith('Bearer ')) {
       res.status(401).json({ error: 'Missing or malformed Authorization header' });
       return;
     }
@@ -46,14 +37,14 @@ export async function verifyToken(req: Request, res: Response, next: NextFunctio
       return;
     }
 
-    const decoded = jwt.verify(token, jwtSecret) as jwt.JwtPayload;
+    const decoded = jwt.verify(token, jwtSecret as string) as jwt.JwtPayload;
 
     // Attach decoded user info to the request
     (req as any).user = {
-      id: decoded.sub,
-      email: decoded.email,
-      role: decoded.role || decoded.user_metadata?.role || 'candidate',
-      created_at: decoded.created_at,
+      id: decoded.sub || '',
+      email: decoded.email || '',
+      role: (decoded.role || decoded.user_metadata?.role || 'candidate') as 'recruiter' | 'candidate',
+      created_at: decoded.created_at || new Date().toISOString(),
     } as AuthUser;
 
     next();

@@ -6,6 +6,9 @@ from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from groq import Groq
 from supabase import create_client, Client
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', '.env'))
 
 app = FastAPI(title="JD Parser Service")
 
@@ -154,55 +157,63 @@ async def parse_and_match(req: InternalMatchRequest):
          
     jd = req.parsed_jd
     try:
-        # 1. Fetch Candidates (limit to 1000 for safety, in production paginate)
-        cands_res = supabase.table("candidates").select("*").limit(1000).execute()
+        # 1. Fetch Candidates (limit to 1000, onboarding_step >= 5)
+        cands_res = supabase.table("candidates").select("*").gte("onboarding_step", 5).limit(1000).execute()
         fetched_candidates = cands_res.data or []
         
         matches_to_insert = []
         
-        # 2. Score Iteration
+        # 2. Batch Processing (groups of 20)
+        batch_size = 20
         async with httpx.AsyncClient() as http:
-            for cand in fetched_candidates:
-                candidate_data = {
-                    "id": cand["id"],
-                    "headline": cand.get("headline", ""),
-                    "pulse_score": cand.get("pulse_score", 0),
-                    "experience_years": cand.get("experience_years", 0),
-                    "notice_period_days": cand.get("notice_period_days", 30),
-                    "skills": cand.get("skills", []),
-                    "github_verified": cand.get("github_verified", False),
-                    "leetcode_verified": cand.get("leetcode_verified", False),
-                    "has_video_pitch": cand.get("has_video_pitch", False),
-                    "location": cand.get("location", "")
-                }
+            for i in range(0, len(fetched_candidates), batch_size):
+                batch = fetched_candidates[i : i + batch_size]
+                
+                candidates_data = []
+                for cand in batch:
+                    candidates_data.append({
+                        "id": cand["id"],
+                        "headline": cand.get("headline", ""),
+                        "pulse_score": cand.get("pulse_score", 0),
+                        "experience_years": cand.get("experience_years", 0),
+                        "notice_period_days": cand.get("notice_period_days", 30),
+                        "skills": cand.get("skills", []),
+                        "github_verified": cand.get("github_verified", False),
+                        "leetcode_verified": cand.get("leetcode_verified", False),
+                        "has_video_pitch": cand.get("has_video_pitch", False),
+                        "location": cand.get("location", "")
+                    })
                 
                 payload = {
-                    "candidate": candidate_data,
-                    "parsed_jd": jd.model_dump(),
-                    "is_bulk": True # Prevents Groq explanations from rate limiting
+                    "candidates": candidates_data,
+                    "parsed_jd": jd.model_dump()
                 }
                 
-                # Fetch match logic dynamically
+                # Call copilot rank-opportunities
                 copres = await http.post(
-                    f"{COPILOT_SERVICE_URL}/copilot/match-score", 
+                    f"{COPILOT_SERVICE_URL}/copilot/rank-opportunities", 
                     json=payload,
-                    timeout=10.0
+                    timeout=30.0
                 )
                 
                 if copres.status_code == 200:
-                    data = copres.json()
-                    score = data.get("match_score", 0)
-                    if score >= 70:
-                        matches_to_insert.append({
-                            "candidate_id": cand["id"],
-                            "jd_id": jd.id,
-                            "match_score": score,
-                            "matched_skills": data.get("matched_skills", [])
-                        })
+                    ranked_data = copres.json().get("ranked", [])
+                    for r in ranked_data:
+                        if r["match_score"] >= 60:
+                            matches_to_insert.append({
+                                "candidate_id": r["candidate_id"],
+                                "jd_id": jd.id,
+                                "match_score": r["match_score"],
+                                "matched_skills": r["matched_skills"],
+                                "missing_skills": r["missing_skills"],
+                                "why_you": r["why_you"],
+                                "growth_opportunity": r["growth_opportunity"]
+                            })
                         
-        # 3. Batch DB Insertion
+        # 3. Batch DB Insertion (Upsert to handle recomputes)
         if len(matches_to_insert) > 0:
-             supabase.table("candidate_matches").insert(matches_to_insert).execute()
+             # UPSERT on (candidate_id, jd_id)
+             supabase.table("candidate_matches").upsert(matches_to_insert, on_conflict="candidate_id,jd_id").execute()
              
         return {"status": "success", "matches_evaluated": len(fetched_candidates), "matches_inserted": len(matches_to_insert)}
     except Exception as e:

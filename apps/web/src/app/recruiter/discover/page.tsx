@@ -20,7 +20,8 @@ import {
   ArrowLeft,
   Check,
   LogOut,
-  Loader2
+  Loader2,
+  Sparkles
 } from 'lucide-react';
 
 interface Candidate {
@@ -38,15 +39,24 @@ interface Candidate {
 }
 
 import { Header } from '@pulse/ui';
-import { getCandidates, addToPipeline } from '@/lib/api';
+import { 
+  getCandidates, 
+  addToPipeline, 
+  sendRecruiterSignal, 
+  getRecruiterRequests 
+} from '@/lib/api';
 
 export default function TalentDiscoveryPage() {
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [addedToPipeline, setAddedToPipeline] = useState<string[]>([]);
   
   const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [inboundRequests, setInboundRequests] = useState<any[]>([]);
   const [totalCandidates, setTotalCandidates] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSignaling, setIsSignaling] = useState(false);
+  const [showConnectModal, setShowConnectModal] = useState(false);
+  const [connectMessage, setConnectMessage] = useState('');
 
   // Filters State
   const [minScore, setMinScore] = useState<number>(0);
@@ -79,6 +89,35 @@ export default function TalentDiscoveryPage() {
     const timeout = setTimeout(fetchCandidates, 300);
     return () => clearTimeout(timeout);
   }, [minScore, minExp, maxExp, maxNoticePeriod]);
+
+  useEffect(() => {
+    getRecruiterRequests().then(async res => {
+      if (res.ok) setInboundRequests(await res.json());
+    });
+  }, []);
+
+  const handleOpenCandidate = async (candidate: Candidate) => {
+    setSelectedCandidate(candidate);
+    // Silent View Event
+    sendRecruiterSignal({
+      candidate_id: candidate.id,
+      interest_type: 'viewed'
+    });
+  };
+
+  const handleConnectRequest = async () => {
+    if (!selectedCandidate) return;
+    setIsSignaling(true);
+    await sendRecruiterSignal({
+      candidate_id: selectedCandidate.id,
+      interest_type: 'unlock_requested',
+      recruiter_message: connectMessage
+    });
+    setIsSignaling(false);
+    setShowConnectModal(false);
+    setConnectMessage('');
+    alert('Connection request sent!');
+  };
 
   const handleAddToPipeline = async (id: string) => {
     if (addedToPipeline.includes(id)) return;
@@ -119,7 +158,7 @@ export default function TalentDiscoveryPage() {
         {/* Right: Pipeline link + avatar + logout */}
         <div className="flex items-center gap-2 sm:gap-6 flex-shrink-0">
           <Link
-            href="/recruiter/dashboard"
+            href="/recruiter/pipeline"
             className="flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors bg-indigo-50 px-3 sm:px-4 py-2 rounded-xl"
           >
             <span className="hidden sm:inline">Go to Pipeline</span>
@@ -366,13 +405,20 @@ export default function TalentDiscoveryPage() {
                           </button>
                         </div>
                         <button
-                          onClick={() => setSelectedCandidate(candidate)}
+                          onClick={() => handleOpenCandidate(candidate)}
                           className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors mt-1"
                         >
                           View Full Profile <ArrowRight className="w-3 h-3" />
                         </button>
                       </div>
                     </div>
+                    {inboundRequests.some(r => r.candidate_id === candidate.id) && (
+                       <div className="absolute top-4 right-4 animate-bounce">
+                          <div className="bg-indigo-600 text-white px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center gap-2">
+                             <Sparkles className="w-3 h-3" /> Inbound Interest
+                          </div>
+                       </div>
+                    )}
                   </div>
                 </div>
               );
@@ -483,17 +529,58 @@ export default function TalentDiscoveryPage() {
             </div>
 
             {/* Modal Footer (Sticky) */}
-            <div className="p-6 bg-white border-t border-slate-100 flex-shrink-0">
+            <div className="p-6 bg-white border-t border-slate-100 flex-shrink-0 flex gap-3">
+              <button 
+                onClick={() => setShowConnectModal(true)}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-white border-2 border-slate-200 text-slate-900 rounded-xl text-base font-bold hover:bg-slate-50 transition-all"
+              >
+                <Plus className="w-5 h-5" /> Request to Connect
+              </button>
               <button 
                 onClick={() => {
                   handleAddToPipeline(selectedCandidate.id);
+                  sendRecruiterSignal({
+                    candidate_id: selectedCandidate.id,
+                    interest_type: 'saved'
+                  });
                   setSelectedCandidate(null);
                 }}
-                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-slate-900 text-white rounded-xl text-base font-bold hover:bg-slate-800 transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-slate-900/30 focus:ring-offset-2"
+                className="flex-[1.5] flex items-center justify-center gap-2 px-6 py-4 bg-slate-900 text-white rounded-xl text-base font-bold hover:bg-slate-800 transition-all shadow-md"
               >
-                <Plus className="w-5 h-5" /> Shortlist & Add to Pipeline
+                <Check className="w-5 h-5" /> Shortlist & Save
               </button>
             </div>
+
+            {showConnectModal && (
+               <div className="absolute inset-0 z-50 bg-white p-12 flex flex-col animate-in slide-in-from-bottom duration-300">
+                  <div className="flex items-center justify-between mb-8">
+                     <h3 className="text-2xl font-black text-slate-900">Connect with Candidate</h3>
+                     <button onClick={() => setShowConnectModal(false)}><X className="w-6 h-6" /></button>
+                  </div>
+                  <div className="flex-1 space-y-6">
+                     <div className="space-y-2">
+                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Personal Message</label>
+                        <textarea 
+                           value={connectMessage}
+                           onChange={e => setConnectMessage(e.target.value)}
+                           className="w-full h-64 p-6 bg-slate-50 border-2 border-slate-100 rounded-[32px] outline-none focus:border-indigo-500/20 text-slate-700 font-medium resize-none"
+                           placeholder="High-growth Fintech is looking for a Lead UI Engineer. I loved your GitHub repository on real-time visualization..."
+                        />
+                     </div>
+                     <p className="text-xs text-slate-400 font-medium italic">
+                        Once accepted, the candidate&apos;s full identity and contact info will be unlocked for your team.
+                     </p>
+                  </div>
+                  <button 
+                    onClick={handleConnectRequest}
+                    disabled={isSignaling}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-indigo-600 text-white rounded-[24px] text-lg font-black hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 disabled:opacity-50"
+                  >
+                    {isSignaling ? <Loader2 className="w-6 h-6 animate-spin" /> : <Shield className="w-6 h-6" />}
+                    Send Secure Connection Request
+                  </button>
+               </div>
+            )}
 
           </div>
         </div>

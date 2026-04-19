@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { getSupabase } from '../lib/supabase';
+import { getSupabase } from '../lib/supabase.js';
 
 /**
  * Express middleware that verifies a Supabase JWT from the Authorization header.
@@ -28,7 +28,7 @@ export async function verifyToken(req: Request, res: Response, next: NextFunctio
       return;
     }
 
-    const decoded = jwt.verify(token, jwtSecret) as jwt.JwtPayload;
+    const decoded = jwt.verify(token, jwtSecret as string) as jwt.JwtPayload;
 
     // Fetch the full user object from Supabase
     const supabase = getSupabase();
