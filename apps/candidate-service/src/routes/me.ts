@@ -614,7 +614,7 @@ meRouter.post('/opportunities/recompute', async (req: Request, res: Response): P
   try {
     const user = getUser(req);
     const supabase = getSupabase();
-    const COPILOT_SERVICE_URL = process.env.COPILOT_SERVICE_URL || 'http://localhost:3005';
+    const COPILOT_SERVICE_URL = process.env.COPILOT_SERVICE_URL || 'http://copilot-service:3005';
 
     // 1. Fetch Candidate + Extras
     const [

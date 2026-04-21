@@ -1,34 +1,29 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const cors_1 = __importDefault(require("cors"));
-const dotenv_1 = __importDefault(require("dotenv"));
-const auth_1 = require("./routes/auth");
-const health_1 = require("./routes/health");
-dotenv_1.default.config({ path: '../../.env' });
-const app = (0, express_1.default)();
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { authRouter } from './routes/auth.js';
+import { healthRouter } from './routes/health.js';
+dotenv.config({ path: '../../.env' });
+const app = express();
 const PORT = process.env.PORT || 3001;
 // ── Middleware ─────────────────────────────
-app.use((0, cors_1.default)({
+app.use(cors({
     origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
     credentials: true,
 }));
-app.use(express_1.default.json());
+app.use(express.json());
 // ── Request logging ───────────────────────
 app.use((req, _res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
     next();
 });
 // ── Routes ────────────────────────────────
-app.use('/auth', auth_1.authRouter);
-app.use('/', health_1.healthRouter);
+app.use('/auth', authRouter);
+app.use('/', healthRouter);
 // ── Start ─────────────────────────────────
 app.listen(PORT, () => {
     console.log(`🔐 Auth Service running on port ${PORT}`);
     console.log(`   Health check: http://localhost:${PORT}/health`);
 });
-exports.default = app;
+export default app;
 //# sourceMappingURL=index.js.map

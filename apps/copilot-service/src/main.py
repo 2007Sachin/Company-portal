@@ -179,6 +179,14 @@ class DraftIntroRequest(BaseModel):
     candidate_full_profile: Dict[str, Any]
     match_context: Dict[str, Any] = {}
 
+class JobEvaluationRequest(BaseModel):
+    candidate: Dict[str, Any]
+    parsed_jd: Dict[str, Any]
+
+class SemanticSearchRequest(BaseModel):
+    query: str
+    candidate: Dict[str, Any]
+
 @app.post("/copilot/rank-opportunities", response_model=RankOpportunitiesResponse)
 def rank_opportunities(req: RankOpportunitiesRequest):
     results = []
@@ -574,4 +582,61 @@ def assessment_grade(req: AssessmentGradeRequest):
 def transcribe(req: TranscribeRequest):
     # Stub implementation as per requirements
     return {"transcript": "Transcription coming soon (requires Whisper integration)."}
+
+@app.post("/copilot/evaluate-job")
+def evaluate_job(req: JobEvaluationRequest):
+    prompt = f"""
+    Analyze the match between this candidate and job:
+    Candidate: {json.dumps(req.candidate)}
+    Job: {json.dumps(req.parsed_jd)}
+    
+    Return JSON with:
+    - why_you: <string, punchy reason why they fit>
+    - growth_opportunity: <string, what skill gap they should close>
+    - match_score: <int 0-100>
+    - match_logic: <string, detailed explanation of the score>
+    """
+    if not GROQ_API_KEY:
+        return {
+            "why_you": "You have the core technical stack for this role.",
+            "growth_opportunity": "Closing the gap on specific systems requirements.",
+            "match_score": 85,
+            "match_logic": "Mocked logic for evaluation."
+        }
+    return ask_groq(prompt)
+
+@app.post("/copilot/semantic-search")
+def semantic_search(req: SemanticSearchRequest):
+    # This would typically use an embedding search + LLM rerank.
+    # For now, we simulate with LLM filtering of "all active jobs" or similar.
+    # In a real app, this calls a vector DB.
+    
+    prompt = f"""
+    Find the best job matches for this query: "{req.query}"
+    Candidate context: {json.dumps(req.candidate)}
+    
+    Return JSON with a 'results' list of {{"id", "role_title", "match_score", "matched_skills", "missing_skills", "location"}}.
+    """
+    if not GROQ_API_KEY:
+        return {
+            "results": [
+                {
+                    "id": "mock-1",
+                    "role_title": "Senior React Engineer",
+                    "match_score": 92,
+                    "matched_skills": ["React", "TypeScript", "Node.js"],
+                    "missing_skills": ["Next.js"],
+                    "location": "Bangalore (Remote)"
+                },
+                {
+                    "id": "mock-2",
+                    "role_title": "Fullstack Developer",
+                    "match_score": 78,
+                    "matched_skills": ["Node.js", "PostgreSQL"],
+                    "missing_skills": ["AWS"],
+                    "location": "Mumbai/Hybrid"
+                }
+            ]
+        }
+    return ask_groq(prompt)
 

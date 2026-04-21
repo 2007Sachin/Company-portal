@@ -1,24 +1,21 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.meRouter = void 0;
-const express_1 = require("express");
-const zod_1 = require("zod");
-const supabase_1 = require("../lib/supabase");
-const proof_1 = require("../lib/proof");
-const shared_utils_1 = require("@pulse/shared-utils");
-exports.meRouter = (0, express_1.Router)();
+import { Router } from 'express';
+import { z } from 'zod';
+import { getSupabase } from '../lib/supabase.js';
+import { emitProofEvent, recalculatePulseScore } from '../lib/proof.js';
+import { verifyToken } from '@pulse/shared-utils';
+export const meRouter = Router();
 // All /candidates/me routes require authentication
-exports.meRouter.use(shared_utils_1.verifyToken);
+meRouter.use(verifyToken);
 // Helper to pull the authenticated user from request
 function getUser(req) {
     return req.user;
 }
 // ── GET /candidates/me/dashboard ───────────────────────────
 // Aggregated endpoint for the Career Cockpit
-exports.meRouter.get('/dashboard', async (req, res) => {
+meRouter.get('/dashboard', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const [candidateRes, streakRes, deltaRes, challengeRes, eventsRes, gridRes, matchesRes, interestsRes, historyRes] = await Promise.all([
@@ -87,10 +84,10 @@ exports.meRouter.get('/dashboard', async (req, res) => {
 });
 // ── GET /candidates/me ─────────────────────────────────────
 // Returns the current candidate's profile from the candidates table.
-exports.meRouter.get('/', async (req, res) => {
+meRouter.get('/', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('candidates')
             .select('*')
@@ -109,19 +106,19 @@ exports.meRouter.get('/', async (req, res) => {
 });
 // ── PUT /candidates/me ─────────────────────────────────────
 // Updates the current candidate's profile.
-const updateProfileSchema = zod_1.z.object({
-    full_name: zod_1.z.string().optional(),
-    headline: zod_1.z.string().optional(),
-    experience_years: zod_1.z.number().int().optional(),
-    notice_period_days: zod_1.z.number().int().optional(),
-    skills: zod_1.z.array(zod_1.z.string()).optional(),
-    github_verified: zod_1.z.boolean().optional(),
-    leetcode_verified: zod_1.z.boolean().optional(),
-    has_video_pitch: zod_1.z.boolean().optional(),
-    location: zod_1.z.string().optional(),
-    onboarding_step: zod_1.z.number().int().optional(),
+const updateProfileSchema = z.object({
+    full_name: z.string().optional(),
+    headline: z.string().optional(),
+    experience_years: z.number().int().optional(),
+    notice_period_days: z.number().int().optional(),
+    skills: z.array(z.string()).optional(),
+    github_verified: z.boolean().optional(),
+    leetcode_verified: z.boolean().optional(),
+    has_video_pitch: z.boolean().optional(),
+    location: z.string().optional(),
+    onboarding_step: z.number().int().optional(),
 }).strict();
-exports.meRouter.put('/', async (req, res) => {
+meRouter.put('/', async (req, res) => {
     try {
         const user = getUser(req);
         const parsed = updateProfileSchema.safeParse(req.body);
@@ -129,7 +126,7 @@ exports.meRouter.put('/', async (req, res) => {
             res.status(400).json({ error: 'Validation failed', details: parsed.error.issues });
             return;
         }
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('candidates')
             .update(parsed.data)
@@ -150,10 +147,10 @@ exports.meRouter.put('/', async (req, res) => {
 });
 // ── GET /candidates/me/views ───────────────────────────────
 // Returns profile view count and recent view entries.
-exports.meRouter.get('/views', async (req, res) => {
+meRouter.get('/views', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         // Total count
         const { count, error: countError } = await supabase
             .from('profile_views')
@@ -185,10 +182,10 @@ exports.meRouter.get('/views', async (req, res) => {
 });
 // ── GET /candidates/me/matches ─────────────────────────────
 // Returns candidate_matches joined with parsed_jds.
-exports.meRouter.get('/matches', async (req, res) => {
+meRouter.get('/matches', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { saved } = req.query;
         let query = supabase
             .from('candidate_matches')
@@ -213,10 +210,10 @@ exports.meRouter.get('/matches', async (req, res) => {
 });
 // ── GET /candidates/me/interests ───────────────────────────
 // GET inbound recruiter signals (Who likes me?)
-exports.meRouter.get('/interests', async (req, res) => {
+meRouter.get('/interests', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { status } = req.query;
         let query = supabase
             .from('recruiter_interest')
@@ -237,12 +234,12 @@ exports.meRouter.get('/interests', async (req, res) => {
     }
 });
 // ── PUT /candidates/me/interests/:id/respond ───────────────
-exports.meRouter.put('/interests/:id/respond', async (req, res) => {
+meRouter.put('/interests/:id/respond', async (req, res) => {
     try {
         const user = getUser(req);
         const { id } = req.params;
         const { status } = req.body; // 'accepted' | 'declined'
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('recruiter_interest')
             .update({
@@ -264,12 +261,12 @@ exports.meRouter.put('/interests/:id/respond', async (req, res) => {
     }
 });
 // ── PUT /candidates/me/matches/:id/save ────────────────────
-exports.meRouter.put('/matches/:id/save', async (req, res) => {
+meRouter.put('/matches/:id/save', async (req, res) => {
     try {
         const user = getUser(req);
         const { id } = req.params;
         const { saved } = req.body; // boolean
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('candidate_matches')
             .update({ saved_at: saved ? new Date().toISOString() : null })
@@ -288,11 +285,11 @@ exports.meRouter.put('/matches/:id/save', async (req, res) => {
     }
 });
 // ── PUT /candidates/me/matches/:id/dismiss ─────────────────
-exports.meRouter.put('/matches/:id/dismiss', async (req, res) => {
+meRouter.put('/matches/:id/dismiss', async (req, res) => {
     try {
         const user = getUser(req);
         const { id } = req.params;
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { error } = await supabase
             .from('candidate_matches')
             .update({ dismissed_at: new Date().toISOString() })
@@ -310,10 +307,10 @@ exports.meRouter.put('/matches/:id/dismiss', async (req, res) => {
 });
 // ── GET /candidates/me/streak ──────────────────────────────
 // Returns the candidate's current streak info.
-exports.meRouter.get('/streak', async (req, res) => {
+meRouter.get('/streak', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('candidate_streaks')
             .select('*')
@@ -333,10 +330,10 @@ exports.meRouter.get('/streak', async (req, res) => {
 });
 // ── GET /candidates/me/challenge/today ─────────────────────
 // Fetches today's challenge or generates a new one if missing.
-exports.meRouter.get('/challenge/today', async (req, res) => {
+meRouter.get('/challenge/today', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const todayStr = new Date().toISOString().slice(0, 10);
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
@@ -394,10 +391,10 @@ exports.meRouter.get('/challenge/today', async (req, res) => {
 });
 // ── POST /candidates/me/challenges/complete ────────────────
 // Marks today's challenge as completed and updates the streak.
-const completeChallengeSchema = zod_1.z.object({
-    challenge_id: zod_1.z.string().uuid(),
+const completeChallengeSchema = z.object({
+    challenge_id: z.string().uuid(),
 });
-exports.meRouter.post('/challenges/complete', async (req, res) => {
+meRouter.post('/challenges/complete', async (req, res) => {
     try {
         const user = getUser(req);
         const parsed = completeChallengeSchema.safeParse(req.body);
@@ -405,7 +402,7 @@ exports.meRouter.post('/challenges/complete', async (req, res) => {
             res.status(400).json({ error: 'Validation failed', details: parsed.error.issues });
             return;
         }
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const now = new Date();
         const todayStr = now.toISOString().slice(0, 10);
         // 1. Mark the challenge as completed
@@ -462,10 +459,10 @@ exports.meRouter.post('/challenges/complete', async (req, res) => {
 });
 // ── GET /candidates/me/challenges ──────────────────────────
 // Returns history of challenges (for the heatmap).
-exports.meRouter.get('/challenges', async (req, res) => {
+meRouter.get('/challenges', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('daily_challenges')
             .select('*')
@@ -484,10 +481,10 @@ exports.meRouter.get('/challenges', async (req, res) => {
     }
 });
 // ── GET /candidates/me/suggestions ─────────────────────────
-exports.meRouter.get('/suggestions', async (req, res) => {
+meRouter.get('/suggestions', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('agent_suggestions')
             .select('*')
@@ -507,10 +504,10 @@ exports.meRouter.get('/suggestions', async (req, res) => {
     }
 });
 // ── PUT /candidates/me/suggestions/:id ─────────────────────
-const updateSuggestionSchema = zod_1.z.object({
-    status: zod_1.z.enum(['accepted', 'dismissed']),
+const updateSuggestionSchema = z.object({
+    status: z.enum(['accepted', 'dismissed']),
 });
-exports.meRouter.put('/suggestions/:id', async (req, res) => {
+meRouter.put('/suggestions/:id', async (req, res) => {
     try {
         const user = getUser(req);
         const { id } = req.params;
@@ -519,7 +516,7 @@ exports.meRouter.put('/suggestions/:id', async (req, res) => {
             res.status(400).json({ error: 'Validation failed', details: parsed.error.issues });
             return;
         }
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('agent_suggestions')
             .update({ status: parsed.data.status })
@@ -539,11 +536,11 @@ exports.meRouter.put('/suggestions/:id', async (req, res) => {
     }
 });
 // ── POST /candidates/me/opportunities/recompute ─────────────
-exports.meRouter.post('/opportunities/recompute', async (req, res) => {
+meRouter.post('/opportunities/recompute', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
-        const COPILOT_SERVICE_URL = process.env.COPILOT_SERVICE_URL || 'http://localhost:3005';
+        const supabase = getSupabase();
+        const COPILOT_SERVICE_URL = process.env.COPILOT_SERVICE_URL || 'http://copilot-service:3005';
         // 1. Fetch Candidate + Extras
         const [{ data: candidate }, { data: goals }, { data: repos }] = await Promise.all([
             supabase.from('candidates').select('*').eq('id', user.id).single(),
@@ -620,11 +617,11 @@ exports.meRouter.post('/opportunities/recompute', async (req, res) => {
 });
 // ── POST /candidates/me/interests ──────────────────────────
 // Express Interest: Candidate -> Recruiter application
-exports.meRouter.post('/interests', async (req, res) => {
+meRouter.post('/interests', async (req, res) => {
     try {
         const user = getUser(req);
         const { jd_id, message } = req.body;
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         // 1. Find recruiter_id for this JD
         const { data: jd, error: jdError } = await supabase
             .from('parsed_jds')
@@ -663,16 +660,16 @@ exports.meRouter.post('/interests', async (req, res) => {
     }
 });
 // ── PUT /candidates/me/goals ───────────────────────────────
-const upsertGoalsSchema = zod_1.z.object({
-    target_roles: zod_1.z.array(zod_1.z.string()),
-    target_locations: zod_1.z.array(zod_1.z.string()),
-    comp_min: zod_1.z.number().int().optional(),
-    comp_max: zod_1.z.number().int().optional(),
-    comp_currency: zod_1.z.string().default('INR'),
-    notice_period_days: zod_1.z.number().int().optional(),
-    what_learning: zod_1.z.array(zod_1.z.string()),
+const upsertGoalsSchema = z.object({
+    target_roles: z.array(z.string()),
+    target_locations: z.array(z.string()),
+    comp_min: z.number().int().optional(),
+    comp_max: z.number().int().optional(),
+    comp_currency: z.string().default('INR'),
+    notice_period_days: z.number().int().optional(),
+    what_learning: z.array(z.string()),
 });
-exports.meRouter.put('/goals', async (req, res) => {
+meRouter.put('/goals', async (req, res) => {
     try {
         const user = getUser(req);
         const parsed = upsertGoalsSchema.safeParse(req.body);
@@ -680,7 +677,7 @@ exports.meRouter.put('/goals', async (req, res) => {
             res.status(400).json({ error: 'Validation failed', details: parsed.error.issues });
             return;
         }
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('candidate_goals')
             .upsert({
@@ -703,10 +700,10 @@ exports.meRouter.put('/goals', async (req, res) => {
     }
 });
 // ── POST /candidates/me/github/scan ────────────────────────
-const githubScanSchema = zod_1.z.object({
-    username: zod_1.z.string(),
+const githubScanSchema = z.object({
+    username: z.string(),
 });
-exports.meRouter.post('/github/scan', async (req, res) => {
+meRouter.post('/github/scan', async (req, res) => {
     try {
         const user = getUser(req);
         const parsed = githubScanSchema.safeParse(req.body);
@@ -745,7 +742,7 @@ exports.meRouter.post('/github/scan', async (req, res) => {
             };
         }));
         // Batch insert into github_repos
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { error: insertError } = await supabase
             .from('github_repos')
             .upsert(processedRepos, { onConflict: 'candidate_id,repo_url' });
@@ -763,12 +760,12 @@ exports.meRouter.post('/github/scan', async (req, res) => {
     }
 });
 // ── POST /candidates/me/storage/sign ───────────────────────
-const storageSignSchema = zod_1.z.object({
-    bucket: zod_1.z.enum(['video-pitches', 'case-study-files', 'profile-avatars']),
-    file_name: zod_1.z.string(),
-    content_type: zod_1.z.string().optional(),
+const storageSignSchema = z.object({
+    bucket: z.enum(['video-pitches', 'case-study-files', 'profile-avatars']),
+    file_name: z.string(),
+    content_type: z.string().optional(),
 });
-exports.meRouter.post('/storage/sign', async (req, res) => {
+meRouter.post('/storage/sign', async (req, res) => {
     try {
         const user = getUser(req);
         const parsed = storageSignSchema.safeParse(req.body);
@@ -777,7 +774,7 @@ exports.meRouter.post('/storage/sign', async (req, res) => {
             return;
         }
         const { bucket, file_name } = parsed.data;
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         // Path includes user ID for RLS enforcement
         const filePath = `${user.id}/${file_name}`;
         const { data, error } = await supabase.storage
@@ -796,10 +793,10 @@ exports.meRouter.post('/storage/sign', async (req, res) => {
     }
 });
 // ── GitHub Repos ──────────────────────────────────────────
-exports.meRouter.get('/github-repos', async (req, res) => {
+meRouter.get('/github-repos', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('github_repos')
             .select('*')
@@ -815,12 +812,12 @@ exports.meRouter.get('/github-repos', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-exports.meRouter.put('/github-repos/:id', async (req, res) => {
+meRouter.put('/github-repos/:id', async (req, res) => {
     try {
         const user = getUser(req);
         const { id } = req.params;
         const { is_featured, ai_generated_readme } = req.body;
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('github_repos')
             .update({ is_featured, ai_generated_readme })
@@ -834,7 +831,7 @@ exports.meRouter.put('/github-repos/:id', async (req, res) => {
         }
         // Emit event if README was generated or featured was toggled
         if (ai_generated_readme || is_featured !== undefined) {
-            await (0, proof_1.emitProofEvent)(user.id, 'readme_generated', { repo_id: id }, is_featured ? 3 : 0);
+            await emitProofEvent(user.id, 'readme_generated', { repo_id: id }, is_featured ? 3 : 0);
         }
         res.json(data);
     }
@@ -843,10 +840,10 @@ exports.meRouter.put('/github-repos/:id', async (req, res) => {
     }
 });
 // ── Case Studies ──────────────────────────────────────────
-exports.meRouter.get('/case-studies', async (req, res) => {
+meRouter.get('/case-studies', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('case_studies')
             .select('*')
@@ -862,10 +859,10 @@ exports.meRouter.get('/case-studies', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-exports.meRouter.post('/case-studies', async (req, res) => {
+meRouter.post('/case-studies', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('case_studies')
             .insert({ ...req.body, candidate_id: user.id })
@@ -875,18 +872,18 @@ exports.meRouter.post('/case-studies', async (req, res) => {
             res.status(400).json({ error: error.message });
             return;
         }
-        await (0, proof_1.emitProofEvent)(user.id, 'case_study_added', { study_id: data.id }, 5);
+        await emitProofEvent(user.id, 'case_study_added', { study_id: data.id }, 5);
         res.json(data);
     }
     catch (err) {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-exports.meRouter.delete('/case-studies/:id', async (req, res) => {
+meRouter.delete('/case-studies/:id', async (req, res) => {
     try {
         const user = getUser(req);
         const { id } = req.params;
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { error } = await supabase
             .from('case_studies')
             .delete()
@@ -896,7 +893,7 @@ exports.meRouter.delete('/case-studies/:id', async (req, res) => {
             res.status(400).json({ error: error.message });
             return;
         }
-        await (0, proof_1.recalculatePulseScore)(user.id);
+        await recalculatePulseScore(user.id);
         res.json({ success: true });
     }
     catch (err) {
@@ -904,10 +901,10 @@ exports.meRouter.delete('/case-studies/:id', async (req, res) => {
     }
 });
 // ── Mock Interviews ───────────────────────────────────────
-exports.meRouter.get('/mock-interviews', async (req, res) => {
+meRouter.get('/mock-interviews', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('mock_interviews')
             .select('*')
@@ -923,10 +920,10 @@ exports.meRouter.get('/mock-interviews', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-exports.meRouter.post('/mock-interviews', async (req, res) => {
+meRouter.post('/mock-interviews', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('mock_interviews')
             .insert({ ...req.body, candidate_id: user.id })
@@ -936,19 +933,19 @@ exports.meRouter.post('/mock-interviews', async (req, res) => {
             res.status(400).json({ error: error.message });
             return;
         }
-        await (0, proof_1.emitProofEvent)(user.id, 'mock_interview_completed', { interview_id: data.id }, 0);
+        await emitProofEvent(user.id, 'mock_interview_completed', { interview_id: data.id }, 0);
         res.json(data);
     }
     catch (err) {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-exports.meRouter.put('/mock-interviews/:id/share', async (req, res) => {
+meRouter.put('/mock-interviews/:id/share', async (req, res) => {
     try {
         const user = getUser(req);
         const { id } = req.params;
         const token = Math.random().toString(36).substring(2, 15);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('mock_interviews')
             .update({ shareable_token: token })
@@ -967,10 +964,10 @@ exports.meRouter.put('/mock-interviews/:id/share', async (req, res) => {
     }
 });
 // ── Skill Assessments ─────────────────────────────────────
-exports.meRouter.get('/skill-assessments', async (req, res) => {
+meRouter.get('/skill-assessments', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('skill_assessments')
             .select('*')
@@ -986,10 +983,10 @@ exports.meRouter.get('/skill-assessments', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-exports.meRouter.post('/skill-assessments', async (req, res) => {
+meRouter.post('/skill-assessments', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('skill_assessments')
             .insert({ ...req.body, candidate_id: user.id })
@@ -1000,7 +997,7 @@ exports.meRouter.post('/skill-assessments', async (req, res) => {
             return;
         }
         if (data.score >= 70) {
-            await (0, proof_1.emitProofEvent)(user.id, 'skill_assessment_passed', { skill: data.skill, score: data.score }, 5);
+            await emitProofEvent(user.id, 'skill_assessment_passed', { skill: data.skill, score: data.score }, 5);
         }
         res.json(data);
     }
@@ -1009,10 +1006,10 @@ exports.meRouter.post('/skill-assessments', async (req, res) => {
     }
 });
 // ── Video Pitch ───────────────────────────────────────────
-exports.meRouter.get('/video-pitch', async (req, res) => {
+meRouter.get('/video-pitch', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('video_pitches')
             .select('*')
@@ -1028,10 +1025,10 @@ exports.meRouter.get('/video-pitch', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-exports.meRouter.post('/video-pitch', async (req, res) => {
+meRouter.post('/video-pitch', async (req, res) => {
     try {
         const user = getUser(req);
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('video_pitches')
             .upsert({ ...req.body, candidate_id: user.id }, { onConflict: 'candidate_id' })
@@ -1041,7 +1038,7 @@ exports.meRouter.post('/video-pitch', async (req, res) => {
             res.status(400).json({ error: error.message });
             return;
         }
-        await (0, proof_1.emitProofEvent)(user.id, 'video_pitch_added', { video_url: data.video_url }, 10);
+        await emitProofEvent(user.id, 'video_pitch_added', { video_url: data.video_url }, 10);
         res.json(data);
     }
     catch (err) {

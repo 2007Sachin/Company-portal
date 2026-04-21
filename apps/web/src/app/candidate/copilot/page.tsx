@@ -13,482 +13,385 @@ import {
   ChevronRight, 
   ChevronDown, 
   Zap,
-  Bot
+  Bot,
+  Loader2,
+  Trash2,
+  Check,
+  X,
+  TrendingUp,
+  BrainCircuit,
+  MessageSquare,
+  ArrowUpRight,
+  ShieldCheck,
+  Code2,
 } from 'lucide-react';
 import { Header } from '@pulse/ui';
 import { 
   getCandidateMe, 
-  getCandidateMatches, 
-  copilotOptimizeProfile, 
-  copilotScoreCoach, 
-  copilotMockInterview,
-  updateCandidateMe
+  runProfileOptimizerAgent, 
+  runScoreCoachAgent, 
+  runMockInterviewAgent,
+  getCandidateMatchesV2,
+  updateCandidateProfileV2,
 } from '@/lib/api';
 
 type Tab = 'optimizer' | 'coach' | 'mock' | 'radar';
 
 export default function CopilotHubPage() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('optimizer');
   const [candidate, setCandidate] = useState<any>(null);
-
-  // States
   const [loading, setLoading] = useState(true);
 
-  // Optimizer limits
-  const [optimizerData, setOptimizerData] = useState<any>(null);
-  const [optimizerLoading, setOptimizerLoading] = useState(false);
+  useEffect(() => {
+    async function load() {
+      const res = await getCandidateMe();
+      if (res.ok) setCandidate(await res.json());
+      setLoading(false);
+    }
+    load();
+  }, []);
 
-  // Coach limits
-  const [coachData, setCoachData] = useState<any>(null);
-  const [coachLoading, setCoachLoading] = useState(false);
+  const agents = [
+    { id: 'optimizer', label: 'Profile Optimizer', icon: Sparkles, color: 'text-indigo-600', desc: 'AI Rewrite & SEO' },
+    { id: 'coach', label: 'Score Coach', icon: Target, color: 'text-amber-500', desc: 'Score Action Plan' },
+    { id: 'mock', label: 'Mock Interview', icon: Bot, color: 'text-rose-500', desc: 'Skill Drills' },
+    { id: 'radar', label: 'Opportunity Radar', icon: Eye, color: 'text-emerald-500', desc: 'Match Insights' },
+  ];
 
-  // Mock Interview limits
-  const [mockDifficulty, setMockDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
-  const [mockData, setMockData] = useState<any[]>([]);
-  const [mockLoading, setMockLoading] = useState(false);
-  const [expandedQ, setExpandedQ] = useState<number | null>(null);
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-50"><Loader2 className="w-8 h-8 text-indigo-600 animate-spin" /></div>;
 
-  // Radar limits
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <Header title="Pulse Co-pilot" />
+      
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-12">
+        <div className="flex flex-col md:flex-row gap-12">
+          {/*sidebar */}
+          <aside className="w-full md:w-80 space-y-3">
+            <h2 className="text-2xl font-black text-slate-900 mb-6 px-2">Agent Central.</h2>
+            {agents.map(a => {
+              const isActive = activeTab === a.id;
+              const Icon = a.icon;
+              return (
+                <button
+                  key={a.id}
+                  onClick={() => setActiveTab(a.id as Tab)}
+                  className={`w-full group flex items-center gap-4 px-6 py-5 rounded-[2rem] transition-all duration-300 ${
+                    isActive 
+                      ? 'bg-white shadow-2xl shadow-slate-200 border border-slate-100 text-slate-900' 
+                      : 'text-slate-400 hover:text-slate-600'
+                  }`}
+                >
+                  <div className={`p-3 rounded-2xl transition-colors ${isActive ? 'bg-indigo-600 text-white' : 'bg-slate-100'}`}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div className="text-left font-black tracking-tight">
+                    <p className="text-sm">{a.label}</p>
+                    <p className={`text-[10px] uppercase tracking-widest ${isActive ? 'text-indigo-300' : 'text-slate-400'}`}>{a.desc}</p>
+                  </div>
+                </button>
+              );
+            })}
+
+            <div className="mt-12 p-8 bg-slate-900 rounded-[2.5rem] text-white relative overflow-hidden">
+               <BrainCircuit className="absolute -bottom-6 -right-6 w-32 h-32 text-indigo-500/20" />
+               <p className="text-xs font-black uppercase tracking-widest text-indigo-400 mb-2">System Status</p>
+               <h4 className="text-lg font-black mb-4">Neural Engine Active</h4>
+               <p className="text-[10px] text-slate-400 leading-relaxed">Your agents are continuously scanning GitHub, LeetCode, and recruiter demand to keep your Pulse optimized.</p>
+            </div>
+          </aside>
+
+          {/* Main Content Area */}
+          <section className="flex-1 min-h-[700px]">
+             <div className="animate-in fade-in slide-in-from-right-8 duration-700">
+               {activeTab === 'optimizer' && <OptimizerHub candidate={candidate} />}
+               {activeTab === 'coach' && <CoachHub candidate={candidate} />}
+               {activeTab === 'mock' && <MockHub candidate={candidate} />}
+               {activeTab === 'radar' && <RadarHub candidate={candidate} />}
+             </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// ── AGENT 1: OPTIMIZER ─────────────────────────────────────
+
+function OptimizerHub({ candidate }: { candidate: any }) {
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<any>(null);
+
+  const run = async () => {
+    setLoading(true);
+    const res = await runProfileOptimizerAgent();
+    if (res.ok) setData(await res.json());
+    setLoading(false);
+  };
+
+  const apply = async () => {
+    if (!data) return;
+    await updateCandidateProfileV2({ headline: data.suggested_headline });
+    window.location.reload();
+  };
+
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Profile Optimizer</h2>
+          <p className="text-slate-500 font-medium">AI analysis to increase discoverability by high-intent recruiters.</p>
+        </div>
+        <button 
+          onClick={run}
+          disabled={loading}
+          className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm hover:scale-105 transition-transform shadow-xl flex items-center gap-2"
+        >
+          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+          Run SEO Scan
+        </button>
+      </div>
+
+      {!data ? (
+        <div className="bg-white rounded-[3rem] border border-slate-100 p-20 text-center flex flex-col items-center">
+           <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-500 mb-6">
+             <Zap className="w-10 h-10" />
+           </div>
+           <h3 className="text-xl font-black text-slate-900 mb-2">Ready to Boost Your Visibility?</h3>
+           <p className="text-slate-500 text-sm max-w-sm mx-auto leading-relaxed">The Profile Optimizer will analyze your headline, skills, and repos to suggest high-impact keywords.</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+           <div className="p-8 bg-blue-50 border border-blue-100 rounded-[2rem] text-blue-900 italic font-medium leading-relaxed">
+             &ldquo;{data.reasoning}&rdquo;
+           </div>
+           
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-white p-10 rounded-[2.5rem] border border-slate-100 space-y-6">
+                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Current Headline</p>
+                 <p className="font-bold text-slate-600">{candidate.headline || 'Not set'}</p>
+              </div>
+              <div className="bg-white p-10 rounded-[2.5rem] border border-indigo-200 shadow-xl shadow-indigo-100 space-y-6 relative overflow-hidden">
+                 <div className="absolute top-0 right-0 px-4 py-2 bg-indigo-600 text-white text-[10px] font-black rounded-bl-2xl uppercase tracking-widest">Suggested</div>
+                 <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">AI Optimized</p>
+                 <p className="font-black text-slate-900 leading-relaxed text-lg">{data.suggested_headline}</p>
+              </div>
+           </div>
+
+           <button onClick={apply} className="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] font-black text-sm hover:bg-slate-800 transition-colors">Apply Optimized Headline</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── AGENT 2: COACH ─────────────────────────────────────────
+
+function CoachHub({ candidate }: { candidate: any }) {
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<any>(null);
+
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+      const res = await runScoreCoachAgent();
+      if (res.ok) setData(await res.json());
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  if (loading) return <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mx-auto mt-20" />;
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-3xl font-black text-slate-900 tracking-tight">Score Coach</h2>
+        <p className="text-slate-500 font-medium mt-2">Your personalized road-map to reaching the top 1% Pulse Score.</p>
+      </div>
+
+      <div className="bg-white rounded-[3rem] border border-slate-200 p-12 flex items-center justify-between shadow-sm">
+         <div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Current Score Path</p>
+            <div className="flex items-center gap-10">
+               <div>
+                 <p className="text-5xl font-black text-slate-900">{data?.current_score}</p>
+                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Current</p>
+               </div>
+               <div className="w-24 h-px bg-slate-100" />
+               <div>
+                  <p className="text-5xl font-black text-indigo-600">{data?.target_score}</p>
+                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mt-1">Short-term Target</p>
+               </div>
+            </div>
+         </div>
+         <div className="text-center bg-indigo-50 px-8 py-6 rounded-[2rem] border border-indigo-100">
+            <TrendingUp className="w-6 h-6 text-indigo-600 mx-auto mb-2" />
+            <p className="text-xs font-black text-indigo-600">+{data?.target_score - data?.current_score} Potential</p>
+         </div>
+      </div>
+
+      <div className="space-y-4">
+         <h4 className="text-sm font-black text-slate-900 uppercase px-4">Priority Actions</h4>
+         {data?.actions.map((act: any, i: number) => (
+           <div key={i} className="group bg-white p-8 rounded-[2rem] border border-slate-100 hover:border-indigo-300 transition-all flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                   <Target className="w-6 h-6" />
+                </div>
+                <div>
+                   <p className="font-black text-slate-900">{act.action}</p>
+                   <div className="flex items-center gap-4 mt-1">
+                      <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Impact: {act.impact}</span>
+                      <span className={`text-[10px] font-black uppercase tracking-widest ${act.difficulty === 'high' ? 'text-rose-400' : 'text-amber-400'}`}>Difficulty: {act.difficulty}</span>
+                   </div>
+                </div>
+              </div>
+              <button className="px-6 py-3 bg-slate-50 text-slate-900 rounded-xl text-xs font-black hover:bg-slate-900 hover:text-white transition-all">Execute Action</button>
+           </div>
+         ))}
+      </div>
+    </div>
+  );
+}
+
+// ── AGENT 3: MOCK ──────────────────────────────────────────
+
+function MockHub({ candidate }: { candidate: any }) {
+  const [loading, setLoading] = useState(false);
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+
+  const run = async () => {
+    setLoading(true);
+    const res = await runMockInterviewAgent({ difficulty, skills: candidate.skills });
+    if (res.ok) {
+      const d = await res.json();
+      setQuestions(d.questions || []);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Neural Mock Drill</h2>
+          <p className="text-slate-500 font-medium">Practice with AI-generated questions mapped to your project history.</p>
+        </div>
+        <div className="flex items-center gap-2 p-1 bg-white border border-slate-100 rounded-2xl">
+           {['easy', 'medium', 'hard'].map(l => (
+             <button 
+              key={l}
+              onClick={() => setDifficulty(l as any)}
+              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${difficulty === l ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
+             >
+               {l}
+             </button>
+           ))}
+        </div>
+      </div>
+
+      {questions.length === 0 ? (
+        <div className="bg-slate-900 rounded-[3rem] p-16 text-center text-white relative overflow-hidden group">
+           <Bot className="absolute -bottom-10 -left-10 w-48 h-48 text-indigo-500/10 group-hover:rotate-12 transition-transform duration-700" />
+           <div className="relative z-10 max-w-sm mx-auto space-y-8">
+              <div className="w-20 h-20 bg-indigo-600 rounded-full flex items-center justify-center mx-auto shadow-2xl">
+                <BrainCircuit className="w-10 h-10" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black tracking-tight">Ready to verify your claims?</h3>
+                <p className="text-slate-400 text-sm font-medium">I'll generate five targeted questions based on the repositories you've featured.</p>
+              </div>
+              <button 
+                onClick={run}
+                disabled={loading}
+                className="w-full py-5 bg-white text-slate-900 rounded-2xl font-black text-sm hover:scale-105 transition-transform flex items-center justify-center gap-2"
+              >
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5 fill-current" />}
+                Generate Interview Drill
+              </button>
+           </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+           {questions.map((q, i) => (
+             <div key={i} className="bg-white p-8 rounded-[2rem] border border-slate-100 space-y-4 hover:border-indigo-200 transition-colors">
+                <div className="flex items-center justify-between">
+                   <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em]">{q.category}</span>
+                   <ChevronDown className="w-4 h-4 text-slate-300" />
+                </div>
+                <p className="text-lg font-black text-slate-900 leading-relaxed">{q.question}</p>
+                <div className="pt-4 flex gap-4">
+                  <button className="flex-1 py-3 bg-slate-50 text-slate-600 rounded-xl text-xs font-black hover:bg-slate-100">See Hint</button>
+                  <button className="flex-1 py-3 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-black hover:bg-indigo-100">Ideal Answer</button>
+                </div>
+             </div>
+           ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── AGENT 4: RADAR ─────────────────────────────────────────
+
+function RadarHub({ candidate }: { candidate: any }) {
+  const [loading, setLoading] = useState(false);
   const [matches, setMatches] = useState<any[]>([]);
 
   useEffect(() => {
-    async function loadInitialData() {
-      try {
-        const [meRes, matchesRes] = await Promise.all([
-          getCandidateMe(),
-          getCandidateMatches()
-        ]);
-        if (meRes.ok) {
-          const cand = await meRes.json();
-          setCandidate(cand);
-        }
-        if (matchesRes.ok) {
-          const m = await matchesRes.json();
-          setMatches(m.matches || []);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadInitialData();
-  }, []);
-
-  // ── Handlers ──────────────────────────────────────────────
-
-  const handleRunOptimizer = async () => {
-    if (!candidate) return;
-    setOptimizerLoading(true);
-    try {
-      const res = await copilotOptimizeProfile({
-        headline: candidate.headline || '',
-        skills: candidate.skills || [],
-        experience_years: candidate.experience_years || 0,
-        github_verified: candidate.github_verified || false,
-        leetcode_verified: candidate.leetcode_verified || false,
-        has_video_pitch: candidate.has_video_pitch || false
-      });
-      if (res.ok) {
-        setOptimizerData(await res.json());
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setOptimizerLoading(false);
-    }
-  };
-
-  const loadCoach = async () => {
-    if (!candidate || coachData) return;
-    setCoachLoading(true);
-    try {
-      const res = await copilotScoreCoach(candidate);
-      if (res.ok) setCoachData(await res.json());
-    } catch (e) { console.error(e); }
-    finally { setCoachLoading(false); }
-  };
-
-  // Auto-load score coach when tab mounts
-  useEffect(() => {
-    if (activeTab === 'coach' && candidate && !coachData) {
-      loadCoach();
-    }
-  }, [activeTab, candidate]);
-
-  const handleAcceptOptimization = async () => {
-    if (!optimizerData) return;
-    // We apply added and removed skills
-    let newSkills = [...(candidate.skills || [])];
-    optimizerData.suggested_skills_to_add.forEach((s: string) => {
-      if (!newSkills.includes(s)) newSkills.push(s);
-    });
-    optimizerData.suggested_skills_to_remove.forEach((s: string) => {
-      newSkills = newSkills.filter(es => es !== s);
-    });
-
-    try {
-      await updateCandidateMe({
-        headline: optimizerData.suggested_headline,
-        skills: newSkills
-      });
-      // Mock local state update
-      setCandidate({
-        ...candidate,
-        headline: optimizerData.suggested_headline,
-        skills: newSkills
-      });
-      setOptimizerData(null); // Clear suggestion
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleGenerateQuestions = async () => {
-    if (!candidate) return;
-    setMockLoading(true);
-    try {
-      const res = await copilotMockInterview({
-        skills: candidate.skills || [],
-        difficulty: mockDifficulty
-      });
+    async function load() {
+      setLoading(true);
+      const res = await getCandidateMatchesV2();
       if (res.ok) {
         const d = await res.json();
-        setMockData(d.questions || []);
+        setMatches(d.matches || []);
       }
-    } catch (e) { console.error(e); }
-    finally { setMockLoading(false); }
-  };
+      setLoading(false);
+    }
+    load();
+  }, []);
 
-  // ── Render ────────────────────────────────────────────────
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50">
-        <Header title="AI Copilot" backTo="/candidate/dashboard" />
-        <div className="flex items-center justify-center h-[60vh]">
-          <div className="animate-spin w-8 h-8 rounded-full border-4 border-indigo-600 border-t-transparent"></div>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mx-auto mt-20" />;
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
-      <Header title="AI Copilot Hub" backTo="/candidate/dashboard" />
-      
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
-        
-        {/* Sidebar */}
-        <aside className="w-full md:w-64 flex-shrink-0 space-y-2">
-          <button 
-            onClick={() => setActiveTab('optimizer')}
-            className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${activeTab === 'optimizer' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-indigo-200'}`}
-          >
-            <Sparkles className="w-5 h-5" />
-            <span className="font-semibold text-sm">Profile Optimizer</span>
-          </button>
-          
-          <button 
-            onClick={() => setActiveTab('coach')}
-            className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${activeTab === 'coach' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-indigo-200'}`}
-          >
-            <Target className="w-5 h-5" />
-            <span className="font-semibold text-sm">Score Coach</span>
-          </button>
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-3xl font-black text-slate-900 tracking-tight">Opportunity Radar</h2>
+        <p className="text-slate-500 font-medium mt-2">Deep insights into how you match against current market demand.</p>
+      </div>
 
-          <button 
-            onClick={() => setActiveTab('mock')}
-            className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${activeTab === 'mock' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-indigo-200'}`}
-          >
-            <Bot className="w-5 h-5" />
-            <span className="font-semibold text-sm">Mock Interview</span>
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('radar')}
-            className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${activeTab === 'radar' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-indigo-200'}`}
-          >
-            <Eye className="w-5 h-5" />
-            <span className="font-semibold text-sm">Opportunity Radar</span>
-          </button>
-        </aside>
-
-        {/* Main Content Area */}
-        <div className="flex-1 min-w-0">
-          
-          {/* 1. Profile Optimizer */}
-          {activeTab === 'optimizer' && (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 animate-in fade-in duration-300">
-              <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                Profile Optimizer
-              </h2>
-              <p className="text-slate-500 mt-2 mb-8">Let Copilot analyze your profile and suggest high-impact improvements to help you stand out to technical recruiters.</p>
-              
-              {!optimizerData ? (
-                <div className="flex flex-col items-center justify-center p-10 bg-slate-50 border border-slate-200 border-dashed rounded-xl">
-                  <Sparkles className="w-10 h-10 text-indigo-400 mb-4" />
-                  <p className="text-slate-600 font-medium mb-6 text-center">Ready to optimize your profile?</p>
-                  <button 
-                    onClick={handleRunOptimizer}
-                    disabled={optimizerLoading}
-                    className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-sm transition-colors disabled:opacity-50 flex items-center gap-2"
-                  >
-                    {optimizerLoading ? <span className="animate-spin w-4 h-4 rounded-full border-2 border-white border-t-transparent"></span> : null}
-                    {optimizerLoading ? 'Analyzing...' : 'Run Optimizer'}
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
-                    <p className="text-sm font-semibold text-blue-900 flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-blue-600" /> Copilot's Reasoning
-                    </p>
-                    <p className="text-sm text-blue-800 mt-2">{optimizerData.reasoning}</p>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {/* Current */}
-                    <div className="p-5 border border-slate-200 rounded-xl bg-slate-50">
-                      <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Current</h3>
-                      <div className="space-y-4">
-                        <div>
-                          <p className="text-xs text-slate-500 mb-1">Headline</p>
-                          <p className="text-sm font-medium text-slate-800">{candidate.headline || "Not set"}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-slate-500 mb-1">Skills</p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {candidate.skills?.map((s: string) => <span key={s} className="px-2 py-0.5 border border-slate-300 rounded text-xs text-slate-600 bg-white">{s}</span>)}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Suggested */}
-                    <div className="p-5 border border-indigo-200 rounded-xl bg-indigo-50/30">
-                      <h3 className="text-xs font-bold uppercase tracking-widest text-indigo-500 mb-4 flex items-center gap-2">Suggested <Sparkles className="w-3.5 h-3.5" /></h3>
-                      <div className="space-y-4">
-                        <div>
-                          <p className="text-xs text-slate-500 mb-1">Headline</p>
-                          <p className="text-sm font-bold text-slate-900">{optimizerData.suggested_headline}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-slate-500 mb-1">Skills Changes</p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {optimizerData.suggested_skills_to_add.map((s: string) => <span key={`add-${s}`} className="px-2 py-0.5 border border-emerald-300 bg-emerald-50 text-emerald-700 rounded text-xs font-semibold">+ {s}</span>)}
-                            {optimizerData.suggested_skills_to_remove.map((s: string) => <span key={`rm-${s}`} className="px-2 py-0.5 border border-red-300 bg-red-50 text-red-700 rounded text-xs line-through opacity-75">{s}</span>)}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
-                    <button onClick={() => setOptimizerData(null)} className="px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl">Reject</button>
-                    <button onClick={handleAcceptOptimization} className="px-5 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm">Accept Changes</button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* 2. Score Coach */}
-          {activeTab === 'coach' && (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 animate-in fade-in duration-300">
-              <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                Score Coach
-              </h2>
-              <p className="text-slate-500 mt-2 mb-8">Personalized action plan to hit your highest possible Pulse Score.</p>
-              
-              {coachLoading ? (
-                 <div className="h-64 flex items-center justify-center text-indigo-600">
-                    <span className="animate-spin w-8 h-8 rounded-full border-4 border-current border-t-transparent"></span>
-                 </div>
-              ) : coachData ? (
-                <div className="space-y-8">
-                  {/* Score Targets */}
-                  <div className="flex items-center gap-8 p-6 bg-slate-50 border border-slate-200 rounded-2xl">
-                    <div className="text-center">
-                      <p className="text-sm font-semibold text-slate-500 uppercase tracking-widest">Current</p>
-                      <p className="text-4xl font-black text-slate-900">{coachData.current_score}</p>
-                    </div>
-                    <div className="flex-1 flex items-center">
-                      <div className="w-full h-2 bg-slate-200 rounded-full relative overflow-hidden">
-                        <div className="absolute left-0 top-0 bottom-0 bg-indigo-500" style={{ width: `${(coachData.current_score / coachData.target_score) * 100}%` }}></div>
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm font-semibold text-indigo-500 uppercase tracking-widest">Target</p>
-                      <p className="text-4xl font-black text-indigo-600">{coachData.target_score}</p>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="space-y-3">
-                    <h3 className="text-sm font-bold text-slate-900 uppercase">Action Plan</h3>
-                    {coachData.actions.length === 0 ? (
-                      <p className="text-emerald-600 font-bold bg-emerald-50 border border-emerald-200 p-4 rounded-xl flex items-center gap-2"><CheckCircle2 className="w-5 h-5"/> You're maxed out! Perfect score.</p>
-                    ) : coachData.actions.map((act: any, idx: number) => (
-                      <div key={idx} className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border border-slate-200 rounded-xl hover:border-indigo-300 transition-colors">
-                        <div>
-                          <p className="font-bold text-slate-900">{act.action}</p>
-                          <div className="flex items-center gap-3 mt-1">
-                            <span className="text-xs font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700">{act.difficulty}</span>
-                            <span className="text-sm font-medium text-emerald-600">Impact: {act.impact}</span>
-                          </div>
-                        </div>
-                        <Link href="/candidate/onboarding" className="px-5 py-2 whitespace-nowrap bg-indigo-50 text-indigo-700 font-bold text-sm rounded-xl hover:bg-indigo-100 transition-colors">
-                          Do it now
-                        </Link>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          )}
-
-          {/* 3. Mock Interview */}
-          {activeTab === 'mock' && (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 animate-in fade-in duration-300">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                <div>
-                  <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">Mock Interview Setup</h2>
-                  <p className="text-slate-500 mt-1">Generate AI technical questions tailored perfectly to your skills.</p>
-                </div>
-                <Link href="/candidate/prep" className="px-4 py-2 border border-slate-200 font-bold text-sm text-slate-700 hover:bg-slate-50 rounded-xl flex items-center gap-2 shrink-0">
-                  Full Screen Experience <ChevronRight className="w-4 h-4"/>
-                </Link>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="bg-emerald-900 p-10 rounded-[3rem] text-white shadow-2xl relative overflow-hidden col-span-1 md:col-span-2">
+           <div className="flex items-center justify-between relative z-10">
+              <div className="space-y-4">
+                 <h4 className="text-xs font-black text-emerald-400 uppercase tracking-widest">Market Alignment</h4>
+                 <h3 className="text-3xl font-black tracking-tight">You are in the Top 8% for <span className="text-emerald-400">Node.js</span> roles.</h3>
+                 <p className="text-emerald-100/60 text-sm max-w-lg leading-relaxed">The radar shows high demand for architects with your specific Proof signals in Bengaluru and SF.</p>
               </div>
-
-              {mockData.length === 0 ? (
-                 <div className="p-6 bg-slate-50 border border-slate-200 rounded-xl space-y-5">
-                   <div className="space-y-2">
-                     <label className="text-sm font-semibold text-slate-700">Select Difficulty</label>
-                     <div className="flex gap-2">
-                       {['easy', 'medium', 'hard'].map(level => (
-                         <button 
-                            key={level}
-                            onClick={() => setMockDifficulty(level as any)}
-                            className={`flex-1 py-3 text-sm font-bold uppercase tracking-wider rounded-xl border transition-all ${mockDifficulty === level ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
-                         >
-                           {level}
-                         </button>
-                       ))}
-                     </div>
-                   </div>
-                   <button 
-                     onClick={handleGenerateQuestions}
-                     disabled={mockLoading}
-                     className="w-full py-4 rounded-xl font-bold bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
-                   >
-                     {mockLoading && <span className="animate-spin w-5 h-5 rounded-full border-2 border-white border-t-transparent"></span>}
-                     {mockLoading ? 'Generating your interview...' : 'Generate Questions'}
-                   </button>
-                 </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between px-2 mb-4">
-                    <h3 className="font-bold text-slate-900">Your practice questions</h3>
-                    <button onClick={() => setMockData([])} className="text-sm font-semibold text-indigo-600 hover:text-indigo-800">Reset</button>
-                  </div>
-                  {mockData.map((q: any, i: number) => (
-                    <div key={i} className="border border-slate-200 rounded-xl overflow-hidden bg-white">
-                      <button 
-                        onClick={() => setExpandedQ(expandedQ === i ? null : i)}
-                        className="w-full p-4 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors text-left"
-                      >
-                        <div className="pr-4">
-                          <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-1 block">{q.category}</span>
-                          <span className="text-sm font-semibold text-slate-900">{q.question}</span>
-                        </div>
-                        <ChevronDown className={`w-5 h-5 text-slate-400 transform transition-transform shrink-0 ${expandedQ === i ? 'rotate-180' : ''}`} />
-                      </button>
-                      
-                      {expandedQ === i && (
-                        <div className="p-5 border-t border-slate-100 space-y-4 bg-white animate-in slide-in-from-top-2 duration-200">
-                          <div>
-                            <p className="text-xs font-bold uppercase text-slate-400 mb-2">Hints</p>
-                            <ul className="list-disc pl-5 text-sm text-slate-600 space-y-1">
-                              {q.hints.map((h: string, hi: number) => <li key={hi}>{h}</li>)}
-                            </ul>
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold uppercase text-slate-400 mb-2">Ideal Answer Points</p>
-                            <ul className="list-disc pl-5 text-sm text-emerald-700 bg-emerald-50 rounded-lg p-3 space-y-1 border border-emerald-100">
-                              {q.ideal_answer_points.map((ap: string, api: number) => <li key={api}>{ap}</li>)}
-                            </ul>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* 4. Opportunity Radar */}
-          {activeTab === 'radar' && (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 animate-in fade-in duration-300">
-              <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2 mb-8">
-                Opportunity Radar
-              </h2>
-              
-              {matches.length === 0 ? (
-                <div className="text-center py-12 bg-slate-50 border border-slate-200 border-dashed rounded-xl">
-                  <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Eye className="w-6 h-6 text-slate-400" />
-                  </div>
-                  <p className="text-slate-600 font-medium">No matches yet. Come back later as recruiters post new tech roles.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 gap-6">
-                  {matches.map((m) => (
-                    <div key={m.id} className="border border-slate-200 rounded-2xl p-6 hover:shadow-md transition-all">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="text-lg font-bold text-slate-900">Senior Developer Role</h3>
-                          <p className="text-slate-500 text-sm">Fintech Company • San Francisco / Remote</p>
-                        </div>
-                        <span className="px-3 py-1.5 bg-green-100 text-green-700 rounded-full font-bold text-sm whitespace-nowrap">
-                          {m.match_score}% Match
-                        </span>
-                      </div>
-                      
-                      <div className="bg-slate-50 rounded-xl p-4 mt-4 space-y-4 border border-slate-100">
-                        <div>
-                          <p className="text-xs font-bold uppercase text-slate-400 mb-2">Skills You Match</p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {m.matched_skills.map((s: string) => (
-                               <span key={`m-${s}`} className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-semibold text-xs border border-emerald-200">{s}</span>
-                            ))}
-                          </div>
-                        </div>
-                        
-                        {m.missing_skills?.length > 0 && (
-                          <div>
-                            <p className="text-xs font-bold uppercase text-slate-400 mb-2">Skills Missing</p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {m.missing_skills.map((s: string) => (
-                                 <span key={`miss-${s}`} className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded font-semibold text-xs border border-slate-200">{s}</span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
+              <div className="w-32 h-32 bg-emerald-800 rounded-full flex items-center justify-center text-4xl font-black text-emerald-400 border-4 border-emerald-700 shadow-2xl">
+                 A+
+              </div>
+           </div>
         </div>
-      </main>
+
+        {matches.slice(0, 4).map(m => (
+          <div key={m.id} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
+             <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{m.parsed_jds?.location || 'Remote'}</span>
+                <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black">{m.match_score}% Fit</span>
+             </div>
+             <h4 className="text-xl font-black text-slate-900 tracking-tight">{m.parsed_jds?.role_title || 'Software Engineer'}</h4>
+             <div className="p-4 bg-slate-50 rounded-2xl italic text-xs text-slate-500 leading-relaxed border border-slate-100">
+               &ldquo;{m.why_you?.slice(0, 100)}...&rdquo;
+             </div>
+             <Link href="/candidate/opportunities" className="w-full py-4 bg-slate-900 text-white rounded-xl font-black text-sm text-center flex items-center justify-center gap-2 group">
+                View Full Analysis <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+             </Link>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

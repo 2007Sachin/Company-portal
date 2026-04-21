@@ -1,38 +1,26 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.candidatesRouter = void 0;
-const express_1 = require("express");
-const zod_1 = require("zod");
-const supabase_1 = require("../lib/supabase");
-const shared_utils_1 = require("@pulse/shared-utils");
-exports.candidatesRouter = (0, express_1.Router)();
+import { Router } from 'express';
+import { z } from 'zod';
+import { getSupabase } from '../lib/supabase.js';
+import { verifyToken } from '@pulse/shared-utils';
+export const candidatesRouter = Router();
 // ── Validation Schema ──────────────────────
-const candidateSchema = zod_1.z.object({
-    id: zod_1.z.string().uuid().optional(),
-    headline: zod_1.z.string().optional().nullable(),
-    pulse_score: zod_1.z.number().int().optional().nullable(),
-    experience_years: zod_1.z.number().int().optional().nullable(),
-    notice_period_days: zod_1.z.number().int().optional().nullable(),
-    skills: zod_1.z.array(zod_1.z.string()).optional().nullable(),
-    github_verified: zod_1.z.boolean().optional().nullable(),
-    leetcode_verified: zod_1.z.boolean().optional().nullable(),
-    has_video_pitch: zod_1.z.boolean().optional().nullable(),
-    location: zod_1.z.string().optional().nullable()
+const candidateSchema = z.object({
+    id: z.string().uuid().optional(),
+    headline: z.string().optional().nullable(),
+    pulse_score: z.number().int().optional().nullable(),
+    experience_years: z.number().int().optional().nullable(),
+    notice_period_days: z.number().int().optional().nullable(),
+    skills: z.array(z.string()).optional().nullable(),
+    github_verified: z.boolean().optional().nullable(),
+    leetcode_verified: z.boolean().optional().nullable(),
+    has_video_pitch: z.boolean().optional().nullable(),
+    location: z.string().optional().nullable()
 });
 // ── GET /candidates (Discovery) ─────────────
-exports.candidatesRouter.get('/', async (req, res) => {
-    // --- MOCK OVERRIDE ---
-    const mockCandidates = [
-        { id: 'c-1', headline: 'Senior Frontend Developer', pulse_score: 950, experience_years: 6, notice_period_days: 15, skills: ['React', 'Next.js', 'TypeScript', 'Tailwind'], github_verified: true, leetcode_verified: true, has_video_pitch: true, location: 'San Francisco, CA', created_at: new Date().toISOString() },
-        { id: 'c-2', headline: 'Backend Engineer', pulse_score: 820, experience_years: 4, notice_period_days: 30, skills: ['Node.js', 'Express', 'PostgreSQL', 'Docker'], github_verified: true, leetcode_verified: false, has_video_pitch: false, location: 'Remote', created_at: new Date().toISOString() },
-        { id: 'c-3', headline: 'Full Stack Ninja', pulse_score: 750, experience_years: 3, notice_period_days: 0, skills: ['React', 'Python', 'Django', 'AWS'], github_verified: false, leetcode_verified: false, has_video_pitch: false, location: 'New York, NY', created_at: new Date().toISOString() },
-    ];
-    res.json({ candidates: mockCandidates, total: mockCandidates.length });
-    return;
-    // ---------------------
+candidatesRouter.get('/', async (req, res) => {
     try {
         const { skills, min_score, max_score, max_notice_period, min_experience, max_experience, search } = req.query;
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         let query = supabase.from('candidates').select('*', { count: 'exact' });
         if (search) {
             query = query.ilike('headline', `%${search}%`);
@@ -68,14 +56,10 @@ exports.candidatesRouter.get('/', async (req, res) => {
     }
 });
 // ── GET /candidates/:id ─────────────────────
-exports.candidatesRouter.get('/:id', shared_utils_1.verifyToken, async (req, res) => {
-    // --- MOCK OVERRIDE ---
-    res.json({ id: req.params.id, headline: 'Mock Candidate', pulse_score: 900, experience_years: 5, notice_period_days: 15, skills: ['React', 'Node'], github_verified: true, leetcode_verified: true, has_video_pitch: true, location: 'Remote', created_at: new Date().toISOString() });
-    return;
-    // ---------------------
+candidatesRouter.get('/:id', verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('candidates')
             .select('*')
@@ -93,18 +77,14 @@ exports.candidatesRouter.get('/:id', shared_utils_1.verifyToken, async (req, res
     }
 });
 // ── POST /candidates ────────────────────────
-exports.candidatesRouter.post('/', shared_utils_1.verifyToken, async (req, res) => {
-    // --- MOCK OVERRIDE ---
-    res.status(201).json({ id: 'c-new', ...req.body, created_at: new Date().toISOString() });
-    return;
-    // ---------------------
+candidatesRouter.post('/', verifyToken, async (req, res) => {
     try {
         const parsed = candidateSchema.safeParse(req.body);
         if (!parsed.success) {
             res.status(400).json({ error: 'Validation failed', details: parsed.error.issues });
             return;
         }
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         // Default id to req.user.id if self-registering, else expect body.id or auto-generate if uuid extension active
         const candidateData = {
             ...parsed.data,
@@ -128,11 +108,7 @@ exports.candidatesRouter.post('/', shared_utils_1.verifyToken, async (req, res) 
     }
 });
 // ── PUT /candidates/:id ─────────────────────
-exports.candidatesRouter.put('/:id', shared_utils_1.verifyToken, async (req, res) => {
-    // --- MOCK OVERRIDE ---
-    res.json({ id: req.params.id, ...req.body, updated_at: new Date().toISOString() });
-    return;
-    // ---------------------
+candidatesRouter.put('/:id', verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
         const parsed = candidateSchema.partial().safeParse(req.body);
@@ -140,7 +116,7 @@ exports.candidatesRouter.put('/:id', shared_utils_1.verifyToken, async (req, res
             res.status(400).json({ error: 'Validation failed', details: parsed.error.issues });
             return;
         }
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('candidates')
             .update(parsed.data)
@@ -160,14 +136,10 @@ exports.candidatesRouter.put('/:id', shared_utils_1.verifyToken, async (req, res
     }
 });
 // ── GET /candidates/:id/score ───────────────
-exports.candidatesRouter.get('/:id/score', shared_utils_1.verifyToken, async (req, res) => {
-    // --- MOCK OVERRIDE ---
-    res.json({ pulse_score: 850 });
-    return;
-    // ---------------------
+candidatesRouter.get('/:id/score', verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         // Fetch candidate
         const { data: candidate, error: fetchError } = await supabase
             .from('candidates')

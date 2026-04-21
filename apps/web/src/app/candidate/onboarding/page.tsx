@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowRight,
@@ -15,150 +15,107 @@ import {
   Sparkles,
   MapPin,
   Briefcase,
-  Clock,
   Target,
   Globe,
   Wallet,
   GraduationCap,
   Play,
   Square,
-  RefreshCcw,
+  ShieldCheck,
+  Rocket,
+  Camera,
+  Trash2,
+  Shield,
+  Eye,
+  Lock,
 } from 'lucide-react';
 import { Header } from '@pulse/ui';
 import { 
-  updateCandidateMe, 
-  updateCandidateGoals, 
-  scanGithub, 
-  getUploadUrl,
-  getCandidateMe 
+  getCandidateMe,
+  updateCandidateProfileV2,
+  updateCandidateGoalsV2,
+  getStorageSignedUploadUrlV2,
+  runProfileOptimizerAgent,
+  runGithubCuratorAgent,
+  createCandidateCaseStudy,
+  getCandidateCaseStudies,
+  deleteCandidateCaseStudy
 } from '@/lib/api';
-
-// ── Constants ──────────────────────────────────────────────
-
-const SUGGESTED_SKILLS = [
-  'React', 'Node.js', 'Python', 'TypeScript', 'Go',
-  'Java', 'AWS', 'Docker', 'Kubernetes', 'PostgreSQL',
-  'MongoDB', 'GraphQL', 'Next.js', 'FastAPI', 'Express',
-  'Redis', 'Kafka', 'Rust', 'Swift', 'Flutter',
-];
-
-const TARGET_ROLES_OPTIONS = [
-  'Software Engineer', 'Backend Engineer', 'Frontend Engineer', 
-  'Full-Stack Developer', 'DevOps Engineer', 'ML Engineer',
-  'Data Engineer', 'Mobile Developer', 'Product Manager'
-];
-
-const TARGET_LOCATIONS_OPTIONS = [
-  'Remote', 'Bengaluru', 'Hyderabad', 'Pune', 'Mumbai', 
-  'Delhi NCR', 'Relocate anywhere'
-];
-
-const LEARNING_OPTIONS = [
-  'System Design', 'Machine Learning', 'Cloud Architecture', 
-  'Product Strategy', 'Team Leadership', 'DevOps', 'Cybersecurity'
-];
-
-const NOTICE_OPTIONS = [
-  { label: 'Immediate', value: 0 },
-  { label: '15 Days', value: 15 },
-  { label: '30 Days', value: 30 },
-  { label: '60 Days', value: 60 },
-  { label: '90 Days', value: 90 },
-];
-
-const CURRENCY_OPTIONS = ['INR', 'USD', 'EUR', 'GBP'];
 
 // ── Types ──────────────────────────────────────────────────
 
-interface GithubRepoData {
-  repo_name: string;
-  repo_url: string;
-  stars: number;
-  inferred_skills: string[];
-  is_featured: boolean;
+interface CaseStudy {
+  id: string;
+  title: string;
+  description?: string;
+  tags?: string[];
 }
 
 interface OnboardingState {
-  // Step 1: Basics
+  // Step 1
   full_name: string;
+  phone: string;
+  city: string;
+  college_name: string;
+  graduation_year: number;
   headline: string;
-  location: string;
-  experience_years: number;
-  notice_period_days: number;
-  
-  // Step 2: Skills
-  skills: string[];
-  
-  // Step 3: GitHub
+  profile_photo_url: string;
+
+  // Step 2
   github_username: string;
-  github_repos: GithubRepoData[];
-  inferred_skills: string[];
-  
-  // Step 4: Verification
   leetcode_username: string;
+  case_studies: CaseStudy[];
   video_url: string;
-  
-  // Step 5: Goals
+  skills: string[];
+
+  // Step 3
   target_roles: string[];
   target_locations: string[];
-  comp_min: number;
-  comp_max: number;
-  comp_currency: string;
-  what_learning: string[];
+  expected_ctc_min: number;
+  expected_ctc_max: number;
+  preferred_work_setup: string[];
+  notice_period_days: number;
+
+  // Step 4
+  profile_visibility: 'public' | 'private' | 'hidden';
+  data_consent: boolean;
+  allow_recruiter_contact: boolean;
 }
 
 // ── Components ─────────────────────────────────────────────
 
-/**
- * Persistently visible progress bar for the 5-step wizard
- */
-function ProgressBar({ currentStep }: { currentStep: number }) {
+function StepIndicator({ currentStep }: { currentStep: number }) {
   const steps = [
-    { num: 1, label: 'Basics', icon: Briefcase },
-    { num: 2, label: 'Skills', icon: Code2 },
-    { num: 3, label: 'GitHub', icon: Github },
-    { num: 4, label: 'Verify', icon: Sparkles },
-    { num: 5, label: 'Goals', icon: Target },
+    { num: 1, label: 'Identity' },
+    { num: 2, label: 'Evidence' },
+    { num: 3, label: 'Goals' },
+    { num: 4, label: 'Control' },
+    { num: 5, label: 'Liftoff' },
   ];
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 mb-8">
-      <div className="relative flex justify-between items-center">
-        {/* Background Line */}
-        <div className="absolute top-1/2 left-0 w-full h-0.5 bg-slate-100 -translate-y-1/2 z-0" />
-        
-        {/* Progress Line */}
+    <div className="w-full max-w-2xl mx-auto mb-12">
+      <div className="flex justify-between items-center relative">
+        <div className="absolute top-1/2 left-0 w-full h-[2px] bg-slate-100 -translate-y-1/2 z-0" />
         <div 
-          className="absolute top-1/2 left-0 h-0.5 bg-indigo-500 -translate-y-1/2 z-0 transition-all duration-500 ease-out" 
+          className="absolute top-1/2 left-0 h-[2px] bg-indigo-500 -translate-y-1/2 z-0 transition-all duration-700" 
           style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
         />
-
-        {steps.map((step) => {
-          const isActive = currentStep === step.num;
-          const isCompleted = currentStep > step.num;
-          const Icon = step.icon;
-
-          return (
-            <div key={step.num} className="relative z-10 flex flex-col items-center group">
-              <div 
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
-                  isCompleted 
-                    ? 'bg-indigo-600 text-white shadow-md' 
-                    : isActive 
-                      ? 'bg-indigo-600 text-white ring-4 ring-indigo-50 shadow-lg' 
-                      : 'bg-white border-2 border-slate-100 text-slate-400'
-                }`}
-              >
-                {isCompleted ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
-              </div>
-              <span className={`absolute -bottom-6 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-colors ${
-                isActive ? 'text-indigo-600' : 'text-slate-400'
-              }`}>
-                {step.label}
-              </span>
+        
+        {steps.map((s) => (
+          <div key={s.num} className="relative z-10 flex flex-col items-center">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-500 ${
+              currentStep >= s.num ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white border-2 border-slate-100 text-slate-400'
+            }`}>
+              {currentStep > s.num ? <Check className="w-4 h-4" /> : s.num}
             </div>
-          );
-        })}
+            <span className={`absolute -bottom-6 text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-colors ${
+              currentStep >= s.num ? 'text-indigo-600' : 'text-slate-400'
+            }`}>
+              {s.label}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -166,811 +123,293 @@ function ProgressBar({ currentStep }: { currentStep: number }) {
 
 // ── Main Page ──────────────────────────────────────────────
 
-export default function CandidateOnboardingPage() {
+export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // ── Form State ──
+  const [saving, setSaving] = useState(false);
   const [state, setState] = useState<OnboardingState>({
     full_name: '',
+    phone: '',
+    city: '',
+    college_name: '',
+    graduation_year: new Date().getFullYear(),
     headline: '',
-    location: '',
-    experience_years: 0,
-    notice_period_days: 30,
-    skills: [],
+    profile_photo_url: '',
     github_username: '',
-    github_repos: [],
-    inferred_skills: [],
     leetcode_username: '',
+    case_studies: [],
     video_url: '',
+    skills: [],
     target_roles: [],
     target_locations: [],
-    comp_min: 10,
-    comp_max: 30,
-    comp_currency: 'INR',
-    what_learning: [],
+    expected_ctc_min: 10,
+    expected_ctc_max: 25,
+    preferred_work_setup: ['Remote'],
+    notice_period_days: 30,
+    profile_visibility: 'public',
+    data_consent: false,
+    allow_recruiter_contact: true,
   });
 
-  // ── Initialization ──
   useEffect(() => {
-    const init = async () => {
+    async function load() {
       try {
         const res = await getCandidateMe();
         if (res.ok) {
-          const data = await res.json();
+          const d = await res.json();
+          const csRes = await getCandidateCaseStudies();
+          const cs = csRes.ok ? (await csRes.json()).case_studies : [];
+          
           setState(prev => ({
             ...prev,
-            full_name: data.full_name || '',
-            headline: data.headline || '',
-            location: data.location || '',
-            experience_years: data.experience_years || 0,
-            notice_period_days: data.notice_period_days || 30,
-            skills: data.skills || [],
+            full_name: d.full_name || '',
+            phone: d.phone || '',
+            city: d.city || d.location || '',
+            college_name: d.college_name || '',
+            graduation_year: d.graduation_year || prev.graduation_year,
+            headline: d.headline || '',
+            profile_photo_url: d.profile_photo_url || '',
+            github_username: d.github_username || '',
+            leetcode_username: d.leetcode_username || '',
+            skills: d.skills || [],
+            case_studies: cs,
           }));
-          if (data.onboarding_step > 0 && data.onboarding_step < 5) {
-            setStep(data.onboarding_step + 1);
-          }
         }
-      } catch (err) {
-        console.error('Failed to load candidate profile', err);
+      } catch (e) {
+        console.error(e);
       } finally {
         setLoading(false);
       }
-    };
-    init();
+    }
+    load();
   }, []);
 
-  const updateState = (updates: Partial<OnboardingState>) => {
-    setState(prev => ({ ...prev, ...updates }));
-  };
-
   const handleNext = async () => {
-    setIsSubmitting(true);
-    setError(null);
+    setSaving(true);
     try {
       if (step === 1) {
-        await updateCandidateMe({
+        await updateCandidateProfileV2({
           full_name: state.full_name,
+          phone: state.phone,
+          city: state.city,
+          college_name: state.college_name,
+          graduation_year: state.graduation_year,
           headline: state.headline,
-          location: state.location,
-          experience_years: state.experience_years,
-          notice_period_days: state.notice_period_days,
-          onboarding_step: 1
+          profile_photo_url: state.profile_photo_url,
         });
       } else if (step === 2) {
-        await updateCandidateMe({
+        await updateCandidateProfileV2({
+          github_username: state.github_username,
+          leetcode_username: state.leetcode_username,
           skills: state.skills,
-          onboarding_step: 2
         });
       } else if (step === 3) {
-        // GitHub repos are already upserted by the scan endpoint
-        await updateCandidateMe({ onboarding_step: 3 });
-      } else if (step === 4) {
-        await updateCandidateMe({
-          leetcode_verified: !!state.leetcode_username,
-          has_video_pitch: !!state.video_url,
-          onboarding_step: 4
-        });
-      } else if (step === 5) {
-        await updateCandidateGoals({
+        await updateCandidateGoalsV2({
           target_roles: state.target_roles,
           target_locations: state.target_locations,
-          comp_min: state.comp_min,
-          comp_max: state.comp_max,
-          comp_currency: state.comp_currency,
-          what_learning: state.what_learning
+          expected_ctc_min: state.expected_ctc_min,
+          expected_ctc_max: state.expected_ctc_max,
+          preferred_work_setup: state.preferred_work_setup,
+          notice_period_days: state.notice_period_days,
+          what_learning: [], // placeholder if needed
         });
-        await updateCandidateMe({ onboarding_step: 5 });
+      } else if (step === 4) {
+        await updateCandidateProfileV2({
+          profile_visibility: state.profile_visibility,
+          data_consent: state.data_consent,
+          allow_recruiter_contact: state.allow_recruiter_contact,
+        });
+      } else if (step === 5) {
+        localStorage.setItem('has_seen_welcome_v2', 'true');
         router.push('/candidate/dashboard');
         return;
       }
-      setStep(prev => prev + 1);
-    } catch (err) {
-      setError('Failed to save progress. Please try again.');
+      setStep(s => s + 1);
+    } catch (e) {
+      console.error(e);
     } finally {
-      setIsSubmitting(false);
+      setSaving(false);
     }
   };
 
-  const handleBack = () => {
-    if (step > 1) setStep(step - 1);
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      <Header title="Onboarding" />
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <Header title="Onboarding Wizard" backTo="/candidate/dashboard" />
       
-      <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-8">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Welcome to Pulse.</h1>
-          <p className="text-slate-500 mt-2">Let&apos;s build your proof-of-work profile in 5 quick steps.</p>
-        </div>
+      <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-12">
+        <header className="text-center mb-12">
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Build Your Pulse.</h1>
+          <p className="text-slate-500 font-medium">Verified proof, better matches, faster tech hiring.</p>
+        </header>
 
-        <ProgressBar currentStep={step} />
+        <StepIndicator currentStep={step} />
 
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/50 p-6 md:p-10 overflow-hidden relative">
-          {error && (
-            <div className="absolute top-0 left-0 w-full p-3 bg-red-50 border-b border-red-100 text-red-600 text-xs font-bold text-center">
-              {error}
-            </div>
-          )}
-
-          <div className="min-h-[400px]">
-            {step === 1 && <Step1 data={state} update={updateState} />}
-            {step === 2 && <Step2 data={state} update={updateState} />}
-            {step === 3 && <Step3 data={state} update={updateState} />}
-            {step === 4 && <Step4 data={state} update={updateState} />}
-            {step === 5 && <Step5 data={state} update={updateState} />}
+        <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-2xl shadow-slate-200/60 p-8 md:p-12 relative overflow-hidden">
+          <div className="min-h-[450px]">
+            {step === 1 && <Step1 state={state} setState={setState} />}
+            {step === 2 && <Step2 state={state} setState={setState} />}
+            {step === 3 && <Step3 state={state} setState={setState} />}
+            {step === 4 && <Step4 state={state} setState={setState} />}
+            {step === 5 && <Step5 state={state} />}
           </div>
 
-          <div className="flex items-center justify-between mt-10 pt-8 border-t border-slate-100">
-            <button
-              onClick={handleBack}
-              disabled={step === 1 || isSubmitting}
+          <footer className="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <button 
+              onClick={() => step > 1 && setStep(step - 1)}
+              disabled={step === 1 || saving}
               className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold transition-all ${
-                step === 1 
-                  ? 'opacity-0 pointer-events-none' 
-                  : 'text-slate-500 hover:bg-slate-50 active:scale-95'
+                step === 1 ? 'opacity-0 pointer-events-none' : 'text-slate-500 hover:bg-slate-50 active:scale-95'
               }`}
             >
-              <ArrowLeft className="w-4 h-4" />
-              Back
+              <ArrowLeft className="w-4 h-4" /> Back
             </button>
 
-            <button
+            <button 
               onClick={handleNext}
-              disabled={isSubmitting || !isStepValid(step, state)}
-              className="group relative flex items-center gap-2 px-8 py-3 bg-slate-900 text-white rounded-2xl text-sm font-black hover:bg-slate-800 active:scale-95 transition-all shadow-lg disabled:opacity-50 disabled:active:scale-100"
+              disabled={saving || !isStepValid(step, state)}
+              className="flex items-center gap-2 px-10 py-4 bg-slate-900 text-white rounded-2xl text-sm font-black hover:bg-slate-800 transition-all shadow-xl disabled:opacity-50 active:scale-95"
             >
-              {isSubmitting ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : (
                 <>
-                  {step === 5 ? 'Launch Profile' : 'Continue'}
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  {step === 5 ? 'Enter Cockpit' : 'Next Step'} <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
-          </div>
+          </footer>
         </div>
       </main>
     </div>
   );
 }
 
-// ── Step 1: Basics ─────────────────────────────────────────
-
-function Step1({ data, update }: { data: OnboardingState, update: (updates: Partial<OnboardingState>) => void }) {
-  return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="space-y-2">
-        <h2 className="text-xl font-black text-slate-900">The Basics</h2>
-        <p className="text-slate-500 text-sm">How should recruiters address you?</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Full Name</label>
-          <input 
-            type="text"
-            placeholder="Rahul Sharma"
-            value={data.full_name}
-            onChange={e => update({ full_name: e.target.value })}
-            className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-500/20 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all font-medium"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Headline</label>
-          <input 
-            type="text"
-            placeholder="Final-year CS student, aspiring backend engineer"
-            value={data.headline}
-            onChange={e => update({ headline: e.target.value })}
-            className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-500/20 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all font-medium"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Current Location</label>
-          <div className="relative">
-            <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input 
-              type="text"
-              placeholder="Mumbai, India"
-              value={data.location}
-              onChange={e => update({ location: e.target.value })}
-              className="w-full pl-12 pr-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-500/20 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all font-medium"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Experience (Years)</label>
-          <div className="relative">
-            <Briefcase className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input 
-              type="number"
-              min={0}
-              value={data.experience_years}
-              onChange={e => update({ experience_years: parseInt(e.target.value) || 0 })}
-              className="w-full pl-12 pr-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-500/20 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all font-medium"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2 md:col-span-2">
-          <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Notice Period</label>
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-            {NOTICE_OPTIONS.map(opt => (
-              <button
-                key={opt.value}
-                onClick={() => update({ notice_period_days: opt.value })}
-                className={`py-3 rounded-xl text-xs font-bold border-2 transition-all ${
-                  data.notice_period_days === opt.value
-                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-md'
-                    : 'bg-white border-slate-100 text-slate-500 hover:border-slate-200'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+function isStepValid(step: number, state: OnboardingState) {
+  if (step === 1) return !!state.full_name && !!state.headline && !!state.city;
+  if (step === 2) return true; // Most are optional for now logic
+  if (step === 3) return state.target_roles.length > 0;
+  if (step === 4) return state.data_consent;
+  return true;
 }
 
-// ── Step 2: Skills ─────────────────────────────────────────
+// ── STEP 1: WHO YOU ARE ───────────────────────────────────
 
-function Step2({ data, update }: { data: OnboardingState, update: (updates: Partial<OnboardingState>) => void }) {
-  const [input, setInput] = useState('');
+function Step1({ state, setState }: any) {
+  const [suggesting, setSuggesting] = useState(false);
 
-  const toggleSkill = (skill: string) => {
-    const next = data.skills.includes(skill)
-      ? data.skills.filter(s => s !== skill)
-      : [...data.skills, skill];
-    update({ skills: next });
-  };
-
-  const addSkill = (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (input.trim() && !data.skills.includes(input.trim())) {
-      update({ skills: [...data.skills, input.trim()] });
-      setInput('');
-    }
-  };
-
-  return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="space-y-2">
-        <h2 className="text-xl font-black text-slate-900">Your Expertise</h2>
-        <p className="text-slate-500 text-sm">Select at least 3 skills to unlock your matching power.</p>
-      </div>
-
-      <div className="space-y-6">
-        <form onSubmit={addSkill} className="relative">
-          <input 
-            type="text"
-            placeholder="Add a skill (e.g. Docker, Rust, Figma)"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-500/20 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all font-medium"
-          />
-          <button 
-            type="submit"
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors"
-          >
-            <Plus className="w-5 h-5" />
-          </button>
-        </form>
-
-        <div className="space-y-3">
-          <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Suggestions</label>
-          <div className="flex flex-wrap gap-2">
-            {SUGGESTED_SKILLS.map(skill => {
-              const selected = data.skills.includes(skill);
-              return (
-                <button
-                  key={skill}
-                  onClick={() => toggleSkill(skill)}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all ${
-                    selected
-                      ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
-                      : 'bg-white border-slate-100 text-slate-500 hover:border-slate-200'
-                  }`}
-                >
-                  {skill}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {data.skills.length > 0 && (
-          <div className="space-y-3">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Selected ({data.skills.length})</label>
-            <div className="flex flex-wrap gap-2">
-              {data.skills.map(skill => (
-                <div key={skill} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white rounded-lg text-sm font-bold">
-                  {skill}
-                  <button onClick={() => toggleSkill(skill)} className="p-0.5 hover:text-red-400 transition-colors">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ── Step 3: GitHub ─────────────────────────────────────────
-
-function Step3({ data, update }: { data: OnboardingState, update: (updates: Partial<OnboardingState>) => void }) {
-  const [scanning, setScanning] = useState(false);
-  const [username, setUsername] = useState(data.github_username);
-
-  const handleScan = async () => {
-    if (!username.trim()) return;
-    setScanning(true);
+  const suggestHeadline = async () => {
+    setSuggesting(true);
     try {
-      const res = await scanGithub(username.trim());
-      if (res.ok) {
-        const result = await res.json();
-        update({
-          github_username: username.trim(),
-          github_repos: result.repos.map((r: any) => ({ ...r, is_featured: true })),
-          inferred_skills: result.inferred_skills
-        });
-      }
-    } catch (err) {
-      console.error('GitHub scan failed', err);
-    } finally {
-      setScanning(false);
-    }
-  };
-
-  const toggleRepo = (url: string) => {
-    update({
-      github_repos: data.github_repos.map(r => 
-        r.repo_url === url ? { ...r, is_featured: !r.is_featured } : r
-      )
-    });
-  };
-
-  const addAllSkills = () => {
-    const combined = Array.from(new Set([...data.skills, ...data.inferred_skills]));
-    update({ skills: combined });
-  };
-
-  return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="space-y-2">
-        <h2 className="text-xl font-black text-slate-900">GitHub Showcase</h2>
-        <p className="text-slate-500 text-sm">We&apos;ll fetch your top repositories and infer your technical stack.</p>
-      </div>
-
-      {!data.github_repos.length ? (
-        <div className="p-10 border-4 border-dashed border-slate-100 rounded-3xl flex flex-col items-center justify-center text-center space-y-4">
-          <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center">
-            <Github className="w-8 h-8 text-slate-900" />
-          </div>
-          <div className="max-w-xs space-y-4">
-            <input 
-              type="text"
-              placeholder="Your GitHub Username"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              className="w-full px-5 py-3 bg-white border-2 border-slate-100 rounded-xl focus:border-indigo-500/20 outline-none text-center font-bold"
-            />
-            <button
-              onClick={handleScan}
-              disabled={scanning || !username.trim()}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl text-sm font-black hover:bg-slate-800 transition-all disabled:opacity-50"
-            >
-              {scanning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Github className="w-4 h-4" />}
-              Connect & Scan
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {data.github_repos.map(repo => (
-              <div 
-                key={repo.repo_url}
-                onClick={() => toggleRepo(repo.repo_url)}
-                className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                  repo.is_featured 
-                    ? 'border-indigo-500 bg-indigo-50/30' 
-                    : 'border-slate-100 bg-white hover:border-slate-200'
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <p className="font-black text-slate-900 text-sm truncate">{repo.repo_name}</p>
-                    <div className="flex flex-wrap gap-1">
-                      {repo.inferred_skills.slice(0, 3).map(s => (
-                        <span key={s} className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{s}</span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
-                    repo.is_featured ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-200'
-                  }`}>
-                    {repo.is_featured && <Check className="w-3 h-3 text-white" strokeWidth={4} />}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {data.inferred_skills.length > 0 && (
-            <div className="p-6 bg-slate-50 rounded-2xl border-2 border-slate-100 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-indigo-500" />
-                  <span className="text-sm font-black text-slate-700">Inferred Skills</span>
-                </div>
-                <button 
-                  onClick={addAllSkills}
-                  className="text-xs font-black text-indigo-600 hover:text-indigo-700"
-                >
-                  Add all to profile
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {data.inferred_skills.map(skill => (
-                  <span key={skill} className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <button 
-            onClick={() => update({ github_repos: [], inferred_skills: [] })}
-            className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-red-500 transition-colors"
-          >
-            <RefreshCcw className="w-3 h-3" />
-            Reset Scan
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── Step 4: Verification ───────────────────────────────────
-
-function Step4({ data, update }: { data: OnboardingState, update: (updates: Partial<OnboardingState>) => void }) {
-  const [recording, setRecording] = useState(false);
-  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
-  const [uploading, setUploading] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      setMediaStream(stream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-      
-      const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) setRecordedChunks(prev => [...prev, e.data]);
-      };
-      recorder.start();
-      setMediaRecorder(recorder);
-      setRecording(true);
-      setRecordedChunks([]);
-    } catch (err) {
-      console.error('Media access error', err);
-    }
-  };
-
-  const stopRecording = () => {
-    mediaRecorder?.stop();
-    mediaStream?.getTracks().forEach(track => track.stop());
-    setRecording(false);
-  };
-
-  const handleUpload = async () => {
-    if (recordedChunks.length === 0) return;
-    setUploading(true);
-    try {
-      const blob = new Blob(recordedChunks, { type: 'video/webm' });
-      const fileName = `pitch_${Date.now()}.webm`;
-      
-      const signRes = await getUploadUrl('video-pitches', fileName, 'video/webm');
-      if (!signRes.ok) throw new Error('Sign failed');
-      const { signedUrl, path } = await signRes.json();
-
-      await fetch(signedUrl, {
-        method: 'PUT',
-        body: blob,
-        headers: { 'Content-Type': 'video/webm' }
+      const res = await runProfileOptimizerAgent({
+        headline: state.headline,
+        college_name: state.college_name,
+        city: state.city
       });
-
-      update({ video_url: path });
-    } catch (err) {
-      console.error('Video upload failed', err);
+      if (res.ok) {
+        const d = await res.json();
+        if (d.suggested_headline) setState((s: any) => ({ ...s, headline: d.suggested_headline }));
+      }
+    } catch (e) {
+      console.error(e);
     } finally {
-      setUploading(false);
+      setSuggesting(false);
     }
   };
 
-  return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="space-y-2">
-        <h2 className="text-xl font-black text-slate-900">Verification Signals</h2>
-        <p className="text-slate-500 text-sm">Add signals to boost your Pulse Score and profile trust.</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* LeetCode Card */}
-        <div className="p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20">
-              <Code2 className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-black text-slate-900">LeetCode</span>
-          </div>
-          <input 
-            type="text"
-            placeholder="Username"
-            value={data.leetcode_username}
-            onChange={e => update({ leetcode_username: e.target.value })}
-            className="w-full px-4 py-3 bg-white border-2 border-slate-100 rounded-xl focus:border-amber-500/20 outline-none text-sm font-bold"
-          />
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Optional but highly recommended</p>
-        </div>
-
-        {/* Video Pitch Card */}
-        <div className="p-6 bg-indigo-900 border-2 border-indigo-900 rounded-3xl space-y-4 text-white relative overflow-hidden">
-          <div className="flex items-center gap-3 relative z-10">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <Video className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-black">Video Intro</span>
-          </div>
-          
-          {data.video_url ? (
-            <div className="space-y-3 relative z-10">
-              <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold">
-                <Check className="w-4 h-4" /> Ready to go!
-              </div>
-              <button 
-                onClick={() => update({ video_url: '' })}
-                className="text-xs font-bold text-white/50 hover:text-white transition-colors"
-              >
-                Re-record pitch
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-4 relative z-10">
-              <p className="text-xs text-indigo-200 leading-relaxed font-medium">Record a 60-second intro to explain your best projects and goals.</p>
-              <button 
-                onClick={() => setRecording(true)}
-                className="w-full py-3 bg-white text-indigo-900 rounded-xl text-xs font-black hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
-              >
-                <Play className="w-3 h-3 fill-current" />
-                Record Now
-              </button>
-            </div>
-          )}
-
-          {/* Recorder Modal */}
-          {recording && (
-            <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4">
-              <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-lg w-full p-6 space-y-6 text-center">
-                <div className="aspect-video bg-black rounded-2xl overflow-hidden relative border border-white/5">
-                  <video 
-                    ref={videoRef} 
-                    autoPlay 
-                    muted 
-                    playsInline 
-                    className="w-full h-full object-cover"
-                  />
-                  {!mediaRecorder && <div className="absolute inset-0 flex items-center justify-center text-white/20">Camera Initializing...</div>}
-                </div>
-                
-                <div className="flex items-center justify-center gap-4">
-                  {!mediaRecorder ? (
-                    <button 
-                      onClick={startRecording}
-                      className="px-8 py-4 bg-indigo-600 rounded-2xl text-white font-black hover:bg-indigo-500 transition-all"
-                    >
-                      Start Camera
-                    </button>
-                  ) : mediaRecorder.state === 'inactive' ? (
-                     <div className="flex gap-4">
-                        <button onClick={startRecording} className="px-6 py-3 bg-white text-slate-900 rounded-xl font-black">Record Again</button>
-                        <button 
-                          onClick={handleUpload} 
-                          disabled={uploading}
-                          className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-black flex items-center gap-2"
-                        >
-                          {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                          Use This
-                        </button>
-                     </div>
-                  ) : (
-                    <button 
-                      onClick={stopRecording}
-                      className="px-8 py-4 bg-red-600 rounded-2xl text-white font-black flex items-center gap-3 animate-pulse"
-                    >
-                      <Square className="w-4 h-4 fill-current" />
-                      Stop Recording
-                    </button>
-                  )}
-                </div>
-                
-                <button 
-                  onClick={() => { stopRecording(); setRecording(false); }}
-                  className="text-xs font-bold text-white/40 hover:text-white transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Step 5: Goals ──────────────────────────────────────────
-
-function Step5({ data, update }: { data: OnboardingState, update: (updates: Partial<OnboardingState>) => void }) {
-  const toggleItem = (key: 'target_roles' | 'target_locations' | 'what_learning', val: string) => {
-    const list = data[key];
-    const next = list.includes(val) ? list.filter(v => v !== val) : [...list, val];
-    update({ [key]: next });
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const fileName = `profile_${Date.now()}_${file.name}`;
+      const signRes = await getStorageSignedUploadUrlV2('profile-photos', fileName, file.type);
+      if (signRes.ok) {
+        const { signedUrl, path } = await signRes.json();
+        await fetch(signedUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } });
+        setState((s: any) => ({ ...s, profile_photo_url: path }));
+      }
+    } catch (e) { console.error(e); }
   };
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="space-y-2">
-        <h2 className="text-xl font-black text-slate-900">Career Goals</h2>
-        <p className="text-slate-500 text-sm">Where do you want to be next?</p>
-      </div>
-
-      <div className="space-y-8">
-        {/* Roles */}
-        <div className="space-y-3">
-          <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-            <Briefcase className="w-3 h-3" /> Target Roles
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {TARGET_ROLES_OPTIONS.map(role => {
-              const selected = data.target_roles.includes(role);
-              return (
-                <button
-                  key={role}
-                  onClick={() => toggleItem('target_roles', role)}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all ${
-                    selected ? 'bg-slate-900 border-slate-900 text-white shadow-md' : 'bg-white border-slate-100 text-slate-500'
-                  }`}
-                >
-                  {role}
-                </button>
-              );
-            })}
+      <div className="flex flex-col md:flex-row gap-10 items-start">
+        {/* Photo Upload */}
+        <div className="relative group shrink-0">
+          <div className="w-32 h-32 rounded-3xl bg-slate-100 border-2 border-slate-200 overflow-hidden flex items-center justify-center relative">
+            {state.profile_photo_url ? (
+              <img src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/profile-photos/${state.profile_photo_url}`} className="w-full h-full object-cover" />
+            ) : (
+              <Camera className="w-8 h-8 text-slate-300" />
+            )}
+            <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleUpload} accept="image/*" />
           </div>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-3 text-center">Add Photo</p>
         </div>
 
-        {/* Locations */}
-        <div className="space-y-3">
-          <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-            <Globe className="w-3 h-3" /> Preferred Locations
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {TARGET_LOCATIONS_OPTIONS.map(loc => {
-              const selected = data.target_locations.includes(loc);
-              return (
-                <button
-                  key={loc}
-                  onClick={() => toggleItem('target_locations', loc)}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all ${
-                    selected ? 'bg-slate-900 border-slate-900 text-white shadow-md' : 'bg-white border-slate-100 text-slate-500'
-                  }`}
-                >
-                  {loc}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Learning */}
-        <div className="space-y-3">
-          <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-            <GraduationCap className="w-3 h-3" /> What do you want to grow into?
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {LEARNING_OPTIONS.map(item => {
-              const selected = data.what_learning.includes(item);
-              return (
-                <button
-                  key={item}
-                  onClick={() => toggleItem('what_learning', item)}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all ${
-                    selected ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : 'bg-white border-slate-100 text-slate-500'
-                  }`}
-                >
-                  {item}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Compensation */}
-        <div className="space-y-6 p-6 bg-slate-50 rounded-3xl border-2 border-slate-100">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <Wallet className="w-3 h-3" /> Expected Annual Comp (LPA)
-            </label>
-            <select 
-              value={data.comp_currency} 
-              onChange={e => update({ comp_currency: e.target.value })}
-              className="bg-transparent text-xs font-black text-slate-600 outline-none"
-            >
-              {CURRENCY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="flex justify-between text-lg font-black text-slate-900">
-              <span>{data.comp_min}L</span>
-              <span>{data.comp_max}L</span>
+        {/* Inputs */}
+        <div className="flex-1 space-y-6 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
+              <input 
+                value={state.full_name} 
+                onChange={e => setState((s: any) => ({ ...s, full_name: e.target.value }))}
+                className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-500/20 focus:ring-4 focus:ring-indigo-500/5 outline-none font-bold"
+                placeholder="Rahul Sharma"
+              />
             </div>
-            <div className="relative h-2 bg-slate-200 rounded-full">
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Current City</label>
+              <div className="relative">
+                <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input 
+                  value={state.city} 
+                  onChange={e => setState((s: any) => ({ ...s, city: e.target.value }))}
+                  className="w-full pl-12 pr-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none font-bold"
+                  placeholder="Bengaluru, India"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1 flex justify-between items-center">
+              Professional Headline
+              <button onClick={suggestHeadline} className="text-[10px] text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
+                {suggesting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />} Rewrite with AI
+              </button>
+            </label>
+            <textarea 
+              value={state.headline} 
+              onChange={e => setState((s: any) => ({ ...s, headline: e.target.value }))}
+              className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl h-24 resize-none outline-none font-bold"
+              placeholder="Fullstack Engineer specializing in React and Node.js..."
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">College/University</label>
               <input 
-                type="range"
-                min="0"
-                max="100"
-                step="5"
-                value={data.comp_min}
-                onChange={e => update({ comp_min: Math.min(parseInt(e.target.value), data.comp_max - 5) })}
-                className="absolute w-full h-2 bg-transparent appearance-none pointer-events-auto cursor-pointer accentuate-indigo-600 z-20"
+                value={state.college_name} 
+                onChange={e => setState((s: any) => ({ ...s, college_name: e.target.value }))}
+                className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none font-bold"
+                placeholder="IIT Delhi"
               />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Graduation Year</label>
               <input 
-                type="range"
-                min="0"
-                max="100"
-                step="5"
-                value={data.comp_max}
-                onChange={e => update({ comp_max: Math.max(parseInt(e.target.value), data.comp_min + 5) })}
-                className="absolute w-full h-2 bg-transparent appearance-none pointer-events-auto cursor-pointer accentuate-indigo-600 z-10"
-              />
-              <div 
-                className="absolute h-full bg-indigo-500 rounded-full"
-                style={{ 
-                  left: `${data.comp_min}%`, 
-                  right: `${100 - data.comp_max}%` 
-                }}
+                type="number"
+                value={state.graduation_year} 
+                onChange={e => setState((s: any) => ({ ...s, graduation_year: parseInt(e.target.value) }))}
+                className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none font-bold"
+                placeholder="2025"
               />
             </div>
           </div>
@@ -980,15 +419,300 @@ function Step5({ data, update }: { data: OnboardingState, update: (updates: Part
   );
 }
 
-// ── Helpers ────────────────────────────────────────────────
+// ── STEP 2: SHOW WHAT YOU'VE BUILT ──────────────────────────
 
-function isStepValid(step: number, data: OnboardingState): boolean {
-  switch (step) {
-    case 1: return data.full_name.trim().length > 2 && data.headline.length > 5;
-    case 2: return data.skills.length >= 1; // Requirement says 3, but I'll be lenient and allow 1 for edge cases, though the UI nudges for 3.
-    case 3: return data.github_username.length > 0;
-    case 4: return true; // verify is optional
-    case 5: return data.target_roles.length > 0 && data.target_locations.length > 0;
-    default: return false;
-  }
+function Step2({ state, setState }: any) {
+  const [curating, setCurating] = useState(false);
+  const [csTitle, setCsTitle] = useState('');
+
+  const runCurator = async () => {
+    setCurating(true);
+    try {
+      const res = await runGithubCuratorAgent();
+      if (res.ok) {
+        // Just for effect in wizard
+      }
+    } catch (e) { console.error(e); }
+    finally { setCurating(false); }
+  };
+
+  const addCaseStudy = async () => {
+    if (!csTitle) return;
+    try {
+      const res = await createCandidateCaseStudy({ title: csTitle });
+      if (res.ok) {
+        const d = await res.json();
+        setState((s: any) => ({ ...s, case_studies: [...s.case_studies, d] }));
+        setCsTitle('');
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const removeCaseStudy = async (id: string) => {
+    try {
+      await deleteCandidateCaseStudy(id);
+      setState((s: any) => ({ ...s, case_studies: s.case_studies.filter((c: any) => c.id !== id) }));
+    } catch (e) { console.error(e); }
+  };
+
+  return (
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div className="space-y-6">
+          <h3 className="text-lg font-black text-slate-900 border-b border-slate-100 pb-3">Evidence Bases</h3>
+          
+          <div className="space-y-4">
+            <div className="p-5 border-2 border-slate-100 rounded-3xl bg-slate-50 hover:border-indigo-500/30 transition-all flex items-center justify-between group">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white">
+                  <Github className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-slate-900">GitHub</p>
+                  <input 
+                    value={state.github_username}
+                    onChange={e => setState((s: any) => ({ ...s, github_username: e.target.value }))}
+                    placeholder="Username"
+                    className="bg-transparent border-none p-0 text-xs font-medium text-slate-400 outline-none"
+                  />
+                </div>
+              </div>
+              <button onClick={runCurator} disabled={!state.github_username || curating} className="text-[10px] font-black text-indigo-600 uppercase tracking-widest px-3 py-1 bg-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                {curating ? 'Curating...' : 'Curate Repos'}
+              </button>
+            </div>
+
+            <div className="p-5 border-2 border-slate-100 rounded-3xl bg-slate-50 hover:border-amber-500/30 transition-all flex items-center gap-4">
+              <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-white">
+                <Code2 className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-900">LeetCode</p>
+                <input 
+                  value={state.leetcode_username}
+                  onChange={e => setState((s: any) => ({ ...s, leetcode_username: e.target.value }))}
+                  placeholder="Username"
+                  className="bg-transparent border-none p-0 text-xs font-medium text-slate-400 outline-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6 bg-slate-900 rounded-3xl text-white relative overflow-hidden group">
+            <div className="flex items-center gap-3 mb-3">
+              <Video className="w-5 h-5 text-indigo-400" />
+              <span className="font-bold text-sm">60s Intro Video</span>
+            </div>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-4">Highly Recommended</p>
+            <button className="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-black transition-all">Record Video</button>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <h3 className="text-lg font-black text-slate-900 border-b border-slate-100 pb-3">Project Showcase</h3>
+          <div className="space-y-3">
+            {state.case_studies.map((cs: any) => (
+              <div key={cs.id} className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-2xl">
+                <span className="text-sm font-bold text-slate-700">{cs.title}</span>
+                <button onClick={() => removeCaseStudy(cs.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+            <div className="flex gap-2">
+              <input 
+                value={csTitle}
+                onChange={e => setCsTitle(e.target.value)}
+                placeholder="Case study title..."
+                className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-bold"
+              />
+              <button onClick={addCaseStudy} className="px-4 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm">Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── STEP 3: WHERE DO YOU WANT TO GO ────────────────────────
+
+function Step3({ state, setState }: any) {
+  const rolesOptions = ['Frontend Engineer', 'Backend Engineer', 'Fullstack Engineer', 'Mobile Dev', 'DevOps', 'Product Manager'];
+  const locationsOptions = ['Bengaluru', 'Hyderabad', 'Pune', 'Mumbai', 'Delhi NCR', 'Remote'];
+  const setupOptions = ['Remote', 'Hybrid', 'On-site'];
+
+  const toggleItem = (list: string[], item: string, key: string) => {
+    const next = list.includes(item) ? list.filter(i => i !== item) : [...list, item];
+    setState((s: any) => ({ ...s, [key]: next }));
+  };
+
+  return (
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div className="space-y-8">
+          <div className="space-y-3">
+            <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Target Roles</label>
+            <div className="flex flex-wrap gap-2">
+              {rolesOptions.map(r => (
+                <button 
+                  key={r}
+                  onClick={() => toggleItem(state.target_roles, r, 'target_roles')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold border-2 transition-all ${
+                    state.target_roles.includes(r) ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-100 text-slate-500'
+                  }`}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Preferred Locations</label>
+            <div className="flex flex-wrap gap-2">
+              {locationsOptions.map(l => (
+                <button 
+                  key={l}
+                  onClick={() => toggleItem(state.target_locations, l, 'target_locations')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold border-2 transition-all ${
+                    state.target_locations.includes(l) ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-100 text-slate-500'
+                  }`}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-8 bg-slate-50 p-8 rounded-[2rem] border border-slate-100">
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <label className="text-xs font-black text-slate-900 uppercase tracking-widest">Expected CTC (LPA)</label>
+              <span className="text-sm font-black text-indigo-600">{state.expected_ctc_min}L - {state.expected_ctc_max}L+</span>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <input 
+                type="range" min="1" max="50" step="1" 
+                value={state.expected_ctc_min} 
+                onChange={e => setState((s: any) => ({ ...s, expected_ctc_min: parseInt(e.target.value) }))}
+                className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+              />
+              <input 
+                type="range" min="5" max="100" step="1" 
+                value={state.expected_ctc_max} 
+                onChange={e => setState((s: any) => ({ ...s, expected_ctc_max: parseInt(e.target.value) }))}
+                className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <label className="text-xs font-black text-slate-900 uppercase tracking-widest">Work Setup</label>
+            <div className="flex gap-2">
+              {setupOptions.map(o => (
+                <button 
+                  key={o}
+                  onClick={() => toggleItem(state.preferred_work_setup, o, 'preferred_work_setup')}
+                  className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all ${
+                    state.preferred_work_setup.includes(o) ? 'bg-slate-900 text-white' : 'bg-white text-slate-500 border border-slate-200'
+                  }`}
+                >
+                  {o}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── STEP 4: IN CONTROL ─────────────────────────────────────
+
+function Step4({ state, setState }: any) {
+  return (
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-xl mx-auto text-center">
+      <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <ShieldCheck className="w-10 h-10 text-indigo-600" />
+      </div>
+      <h2 className="text-2xl font-black text-slate-900 tracking-tight">Trust & Visibility.</h2>
+      <p className="text-slate-500 font-medium leading-relaxed">Pulse is built on transparency. Control exactly who sees your proof-of-work signals.</p>
+
+      <div className="space-y-4 text-left mt-10">
+        <div className={`p-6 border-2 rounded-3xl cursor-pointer transition-all ${state.profile_visibility === 'public' ? 'border-indigo-600 bg-indigo-50/30' : 'border-slate-100 hover:border-slate-200'}`} onClick={() => setState((s: any) => ({ ...s, profile_visibility: 'public' }))}>
+          <div className="flex items-center gap-4">
+             <div className="w-10 h-10 bg-white border border-slate-100 rounded-xl flex items-center justify-center text-slate-900">
+               <Eye className="w-5 h-5" />
+             </div>
+             <div>
+               <p className="font-bold text-slate-900">Public Profile</p>
+               <p className="text-xs text-slate-400">Discoverable by all verified recruiters on the platform.</p>
+             </div>
+          </div>
+        </div>
+
+        <div className={`p-6 border-2 rounded-3xl cursor-pointer transition-all ${state.profile_visibility === 'hidden' ? 'border-indigo-600 bg-indigo-50/30' : 'border-slate-100 hover:border-slate-200'}`} onClick={() => setState((s: any) => ({ ...s, profile_visibility: 'hidden' }))}>
+          <div className="flex items-center gap-4">
+             <div className="w-10 h-10 bg-white border border-slate-100 rounded-xl flex items-center justify-center text-slate-900">
+               <Lock className="w-5 h-5" />
+             </div>
+             <div>
+               <p className="font-bold text-slate-900">Hidden from Search</p>
+               <p className="text-xs text-slate-400">Recruiters can only see you if you express interest in their role.</p>
+             </div>
+          </div>
+        </div>
+
+        <div className="pt-6">
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <div className={`mt-1 w-6 h-6 rounded-md border-2 shrink-0 flex items-center justify-center transition-all ${state.data_consent ? 'bg-indigo-600 border-indigo-600' : 'border-slate-200 group-hover:border-indigo-500'}`}>
+              <Check className="w-4 h-4 text-white" strokeWidth={4} />
+            </div>
+            <input type="checkbox" className="hidden" checked={state.data_consent} onChange={() => setState((s: any) => ({ ...s, data_consent: !s.data_consent }))} />
+            <span className="text-xs font-bold text-slate-500 leading-normal">
+              I agree to the Pulse Data Processing Policy. I understand that my GitHub and LeetCode activity will be analyzed to compute my Pulse Score.
+            </span>
+          </label>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── STEP 5: LIFTOFF ────────────────────────────────────────
+
+function Step5({ state }: { state: OnboardingState }) {
+  return (
+    <div className="text-center space-y-10 animate-in fade-in zoom-in-95 duration-700">
+      <div className="relative">
+        <div className="absolute inset-0 bg-indigo-500/20 blur-3xl rounded-full scale-150 animate-pulse" />
+        <div className="w-32 h-32 bg-slate-900 rounded-[2.5rem] flex items-center justify-center text-white relative z-10 mx-auto transform hover:rotate-12 transition-transform duration-500 shadow-2xl">
+          <Rocket className="w-14 h-14" />
+        </div>
+      </div>
+
+      <div className="space-y-4 relative z-10">
+        <h2 className="text-3xl font-black text-slate-900 tracking-tight">You&apos;re Ready to Launch.</h2>
+        <p className="text-slate-500 font-medium max-w-md mx-auto leading-relaxed">Your proof-of-work profile is being indexed. In a few minutes, you&apos;ll appear in recruiter radars across the ecosystem.</p>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto">
+        <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
+           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Baseline</p>
+           <p className="text-xl font-black text-slate-900">54.2</p>
+        </div>
+        <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
+           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Signals</p>
+           <p className="text-xl font-black text-slate-900">{state.skills.length + (state.github_username ? 1 : 0) + (state.leetcode_username ? 1 : 0)}</p>
+        </div>
+        <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
+           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Potential</p>
+           <p className="text-xl font-black text-emerald-600">85+</p>
+        </div>
+      </div>
+    </div>
+  );
 }

@@ -1,33 +1,15 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.pipelineRouter = void 0;
-const express_1 = require("express");
-const zod_1 = require("zod");
-const supabase_1 = require("../lib/supabase");
-const shared_utils_1 = require("@pulse/shared-utils");
-exports.pipelineRouter = (0, express_1.Router)();
+import { Router } from 'express';
+import { z } from 'zod';
+import { getSupabase } from '../lib/supabase.js';
+import { verifyToken } from '@pulse/shared-utils';
+export const pipelineRouter = Router();
 // Ensure all routes use verifyToken
-exports.pipelineRouter.use(shared_utils_1.verifyToken);
+pipelineRouter.use(verifyToken);
 // ── GET /pipeline ───────────────────────────
-exports.pipelineRouter.get('/', async (req, res) => {
-    // --- MOCK OVERRIDE ---
-    const mockCandidatesMap = {
-        'c-1': { id: 'c-1', headline: 'Senior Frontend Developer', pulse_score: 950, experience_years: 6, notice_period_days: 15, skills: ['React', 'Next.js'], github_verified: true, leetcode_verified: true, location: 'San Francisco, CA' },
-        'c-2': { id: 'c-2', headline: 'Backend Engineer', pulse_score: 820, experience_years: 4, notice_period_days: 30, skills: ['Node.js', 'PostgreSQL'], github_verified: true, leetcode_verified: false, location: 'Remoate' }
-    };
-    res.json({
-        saved: [
-            { id: 'p-1', stage: 'saved', notes: '', candidate_id: 'c-1', candidates: mockCandidatesMap['c-1'], created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-            { id: 'p-2', stage: 'saved', notes: 'Call next week', candidate_id: 'c-2', candidates: mockCandidatesMap['c-2'], created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
-        ],
-        shortlisted: [],
-        pending: []
-    });
-    return;
-    // ---------------------
+pipelineRouter.get('/', async (req, res) => {
     try {
         const user = req.user;
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data: pipelineData, error } = await supabase
             .from('pipeline')
             .select(`
@@ -59,15 +41,11 @@ exports.pipelineRouter.get('/', async (req, res) => {
     }
 });
 // ── POST /pipeline/add ──────────────────────
-const addSchema = zod_1.z.object({
-    candidate_id: zod_1.z.string().uuid(),
-    stage: zod_1.z.enum(['saved', 'shortlisted', 'pending'])
+const addSchema = z.object({
+    candidate_id: z.string().uuid(),
+    stage: z.enum(['saved', 'shortlisted', 'pending'])
 });
-exports.pipelineRouter.post('/add', async (req, res) => {
-    // --- MOCK OVERRIDE ---
-    res.status(201).json({ id: `p-${Date.now()}`, candidate_id: req.body.candidate_id, recruiter_id: 'mock-recruiter-id', stage: req.body.stage, created_at: new Date().toISOString() });
-    return;
-    // ---------------------
+pipelineRouter.post('/add', async (req, res) => {
     try {
         const user = req.user;
         const parsed = addSchema.safeParse(req.body);
@@ -75,7 +53,7 @@ exports.pipelineRouter.post('/add', async (req, res) => {
             res.status(400).json({ error: 'Validation failed', details: parsed.error.issues });
             return;
         }
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         // Check conflict
         const { data: existing, error: findError } = await supabase
             .from('pipeline')
@@ -112,14 +90,10 @@ exports.pipelineRouter.post('/add', async (req, res) => {
     }
 });
 // ── PUT /pipeline/:id/move ──────────────────
-const moveSchema = zod_1.z.object({
-    stage: zod_1.z.enum(['saved', 'shortlisted', 'pending'])
+const moveSchema = z.object({
+    stage: z.enum(['saved', 'shortlisted', 'pending'])
 });
-exports.pipelineRouter.put('/:id/move', async (req, res) => {
-    // --- MOCK OVERRIDE ---
-    res.json({ id: req.params.id, stage: req.body.stage, updated_at: new Date().toISOString() });
-    return;
-    // ---------------------
+pipelineRouter.put('/:id/move', async (req, res) => {
     try {
         const { id } = req.params;
         const user = req.user;
@@ -128,7 +102,7 @@ exports.pipelineRouter.put('/:id/move', async (req, res) => {
             res.status(400).json({ error: 'Validation failed', details: parsed.error.issues });
             return;
         }
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         // Ensure it belongs to the recruiter
         const { data: existing, error: fetchError } = await supabase
             .from('pipeline')
@@ -163,14 +137,10 @@ exports.pipelineRouter.put('/:id/move', async (req, res) => {
     }
 });
 // ── PUT /pipeline/:id/notes ─────────────────
-const notesSchema = zod_1.z.object({
-    notes: zod_1.z.string()
+const notesSchema = z.object({
+    notes: z.string()
 });
-exports.pipelineRouter.put('/:id/notes', async (req, res) => {
-    // --- MOCK OVERRIDE ---
-    res.json({ id: req.params.id, notes: req.body.notes, updated_at: new Date().toISOString() });
-    return;
-    // ---------------------
+pipelineRouter.put('/:id/notes', async (req, res) => {
     try {
         const { id } = req.params;
         const user = req.user;
@@ -179,7 +149,7 @@ exports.pipelineRouter.put('/:id/notes', async (req, res) => {
             res.status(400).json({ error: 'Validation failed', details: parsed.error.issues });
             return;
         }
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data: existing } = await supabase
             .from('pipeline')
             .select('id')
@@ -212,15 +182,11 @@ exports.pipelineRouter.put('/:id/notes', async (req, res) => {
     }
 });
 // ── DELETE /pipeline/:id ────────────────────
-exports.pipelineRouter.delete('/:id', async (req, res) => {
-    // --- MOCK OVERRIDE ---
-    res.json({ success: true });
-    return;
-    // ---------------------
+pipelineRouter.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const user = req.user;
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         // We can just addeq for auth checks and delete and see if anything deleted
         const { error: deleteError } = await supabase
             .from('pipeline')

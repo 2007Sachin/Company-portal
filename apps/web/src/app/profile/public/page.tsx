@@ -1,191 +1,82 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Card, ScoreRing, ProgressBar, Button } from '@/components/ui';
-import { Avatar } from '@/components/ui/avatar';
-import { getActivityIcon, formatRelativeTime } from '@/lib/utils';
-import { GitCommit, GitMerge, CheckCircle, FileText, ArrowLeft } from 'lucide-react';
+import { Copy, ExternalLink, Loader2 } from 'lucide-react';
+import { Header } from '@pulse/ui';
+import { getCandidateMe } from '@/lib/api';
 
-const activityIcons: Record<string, React.ReactNode> = {
-  GitCommit: <GitCommit size={18} />,
-  GitMerge: <GitMerge size={18} />,
-  CheckCircle: <CheckCircle size={18} />,
-  FileText: <FileText size={18} />,
-};
+export default function PublicProfilePreviewPage() {
+  const [candidate, setCandidate] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-const profile = {
-  full_name: 'Sachin Kumar',
-  professional_headline: 'Full Stack Developer | React & Node.js',
-  avatar_url: null,
-  location: 'Bangalore, India',
-  college: 'XYZ Engineering College',
-  degree: 'B.Tech',
-  branch: 'Computer Science',
-  graduation_year: 2025,
-  target_roles: ['Full Stack Developer', 'Backend Developer', 'DevOps Engineer'],
-  bio: 'Passionate full-stack developer with a focus on building scalable web applications. I love open source and believe in learning by building.',
-};
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      try {
+        const response = await getCandidateMe();
+        if (response.ok) {
+          setCandidate(await response.json());
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
 
-const score = {
-  overall: 72,
-  velocity: 78,
-  consistency: 65,
-  breadth: 70,
-  impact: 58,
-  trend: 'rising' as const,
-  percentile: 75,
-};
+    load();
+  }, []);
 
-const activity = [
-  { id: '1', type: 'github_commit', title: 'feat: add user authentication flow', platform: 'github' as const, occurred_at: new Date(Date.now() - 2 * 3600000).toISOString() },
-  { id: '2', type: 'leetcode_solve', title: 'Solved: Two Sum II (Medium)', platform: 'leetcode' as const, occurred_at: new Date(Date.now() - 5 * 3600000).toISOString() },
-  { id: '3', type: 'github_pr_merged', title: 'PR #47: Implement dashboard analytics', platform: 'github' as const, occurred_at: new Date(Date.now() - 8 * 3600000).toISOString() },
-  { id: '4', type: 'medium_article', title: 'Understanding React Server Components', platform: 'medium' as const, occurred_at: new Date(Date.now() - 24 * 3600000).toISOString() },
-];
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <Header title="Public Profile" backTo="/candidate/dashboard" />
+        <div className="flex h-[70vh] items-center justify-center">
+          <Loader2 className="h-9 w-9 animate-spin text-indigo-600" />
+        </div>
+      </div>
+    );
+  }
 
-const languages = [
-  { name: 'TypeScript', percentage: 45, color: 'bg-blue-500' },
-  { name: 'Python', percentage: 25, color: 'bg-yellow-500' },
-  { name: 'Go', percentage: 15, color: 'bg-cyan-500' },
-  { name: 'JavaScript', percentage: 10, color: 'bg-amber-500' },
-  { name: 'CSS', percentage: 5, color: 'bg-pink-500' },
-];
+  const username = candidate?.username || 'your-username';
+  const publicUrl = `/p/${username}`;
 
-export default function PublicProfilePage() {
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
-      {/* Nav */}
-      <nav className="border-b border-slate-200 bg-white sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors group"
-            >
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-              Dashboard
+    <div className="min-h-screen bg-slate-50">
+      <Header title="Public Profile" backTo="/candidate/dashboard" />
+
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+        <section className="rounded-[32px] border border-slate-200 bg-white p-8 shadow-sm">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-indigo-600">Shareable profile link</p>
+          <h1 className="mt-2 text-3xl font-black text-slate-900">Your public Pulse profile</h1>
+          <p className="mt-3 text-sm text-slate-600">
+            Recruiters can use this page to see your Pulse Score, proof of work, case studies, and video pitch highlights without waiting for a cold outreach thread to go anywhere.
+          </p>
+
+          <div className="mt-6 rounded-3xl border border-slate-100 bg-slate-50 p-5">
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">Public URL</p>
+            <p className="mt-2 break-all text-lg font-black text-slate-900">{publicUrl}</p>
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link href={publicUrl} className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-black text-white transition hover:bg-slate-800">
+              Preview profile
+              <ExternalLink className="h-4 w-4" />
             </Link>
+            <button
+              onClick={() => navigator.clipboard.writeText(window.location.origin + publicUrl)}
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-900 transition hover:border-indigo-200 hover:bg-indigo-50"
+            >
+              Copy link
+              <Copy className="h-4 w-4" />
+            </button>
           </div>
-          <Link href="/auth/signup">
-            <Button size="sm" variant="secondary">
-              Create your profile
-            </Button>
-          </Link>
-        </div>
-      </nav>
 
-      <main className="max-w-4xl mx-auto px-6 py-8 space-y-6">
-        {/* Profile Header */}
-        <Card className="overflow-hidden">
-          <div className="h-32 bg-pulse-600 relative" />
-          <div className="px-6 pb-6">
-            <div className="flex flex-col md:flex-row md:items-end gap-4 -mt-12">
-              <Avatar src={null} name={profile.full_name} size="xl" className="ring-4 ring-white" />
-              <div className="flex-1 pb-1 space-y-1">
-                <h1 className="text-2xl font-bold text-slate-800">{profile.full_name}</h1>
-                <p className="text-sm text-slate-500">{profile.professional_headline}</p>
-                <div className="flex flex-wrap gap-3 text-xs text-slate-500 pt-1">
-                  <span>{profile.location}</span>
-                  <span>{profile.degree}, {profile.branch} &middot; {profile.graduation_year}</span>
-                  <span>{profile.college}</span>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button size="sm" variant="primary" onClick={() => window.location.href = 'mailto:rahul@example.com'}>Contact</Button>
-                <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText(window.location.href); }}>Share</Button>
-              </div>
-            </div>
-            {profile.bio && (
-              <p className="mt-4 text-sm text-slate-600 leading-relaxed">{profile.bio}</p>
-            )}
-            <div className="flex flex-wrap gap-2 mt-4">
-              {profile.target_roles.map((role) => (
-                <span key={role} className="px-3 py-1 text-xs rounded-chip bg-slate-50 text-slate-700 border border-slate-200">
-                  {role}
-                </span>
-              ))}
-            </div>
-          </div>
-        </Card>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Score */}
-          <Card className="p-6 space-y-6">
-            <h3 className="text-sm font-semibold text-slate-800">Pulse Score</h3>
-            <div className="flex flex-col items-center gap-3">
-              <ScoreRing score={score.overall} size={140} strokeWidth={10} />
-              <p className="text-xs text-slate-500">Trending up &middot; Top {100 - score.percentile}%</p>
-            </div>
-            <div className="space-y-3">
-              <ProgressBar label="Velocity" value={score.velocity} size="sm" color="bg-blue-500" />
-              <ProgressBar label="Consistency" value={score.consistency} size="sm" color="bg-green-500" />
-              <ProgressBar label="Breadth" value={score.breadth} size="sm" color="bg-purple-500" />
-              <ProgressBar label="Impact" value={score.impact} size="sm" color="bg-amber-500" />
-            </div>
-          </Card>
-
-          {/* Activity + Languages */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="p-6 space-y-4">
-              <h3 className="text-sm font-semibold text-slate-800">Recent activity</h3>
-              <div className="space-y-1">
-                {activity.map((item) => {
-                  const iconName = getActivityIcon(item.type);
-                  const icon = activityIcons[iconName] || <CheckCircle size={18} />;
-                  return (
-                    <div key={item.id} className="flex items-center gap-4 px-3 py-3 rounded-card hover:bg-slate-50 transition-colors">
-                      <span className="text-slate-400 flex-shrink-0">{icon}</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-slate-700 truncate">{item.title}</p>
-                        <p className="text-xs text-slate-400 capitalize">{item.platform}</p>
-                      </div>
-                      <span className="text-xs text-slate-400 flex-shrink-0">{formatRelativeTime(item.occurred_at)}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </Card>
-
-            <Card className="p-6 space-y-4">
-              <h3 className="text-sm font-semibold text-slate-800">Top languages</h3>
-              <div className="space-y-3">
-                {languages.map((lang) => (
-                  <div key={lang.name} className="flex items-center gap-3">
-                    <span className="text-sm text-slate-600 w-24">{lang.name}</span>
-                    <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${lang.color} transition-all duration-700`}
-                        style={{ width: `${lang.percentage}%` }}
-                      />
-                    </div>
-                    <span className="text-xs text-slate-500 w-10 text-right">{lang.percentage}%</span>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { label: 'Commits (30d)', value: '127' },
-                { label: 'PRs merged', value: '8' },
-                { label: 'LeetCode solved', value: '284' },
-                { label: 'Contest rating', value: '1,680' },
-                { label: 'Articles', value: '12' },
-                { label: 'Streak', value: '15d' },
-              ].map((stat) => (
-                <Card key={stat.label} className="p-4 text-center" hover>
-                  <p className="text-xl font-bold text-slate-800">{stat.value}</p>
-                  <p className="text-xs text-slate-500 mt-1">{stat.label}</p>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="text-center py-6 text-xs text-slate-500">
-          Powered by <span className="text-pulse-600 font-semibold">Pulse</span> &middot; Activity-as-Pedigree
-        </div>
+          {!candidate?.username && (
+            <p className="mt-5 text-sm text-amber-600">
+              Your username is not set yet, so this preview uses a placeholder. Once username support is finalized in onboarding/settings, this link will become stable.
+            </p>
+          )}
+        </section>
       </main>
     </div>
   );

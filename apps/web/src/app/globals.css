@@ -4,15 +4,32 @@
 
 @layer base {
   :root {
-    --pulse-primary: 37 99 235; /* blue-600 */
-    --pulse-success: 22 163 74;
-    --pulse-warning: 217 119 6;
-    --pulse-danger: 220 38 38;
-    --radius: 12px;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 142.1 70.6% 45.3%; /* Emerald 500 */
+    --primary-foreground: 144.9 80.4% 10%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215.4 16.3% 56.9%;
+    --accent: 263.4 70% 50.4%; /* Indigo 600 */
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 142.1 70.6% 45.3%;
+    --radius: 1rem;
+    
+    --pulse-primary: 142 70 45;
   }
 
   * {
-    border-color: theme('colors.slate.200');
+    border-color: hsl(var(--border));
   }
 
   html {
@@ -22,14 +39,13 @@
   }
 
   body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: #f8fafc;
-    color: theme('colors.slate.800');
-  }
-
-  ::selection {
-    background: rgb(var(--pulse-primary) / 0.12);
-    color: theme('colors.slate.900');
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(263, 70%, 50%, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(142, 70%, 45%, 0.1) 0px, transparent 50%);
+    background-attachment: fixed;
   }
 }
 

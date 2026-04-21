@@ -1,0 +1,25 @@
+
+> @pulse/web@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.5
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 4.4s
+ ○ Compiling /src/middleware ...
+ ✓ Compiled /src/middleware in 767ms (73 modules)
+ ○ Compiling /auth/login ...
+ ✓ Compiled /auth/login in 5.5s (526 modules)
+ GET /auth/login 200 in 5950ms
+ ✓ Compiled in 1084ms (271 modules)
+ GET /auth/login 200 in 60ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 2.9s (542 modules)
+ ○ Compiling /profile/public ...
+ ✓ Compiled /profile/public in 564ms (553 modules)
+ ✓ Compiled in 1413ms (292 modules)
+ ✓ Compiled in 405ms (292 modules)
+ ✓ Compiled in 510ms (292 modules)
+ ✓ Compiled in 371ms (292 modules)
+ ✓ Compiled in 562ms (292 modules)

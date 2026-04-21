@@ -1,29 +1,18 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.authRouter = void 0;
-const express_1 = require("express");
-const supabase_1 = require("../lib/supabase");
-const verifyToken_1 = require("../middleware/verifyToken");
-exports.authRouter = (0, express_1.Router)();
+import { Router } from 'express';
+import { getSupabase } from '../lib/supabase.js';
+import { verifyToken } from '../middleware/verifyToken.js';
+export const authRouter = Router();
 // ─────────────────────────────────────────────
 // POST /auth/login
 // ─────────────────────────────────────────────
-exports.authRouter.post('/login', async (req, res) => {
-    // --- MOCK OVERRIDE ---
-    res.json({
-        token: 'mock-jwt-token',
-        refresh_token: 'mock-refresh-token',
-        user: { id: `mock-${req.body.role || 'candidate'}-id`, email: req.body.email || 'user@example.com', role: req.body.role || 'candidate', created_at: new Date().toISOString() },
-    });
-    return;
-    // ---------------------
+authRouter.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) {
             res.status(400).json({ error: 'Email and password are required' });
             return;
         }
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         // Sign in via Supabase Auth
         const { data, error } = await supabase.auth.signInWithPassword({
             email,
@@ -54,15 +43,7 @@ exports.authRouter.post('/login', async (req, res) => {
 // ─────────────────────────────────────────────
 // POST /auth/signup
 // ─────────────────────────────────────────────
-exports.authRouter.post('/signup', async (req, res) => {
-    // --- MOCK OVERRIDE ---
-    res.status(201).json({
-        token: 'mock-jwt-token',
-        refresh_token: 'mock-refresh-token',
-        user: { id: 'mock-recruiter-id', email: req.body.email || 'user@example.com', role: req.body.role || 'candidate', created_at: new Date().toISOString() },
-    });
-    return;
-    // ---------------------
+authRouter.post('/signup', async (req, res) => {
     try {
         const { email, password, role } = req.body;
         if (!email || !password) {
@@ -70,7 +51,7 @@ exports.authRouter.post('/signup', async (req, res) => {
             return;
         }
         const userRole = role === 'recruiter' ? 'recruiter' : 'candidate';
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         // Create user in Supabase Auth
         const { data, error } = await supabase.auth.admin.createUser({
             email,
@@ -133,13 +114,9 @@ exports.authRouter.post('/signup', async (req, res) => {
 // ─────────────────────────────────────────────
 // POST /auth/logout
 // ─────────────────────────────────────────────
-exports.authRouter.post('/logout', verifyToken_1.verifyToken, async (req, res) => {
-    // --- MOCK OVERRIDE ---
-    res.json({ success: true });
-    return;
-    // ---------------------
+authRouter.post('/logout', verifyToken, async (req, res) => {
     try {
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const userId = req.user.id;
         // Sign out the user from Supabase (invalidate all sessions)
         const { error } = await supabase.auth.admin.signOut(userId);
@@ -157,15 +134,11 @@ exports.authRouter.post('/logout', verifyToken_1.verifyToken, async (req, res) =
 // ─────────────────────────────────────────────
 // GET /auth/me
 // ─────────────────────────────────────────────
-exports.authRouter.get('/me', verifyToken_1.verifyToken, async (req, res) => {
-    // --- MOCK OVERRIDE ---
-    res.json({ user: req.user });
-    return;
-    // ---------------------
+authRouter.get('/me', verifyToken, async (req, res) => {
     try {
         const user = req.user;
         // Optionally enrich with profile data from the users table
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data: profile } = await supabase
             .from('users')
             .select('*')
@@ -183,22 +156,14 @@ exports.authRouter.get('/me', verifyToken_1.verifyToken, async (req, res) => {
 // ─────────────────────────────────────────────
 // POST /auth/refresh
 // ─────────────────────────────────────────────
-exports.authRouter.post('/refresh', async (req, res) => {
-    // --- MOCK OVERRIDE ---
-    res.json({
-        token: 'mock-jwt-token',
-        refresh_token: 'mock-refresh-token',
-        user: { id: `mock-${req.body.role || 'candidate'}-id`, email: 'user@example.com', role: req.body.role || 'candidate', created_at: new Date().toISOString() },
-    });
-    return;
-    // ---------------------
+authRouter.post('/refresh', async (req, res) => {
     try {
         const { refresh_token } = req.body;
         if (!refresh_token) {
             res.status(400).json({ error: 'refresh_token is required' });
             return;
         }
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data, error } = await supabase.auth.refreshSession({
             refresh_token,
         });

@@ -29,25 +29,6 @@ const fetchAPI = async (endpoint: string, options: RequestInit = {}) => {
   return res;
 };
 
-// ── Auth Service ──────────────────────────────
-export const login = async (email: string, password: string) => {
-  return fetchAPI('/api/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
-  });
-};
-
-export const signup = async (email: string, password: string, role: string) => {
-  return fetchAPI('/api/auth/signup', {
-    method: 'POST',
-    body: JSON.stringify({ email, password, role }),
-  });
-};
-
-export const logout = async () => {
-  return fetchAPI('/api/auth/logout', { method: 'POST' });
-};
-
 // ── JD Parser Service ───────────────────────
 export const parseJD = async (text: string) => {
   return fetchAPI('/api/jd/parse', {
@@ -85,6 +66,28 @@ export const createCandidate = async (data: {
   });
 };
 
+// ── Candidate Experience V2 ──────────────────
+export const updateCandidateProfileV2 = async (data: any) => {
+  return fetchAPI('/api/candidates', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+export const updateCandidateGoalsV2 = async (data: any) => {
+  return fetchAPI('/api/candidates/goals', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+export const getStorageSignedUploadUrlV2 = async (bucket: string, fileName: string, contentType?: string) => {
+  return fetchAPI('/api/candidates/storage/sign', {
+    method: 'POST',
+    body: JSON.stringify({ bucket, file_name: fileName, content_type: contentType }),
+  });
+};
+
 // ── Candidate Me (Dashboard) ─────────────────
 export const getCandidateMe = async () => {
   return fetchAPI('/api/candidates/me');
@@ -92,6 +95,140 @@ export const getCandidateMe = async () => {
 
 export const getCandidateDashboard = async () => {
   return fetchAPI('/api/candidates/me/dashboard');
+};
+
+export const getCandidateScoreBreakdown = async () => {
+  return fetchAPI('/api/candidates/score/breakdown');
+};
+
+export const recalculateCandidateScore = async () => {
+  return fetchAPI('/api/candidates/score/recalculate', {
+    method: 'POST',
+  });
+};
+
+export const getCandidateVisibilitySummary = async () => {
+  return fetchAPI('/api/candidates/visibility');
+};
+
+export const getCandidateActivityFeed = async () => {
+  return fetchAPI('/api/candidates/activity-feed');
+};
+
+export const computeCandidateMatches = async () => {
+  return fetchAPI('/api/candidates/matches/compute', {
+    method: 'POST',
+  });
+};
+
+export const getCandidateMatchesV2 = async (status?: string, saved?: boolean) => {
+  const params = new URLSearchParams();
+  if (status) params.set('status', status);
+  if (saved) params.set('saved', 'true');
+  const query = params.toString();
+  return fetchAPI(`/api/candidates/matches${query ? `?${query}` : ''}`);
+};
+
+export const updateCandidateMatch = async (
+  id: string,
+  data: { status?: 'new' | 'seen' | 'interested' | 'dismissed' | 'engaged'; saved?: boolean },
+) => {
+  return fetchAPI(`/api/candidates/matches/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+};
+
+export const expressInterestForMatch = async (id: string, intro_message: string) => {
+  return fetchAPI(`/api/candidates/matches/${id}/express`, {
+    method: 'POST',
+    body: JSON.stringify({ intro_message }),
+  });
+};
+
+export const getTodayChallengeV2 = async () => {
+  return fetchAPI('/api/candidates/challenges/today');
+};
+
+export const completeChallengeV2 = async (challenge_id: string) => {
+  return fetchAPI('/api/candidates/challenges/complete', {
+    method: 'POST',
+    body: JSON.stringify({ challenge_id }),
+  });
+};
+
+export const getCandidateStreakV2 = async () => {
+  return fetchAPI('/api/candidates/streak');
+};
+
+export const getCandidateCaseStudies = async () => {
+  return fetchAPI('/api/candidates/case-studies');
+};
+
+export const createCandidateCaseStudy = async (data: {
+  title: string;
+  description?: string;
+  file_url?: string;
+  external_url?: string;
+  tags?: string[];
+}) => {
+  return fetchAPI('/api/candidates/case-studies', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
+
+export const deleteCandidateCaseStudy = async (id: string) => {
+  return fetchAPI(`/api/candidates/case-studies/${id}`, {
+    method: 'DELETE',
+  });
+};
+
+export const runProfileOptimizerAgent = async (data?: any) => {
+  return fetchAPI('/api/candidates/agents/profile-optimize', {
+    method: 'POST',
+    body: data ? JSON.stringify(data) : undefined,
+  });
+};
+
+export const runGithubCuratorAgent = async () => {
+  return fetchAPI('/api/candidates/agents/github-curate', {
+    method: 'POST',
+  });
+};
+
+export const runScoreCoachAgent = async () => {
+  return fetchAPI('/api/candidates/agents/score-coach', {
+    method: 'POST',
+  });
+};
+
+export const runMockInterviewAgent = async (data: any) => {
+  return fetchAPI('/api/candidates/agents/mock-interview', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
+
+export const startMockInterviewV2 = runMockInterviewAgent;
+
+export const submitMockInterviewAnswerV2 = async (id: string, data: {
+  question_index: number;
+  answer: string;
+  elapsed_seconds?: number;
+}) => {
+  return fetchAPI(`/api/candidates/agents/mock-interview/${id}/answer`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
+
+export const getMockInterviewHistoryV2 = async () => {
+  return fetchAPI('/api/candidates/agents/mock-interview/history');
+};
+
+export const getCandidatePublicProfile = async (username: string) => {
+  return fetchAPI(`/api/candidates/profile/public/${username}`);
 };
 
 export const getCandidateViews = async () => {
@@ -414,4 +551,62 @@ export const copilotDraftIntro = async (data: {
     method: 'POST',
     body: JSON.stringify(data),
   });
+};
+
+// ── Agentic V2 (Cockpit Migration) ──────────
+
+export const getAgentFeed = async (status: string = 'unread') => {
+  return fetchAPI(`/api/candidates/feed?status=${status}`);
+};
+
+export const getAgentBriefing = async () => {
+  return fetchAPI('/api/candidates/feed/briefing');
+};
+
+export const actOnFeedItem = async (id: string, action: 'read' | 'archive' | 'actioned') => {
+  return fetchAPI(`/api/candidates/feed/${id}/action`, {
+    method: 'PATCH',
+    body: JSON.stringify({ action }),
+  });
+};
+
+export const getAgentPreferences = async () => {
+  return fetchAPI('/api/candidates/agent-preferences');
+};
+
+export const updateAgentPreferences = async (data: any) => {
+  return fetchAPI('/api/candidates/agent-preferences', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+export const runConversationalSearch = async (query: string, context?: string[]) => {
+  return fetchAPI('/api/candidates/jobs/search', {
+    method: 'POST',
+    body: JSON.stringify({ query, context }),
+  });
+};
+
+export const evaluateJobMatch = async (matchId: string) => {
+  return fetchAPI(`/api/candidates/jobs/${matchId}/evaluate`, {
+    method: 'POST',
+  });
+};
+
+export const applyWithAI = async (matchId: string, intro_text?: string) => {
+  return fetchAPI(`/api/candidates/jobs/${matchId}/apply`, {
+    method: 'POST',
+    body: JSON.stringify({ intro_text }),
+  });
+};
+
+export const runAgentCycle = async () => {
+  return fetchAPI('/api/candidates/agent/run', {
+    method: 'POST',
+  });
+};
+
+export const getAllJobs = async (page: number = 1, limit: number = 20, search: string = '') => {
+  return fetchAPI(`/api/candidates/jobs/all?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`);
 };

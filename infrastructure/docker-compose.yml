@@ -81,6 +81,10 @@ services:
     environment:
       - PORT=8000
       - GROQ_API_KEY=${GROQ_API_KEY}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - COPILOT_SERVICE_URL=http://copilot-service:3005
+      - JD_PARSER_SELF_URL=http://jd-parser:8000
     restart: unless-stopped
     networks:
       - pulse-network
@@ -158,6 +162,8 @@ services:
       - "3005:3005"
     environment:
       - GROQ_API_KEY=${GROQ_API_KEY}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
     restart: unless-stopped
     networks:
       - pulse-network

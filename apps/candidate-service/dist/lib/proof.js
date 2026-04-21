@@ -1,13 +1,10 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.emitProofEvent = emitProofEvent;
-exports.recalculatePulseScore = recalculatePulseScore;
-const supabase_1 = require("./supabase");
+import { getSupabase } from './supabase.js';
+import { recalculatePulseScoreV2 } from './candidate-cockpit.js';
 /**
  * Emits a proof event and triggers a score recalculation
  */
-async function emitProofEvent(candidateId, eventType, eventData, scoreImpact) {
-    const supabase = (0, supabase_1.getSupabase)();
+export async function emitProofEvent(candidateId, eventType, eventData, scoreImpact) {
+    const supabase = getSupabase();
     // 1. Insert proof event
     const { error: eventError } = await supabase
         .from('proof_events')
@@ -27,58 +24,11 @@ async function emitProofEvent(candidateId, eventType, eventData, scoreImpact) {
 /**
  * Re-calculates Pulse Score based on all profile signals and proof events
  */
-async function recalculatePulseScore(candidateId) {
-    const supabase = (0, supabase_1.getSupabase)();
+export async function recalculatePulseScore(candidateId) {
     try {
-        // 1. Fetch Candidate profile
-        const { data: candidate, error: candError } = await supabase
-            .from('candidates')
-            .select('*')
-            .eq('id', candidateId)
-            .single();
-        if (candError || !candidate)
-            throw candError || new Error('Candidate not found');
-        // 2. Fetch associated proof-of-work data
-        const [{ count: caseStudyCount }, { data: videoPitch }, { data: passedAssessments }, { data: featuredRepos }] = await Promise.all([
-            supabase.from('case_studies').select('*', { count: 'exact', head: true }).eq('candidate_id', candidateId),
-            supabase.from('video_pitches').select('transcript').eq('candidate_id', candidateId).maybeSingle(),
-            supabase.from('skill_assessments').select('score').eq('candidate_id', candidateId).gte('score', 70),
-            supabase.from('github_repos').select('ai_generated_readme').eq('candidate_id', candidateId).eq('is_featured', true)
-        ]);
-        // 3. Calculation Logic
-        let score = 50; // Base score
-        // Onboarding verifications
-        if (candidate.github_verified)
-            score += 20;
-        if (candidate.leetcode_verified)
-            score += 15;
-        if (candidate.has_video_pitch) {
-            score += 10;
-            // Bonus for transcript
-            if (videoPitch?.transcript) {
-                score += 10;
-            }
-        }
-        // Skills
-        const skillsCount = candidate.skills?.length || 0;
-        score += Math.min(skillsCount * 5, 25);
-        // Case Studies
-        const csCount = caseStudyCount || 0;
-        score += Math.min(csCount * 5, 15);
-        // Skill Assessments
-        const saCount = passedAssessments?.length || 0;
-        score += Math.min(saCount * 5, 20);
-        // Featured Repos with AI READMEs
-        const aiReadmeCount = featuredRepos?.filter(r => r.ai_generated_readme).length || 0;
-        score += Math.min(aiReadmeCount * 3, 9);
-        // 4. Cap and Update
-        const finalScore = Math.min(score, 150);
-        await supabase
-            .from('candidates')
-            .update({ pulse_score: finalScore })
-            .eq('id', candidateId);
-        console.log(`[recalculatePulseScore] Candidate ${candidateId}: ${finalScore}`);
-        return finalScore;
+        const score = await recalculatePulseScoreV2(candidateId);
+        console.log(`[recalculatePulseScore] Candidate ${candidateId}: ${score.overall}`);
+        return score.overall;
     }
     catch (err) {
         console.error('[recalculatePulseScore] Error:', err);

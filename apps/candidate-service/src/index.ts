@@ -5,6 +5,7 @@ import { healthRouter } from './routes/health.js';
 import { candidatesRouter } from './routes/candidates.js';
 import { meRouter } from './routes/me.js';
 import { recruiterRouter } from './routes/recruiter.js';
+import { candidateExperienceRouter } from './routes/candidate-experience.js';
 
 dotenv.config({ path: '../../.env' });
 
@@ -24,6 +25,7 @@ app.use((req, _res, next) => {
 
 app.use('/candidates/me', meRouter);
 app.use('/recruiters', recruiterRouter);
+app.use('/candidates', candidateExperienceRouter);
 app.use('/candidates', candidatesRouter);
 app.use('/', healthRouter);
 

@@ -1,18 +1,12 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyToken = verifyToken;
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const supabase_1 = require("../lib/supabase");
+import jwt from 'jsonwebtoken';
+import { getSupabase } from '../lib/supabase.js';
 /**
  * Express middleware that verifies a Supabase JWT from the Authorization header.
  *
  * On success, attaches the decoded user to `req.user`.
  * On failure, returns 401 Unauthorized.
  */
-async function verifyToken(req, res, next) {
+export async function verifyToken(req, res, next) {
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -27,9 +21,9 @@ async function verifyToken(req, res, next) {
             res.status(500).json({ error: 'Server configuration error' });
             return;
         }
-        const decoded = jsonwebtoken_1.default.verify(token, jwtSecret);
+        const decoded = jwt.verify(token, jwtSecret);
         // Fetch the full user object from Supabase
-        const supabase = (0, supabase_1.getSupabase)();
+        const supabase = getSupabase();
         const { data: { user }, error } = await supabase.auth.admin.getUserById(decoded.sub);
         if (error || !user) {
             res.status(401).json({ error: 'Invalid or expired token' });
@@ -45,11 +39,11 @@ async function verifyToken(req, res, next) {
         next();
     }
     catch (err) {
-        if (err instanceof jsonwebtoken_1.default.TokenExpiredError) {
+        if (err instanceof jwt.TokenExpiredError) {
             res.status(401).json({ error: 'Token expired' });
             return;
         }
-        if (err instanceof jsonwebtoken_1.default.JsonWebTokenError) {
+        if (err instanceof jwt.JsonWebTokenError) {
             res.status(401).json({ error: 'Invalid token' });
             return;
         }

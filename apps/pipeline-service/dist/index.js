@@ -1,30 +1,25 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const cors_1 = __importDefault(require("cors"));
-const dotenv_1 = __importDefault(require("dotenv"));
-const health_1 = require("./routes/health");
-const pipeline_1 = require("./routes/pipeline");
-dotenv_1.default.config({ path: '../../.env' });
-const app = (0, express_1.default)();
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { healthRouter } from './routes/health.js';
+import { pipelineRouter } from './routes/pipeline.js';
+dotenv.config({ path: '../../.env' });
+const app = express();
 const PORT = process.env.PORT || 3003;
-app.use((0, cors_1.default)({
+app.use(cors({
     origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
     credentials: true,
 }));
-app.use(express_1.default.json());
+app.use(express.json());
 app.use((req, _res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
     next();
 });
-app.use('/pipeline', pipeline_1.pipelineRouter);
-app.use('/', health_1.healthRouter);
+app.use('/pipeline', pipelineRouter);
+app.use('/', healthRouter);
 app.listen(PORT, () => {
     console.log(`📋 Pipeline Service running on port ${PORT}`);
     console.log(`   Health check: http://localhost:${PORT}/health`);
 });
-exports.default = app;
+export default app;
 //# sourceMappingURL=index.js.map

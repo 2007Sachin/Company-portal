@@ -21,15 +21,6 @@ const candidateSchema = z.object({
 
 // ── GET /candidates (Discovery) ─────────────
 candidatesRouter.get('/', async (req: Request, res: Response): Promise<void> => {
-  // --- MOCK OVERRIDE ---
-  const mockCandidates = [
-    { id: 'c-1', headline: 'Senior Frontend Developer', pulse_score: 950, experience_years: 6, notice_period_days: 15, skills: ['React', 'Next.js', 'TypeScript', 'Tailwind'], github_verified: true, leetcode_verified: true, has_video_pitch: true, location: 'San Francisco, CA', created_at: new Date().toISOString() },
-    { id: 'c-2', headline: 'Backend Engineer', pulse_score: 820, experience_years: 4, notice_period_days: 30, skills: ['Node.js', 'Express', 'PostgreSQL', 'Docker'], github_verified: true, leetcode_verified: false, has_video_pitch: false, location: 'Remote', created_at: new Date().toISOString() },
-    { id: 'c-3', headline: 'Full Stack Ninja', pulse_score: 750, experience_years: 3, notice_period_days: 0, skills: ['React', 'Python', 'Django', 'AWS'], github_verified: false, leetcode_verified: false, has_video_pitch: false, location: 'New York, NY', created_at: new Date().toISOString() },
-  ];
-  res.json({ candidates: mockCandidates, total: mockCandidates.length });
-  return;
-  // ---------------------
   try {
     const {
       skills,
@@ -80,10 +71,6 @@ candidatesRouter.get('/', async (req: Request, res: Response): Promise<void> => 
 
 // ── GET /candidates/:id ─────────────────────
 candidatesRouter.get('/:id', verifyToken, async (req: Request, res: Response): Promise<void> => {
-  // --- MOCK OVERRIDE ---
-  res.json({ id: req.params.id, headline: 'Mock Candidate', pulse_score: 900, experience_years: 5, notice_period_days: 15, skills: ['React', 'Node'], github_verified: true, leetcode_verified: true, has_video_pitch: true, location: 'Remote', created_at: new Date().toISOString() });
-  return;
-  // ---------------------
   try {
     const { id } = req.params;
     const supabase = getSupabase();
@@ -108,10 +95,6 @@ candidatesRouter.get('/:id', verifyToken, async (req: Request, res: Response): P
 
 // ── POST /candidates ────────────────────────
 candidatesRouter.post('/', verifyToken, async (req: Request, res: Response): Promise<void> => {
-  // --- MOCK OVERRIDE ---
-  res.status(201).json({ id: 'c-new', ...req.body, created_at: new Date().toISOString() });
-  return;
-  // ---------------------
   try {
     const parsed = candidateSchema.safeParse(req.body);
 
@@ -148,10 +131,6 @@ candidatesRouter.post('/', verifyToken, async (req: Request, res: Response): Pro
 
 // ── PUT /candidates/:id ─────────────────────
 candidatesRouter.put('/:id', verifyToken, async (req: Request, res: Response): Promise<void> => {
-  // --- MOCK OVERRIDE ---
-  res.json({ id: req.params.id, ...req.body, updated_at: new Date().toISOString() });
-  return;
-  // ---------------------
   try {
     const { id } = req.params;
     const parsed = candidateSchema.partial().safeParse(req.body);
@@ -184,10 +163,6 @@ candidatesRouter.put('/:id', verifyToken, async (req: Request, res: Response): P
 
 // ── GET /candidates/:id/score ───────────────
 candidatesRouter.get('/:id/score', verifyToken, async (req: Request, res: Response): Promise<void> => {
-   // --- MOCK OVERRIDE ---
-   res.json({ pulse_score: 850 });
-   return;
-   // ---------------------
    try {
      const { id } = req.params;
      const supabase = getSupabase();

@@ -10,21 +10,6 @@ pipelineRouter.use(verifyToken);
 
 // ── GET /pipeline ───────────────────────────
 pipelineRouter.get('/', async (req: Request, res: Response): Promise<void> => {
-  // --- MOCK OVERRIDE ---
-  const mockCandidatesMap = {
-    'c-1': { id: 'c-1', headline: 'Senior Frontend Developer', pulse_score: 950, experience_years: 6, notice_period_days: 15, skills: ['React', 'Next.js'], github_verified: true, leetcode_verified: true, location: 'San Francisco, CA' },
-    'c-2': { id: 'c-2', headline: 'Backend Engineer', pulse_score: 820, experience_years: 4, notice_period_days: 30, skills: ['Node.js', 'PostgreSQL'], github_verified: true, leetcode_verified: false, location: 'Remoate' }
-  };
-  res.json({
-    saved: [
-      { id: 'p-1', stage: 'saved', notes: '', candidate_id: 'c-1', candidates: mockCandidatesMap['c-1'], created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-      { id: 'p-2', stage: 'saved', notes: 'Call next week', candidate_id: 'c-2', candidates: mockCandidatesMap['c-2'], created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
-    ],
-    shortlisted: [],
-    pending: []
-  });
-  return;
-  // ---------------------
   try {
     const user = (req as any).user as AuthUser;
     const supabase = getSupabase();
@@ -70,10 +55,6 @@ const addSchema = z.object({
 });
 
 pipelineRouter.post('/add', async (req: Request, res: Response): Promise<void> => {
-  // --- MOCK OVERRIDE ---
-  res.status(201).json({ id: `p-${Date.now()}`, candidate_id: req.body.candidate_id, recruiter_id: 'mock-recruiter-id', stage: req.body.stage, created_at: new Date().toISOString() });
-  return;
-  // ---------------------
   try {
     const user = (req as any).user as AuthUser;
     const parsed = addSchema.safeParse(req.body);
@@ -130,10 +111,6 @@ const moveSchema = z.object({
 });
 
 pipelineRouter.put('/:id/move', async (req: Request, res: Response): Promise<void> => {
-  // --- MOCK OVERRIDE ---
-  res.json({ id: req.params.id, stage: req.body.stage, updated_at: new Date().toISOString() });
-  return;
-  // ---------------------
   try {
     const { id } = req.params;
     const user = (req as any).user as AuthUser;
@@ -189,10 +166,6 @@ const notesSchema = z.object({
 });
 
 pipelineRouter.put('/:id/notes', async (req: Request, res: Response): Promise<void> => {
-  // --- MOCK OVERRIDE ---
-  res.json({ id: req.params.id, notes: req.body.notes, updated_at: new Date().toISOString() });
-  return;
-  // ---------------------
   try {
     const { id } = req.params;
     const user = (req as any).user as AuthUser;
@@ -242,10 +215,6 @@ pipelineRouter.put('/:id/notes', async (req: Request, res: Response): Promise<vo
 
 // ── DELETE /pipeline/:id ────────────────────
 pipelineRouter.delete('/:id', async (req: Request, res: Response): Promise<void> => {
-  // --- MOCK OVERRIDE ---
-  res.json({ success: true });
-  return;
-  // ---------------------
   try {
     const { id } = req.params;
     const user = (req as any).user as AuthUser;

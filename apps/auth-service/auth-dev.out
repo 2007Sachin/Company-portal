@@ -1,0 +1,14 @@
+
+> @pulse/auth-service@0.1.0 dev
+> tsx watch src/index.ts
+
+🔐 Auth Service running on port 3001
+   Health check: http://localhost:3001/health
+[2026-04-19T18:34:51.014Z] GET /health
+[2026-04-19T18:35:01.424Z] POST /auth/login
+[2026-04-19T18:36:36.872Z] POST /auth/login
+[2026-04-19T18:36:55.407Z] POST /auth/login
+[2026-04-19T18:37:51.457Z] GET /health
+[2026-04-19T18:37:51.515Z] POST /auth/signup
+[2026-04-19T18:38:02.489Z] POST /auth/login
+[2026-04-19T18:39:16.608Z] POST /auth/login

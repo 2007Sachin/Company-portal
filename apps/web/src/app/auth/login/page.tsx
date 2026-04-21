@@ -30,7 +30,7 @@ export default function LoginPage() {
     try {
       const data = await login(email, password, userType);
       const role = data.user?.role || userType;
-      router.push(role === 'candidate' ? '/dashboard' : '/recruiter/dashboard');
+      router.push(role === 'candidate' ? '/candidate/home' : '/recruiter/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid email or password. Please try again.');
       setIsLoading(false);
@@ -41,7 +41,7 @@ export default function LoginPage() {
     // TODO: Implement Google OAuth via auth-service
     setIsLoading(true);
     await new Promise(r => setTimeout(r, 600));
-    router.push(userType === 'candidate' ? '/dashboard' : '/recruiter/dashboard');
+    router.push(userType === 'candidate' ? '/candidate/home' : '/recruiter/dashboard');
   };
 
   return (
@@ -254,8 +254,8 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-slate-500 font-medium">
             {userType === 'candidate' ? "New to Pulse?" : "Interested in Pulse for your team?"}{' '}
-            <Link href="/auth/signup" className="text-blue-600 hover:text-blue-700 font-bold transition-colors">
-              {userType === 'candidate' ? 'Create your profile' : 'Request Access'}
+            <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 font-bold transition-colors">
+              {userType === 'candidate' ? 'Continue to sign in' : 'Continue to recruiter login'}
             </Link>
           </p>
         </div>

@@ -26,6 +26,7 @@ if SUPABASE_URL and SUPABASE_SERVICE_KEY:
 
 # 3. Environment configuration for internal services
 COPILOT_SERVICE_URL = os.environ.get("COPILOT_SERVICE_URL", "http://copilot-service:3005")
+JD_PARSER_SELF_URL = os.environ.get("JD_PARSER_SELF_URL", "http://jd-parser:8000")
 
 
 # ==========================================
@@ -53,7 +54,7 @@ async def trigger_parse_and_match(payload: dict):
     try:
         async with httpx.AsyncClient() as client:
             await client.post(
-                "http://localhost:8000/jd/parse-and-match",
+                f"{JD_PARSER_SELF_URL}/jd/parse-and-match",
                 json=payload,
                 timeout=60.0
             )
